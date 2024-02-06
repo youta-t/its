@@ -84,7 +84,7 @@ func GreaterThan[T Numeric | string](want T) itskit.Matcher[T] {
 // GreaterEq tests of numeric value with
 //
 //	want <= got
-func GreaterEq[T Numeric | string](want T) itskit.Matcher[T] {
+func GreaterEq[T Numeric | ~string](want T) itskit.Matcher[T] {
 	return itskit.SimpleMatcher(
 		func(got T) bool { return want <= got },
 		"%+v <= %+v",
