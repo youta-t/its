@@ -5,30 +5,42 @@ package gen
 import (
 	"strings"
 
+	its "github.com/youta-t/its"
+	config "github.com/youta-t/its/config"
 	itskit "github.com/youta-t/its/itskit"
 	itsio "github.com/youta-t/its/itskit/itsio"
 	testee "github.com/youta-t/its/structer/example/internal/sub2"
 )
 
 type Sub2Spec struct {
-	IntField itskit.Matcher[int]
+	IntField its.Matcher[int]
 }
 
 type _Sub2Matcher struct {
-	fields []itskit.Matcher[testee.Sub2]
+	fields []its.Matcher[testee.Sub2]
 }
 
-func ItsSub2(want Sub2Spec) itskit.Matcher[testee.Sub2] {
-	sub := []itskit.Matcher[testee.Sub2]{}
+func ItsSub2(want Sub2Spec) its.Matcher[testee.Sub2] {
+	sub := []its.Matcher[testee.Sub2]{}
 
-	sub = append(
-		sub,
-		itskit.Property(
-			".IntField",
-			func(got testee.Sub2) int { return got.IntField },
-			want.IntField,
-		),
-	)
+	{
+		matcher := want.IntField
+		if matcher == nil {
+			if config.StrictModeForStruct {
+				matcher = its.Never[int]()
+			} else {
+				matcher = its.Always[int]()
+			}
+		}
+		sub = append(
+			sub,
+			itskit.Property[testee.Sub2, int](
+				".IntField",
+				func(got testee.Sub2) int { return got.IntField },
+				matcher,
+			),
+		)
+	}
 
 	return _Sub2Matcher{fields: sub}
 }

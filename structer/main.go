@@ -112,6 +112,7 @@ The new file, has "Matcher" and "Spec" types, is placed in "./gen" directory (by
 			"its":    {Name: "its", Path: "github.com/youta-t/its"},
 			"itskit": {Name: "itskit", Path: "github.com/youta-t/its/itskit"},
 			"itsio":  {Name: "itsio", Path: "github.com/youta-t/its/itskit/itsio"},
+			"config": {Name: "config", Path: "github.com/youta-t/its/config"},
 		}
 		usedImports := map[string]*internal.Import{}
 
@@ -198,14 +199,24 @@ type _{{ .Name }}Matcher{{ .GenericExpr true }} struct {
 func Its{{ .Name }}{{ .GenericExpr true }}(want {{ .Name }}Spec{{ .GenericExpr false }}) its.Matcher[{{ .Expr }}] {
 	sub := []its.Matcher[{{ .Expr }}]{}
 	{{ range .Body.Fields }}
-	sub = append(
-		sub,
-		itskit.Property[{{ $s.Expr }}, {{ .Type.Expr }}](
-			".{{ .Name }}",
-			func(got {{ $s.Expr }}) {{ .Type.Expr }} { return got.{{ .Name }} },
-			want.{{ .Name }},
-		),
-	)
+	{
+		matcher := want.{{ .Name }}
+		if matcher == nil {
+			if config.StrictModeForStruct {
+				matcher = its.Never[{{ .Type.Expr }}]()
+			} else {
+				matcher = its.Always[{{ .Type.Expr }}]()
+			}
+		}
+		sub = append(
+			sub,
+			itskit.Property[{{ $s.Expr }}, {{ .Type.Expr }}](
+				".{{ .Name }}",
+				func(got {{ $s.Expr }}) {{ .Type.Expr }} { return got.{{ .Name }} },
+				matcher,
+			),
+		)
+	}
 	{{ end }}
 
 	return _{{ .Name }}Matcher{{ .GenericExpr false }}{ fields: sub }
