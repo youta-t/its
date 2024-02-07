@@ -49,3 +49,25 @@ func ExampleNot() {
 	// ✘ // not:
 	//     ✔ /* got */ 42 == /* want */ 42
 }
+
+func ExampleNone() {
+	its.None(
+		its.EqEq(1),
+		its.EqEq(2),
+		its.EqEq(3),
+	).
+		Match(4).OrError(t)
+
+	its.None(
+		its.EqEq(1),
+		its.EqEq(2),
+		its.EqEq(3),
+	).
+		Match(2).OrError(t)
+
+	// Output:
+	// ✘ // none of:
+	//     ✘ /* got */ 2 == /* want */ 1
+	//     ✔ /* got */ 2 == /* want */ 2
+	//     ✘ /* got */ 2 == /* want */ 3
+}
