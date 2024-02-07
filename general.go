@@ -14,7 +14,7 @@ import (
 // EqEq tests of comparable with
 //
 //	want == got
-func EqEq[T comparable](want T) itskit.Matcher[T] {
+func EqEq[T comparable](want T) Matcher[T] {
 	return itskit.SimpleMatcher(
 		func(got T) bool { return got == want },
 		"%+v == %+v",
@@ -60,7 +60,7 @@ func (epm eqeqPtrMatcher[T]) String() string {
 // EqEqPtr tests of pointer for comparable with
 //
 //	(want == got) || (*want == *got)
-func EqEqPtr[T comparable](want *T) itskit.Matcher[*T] {
+func EqEqPtr[T comparable](want *T) Matcher[*T] {
 	return eqeqPtrMatcher[T]{
 		label: itskit.NewLabel(
 			"%+v == %+v",
@@ -73,7 +73,7 @@ func EqEqPtr[T comparable](want *T) itskit.Matcher[*T] {
 // GreaterThan tests of numeric value with
 //
 //	want < got
-func GreaterThan[T Numeric | string](want T) itskit.Matcher[T] {
+func GreaterThan[T Numeric | string](want T) Matcher[T] {
 	return itskit.SimpleMatcher(
 		func(got T) bool { return want < got },
 		"%+v < %+v",
@@ -84,7 +84,7 @@ func GreaterThan[T Numeric | string](want T) itskit.Matcher[T] {
 // GreaterEq tests of numeric value with
 //
 //	want <= got
-func GreaterEq[T Numeric | ~string](want T) itskit.Matcher[T] {
+func GreaterEq[T Numeric | ~string](want T) Matcher[T] {
 	return itskit.SimpleMatcher(
 		func(got T) bool { return want <= got },
 		"%+v <= %+v",
@@ -95,7 +95,7 @@ func GreaterEq[T Numeric | ~string](want T) itskit.Matcher[T] {
 // LesserThan tests of numeric value with
 //
 //	want > got
-func LesserThan[T Numeric | ~string](want T) itskit.Matcher[T] {
+func LesserThan[T Numeric | ~string](want T) Matcher[T] {
 	return itskit.SimpleMatcher(
 		func(got T) bool { return want > got },
 		"%+v > %+v",
@@ -106,7 +106,7 @@ func LesserThan[T Numeric | ~string](want T) itskit.Matcher[T] {
 // LesserEq tests of numeric value with
 //
 //	want > got
-func LesserEq[T Numeric | ~string](want T) itskit.Matcher[T] {
+func LesserEq[T Numeric | ~string](want T) Matcher[T] {
 	return itskit.SimpleMatcher(
 		func(got T) bool { return want >= got },
 		"%+v >= %+v",
@@ -119,7 +119,7 @@ func LesserEq[T Numeric | ~string](want T) itskit.Matcher[T] {
 //	got.Before(want)
 //
 // want value can be time.Time, for example, but whatever okay if it has Before().
-func Before[T interface{ Before(T) bool }](want T) itskit.Matcher[T] {
+func Before[T interface{ Before(T) bool }](want T) Matcher[T] {
 	return itskit.SimpleMatcher(
 		func(got T) bool { return got.Before(want) },
 		"(%+v).Before(%+v)",
@@ -132,7 +132,7 @@ func Before[T interface{ Before(T) bool }](want T) itskit.Matcher[T] {
 //	got.After(want)
 //
 // want value can be time.Time, for example, but whatever okay if it has After().
-func After[T interface{ After(T) bool }](want T) itskit.Matcher[T] {
+func After[T interface{ After(T) bool }](want T) Matcher[T] {
 	return itskit.SimpleMatcher(
 		func(got T) bool { return got.After(want) },
 		"(%+v).After(%+v)",
@@ -145,9 +145,9 @@ func After[T interface{ After(T) bool }](want T) itskit.Matcher[T] {
 //	expcted.Equal(got)
 //
 // want value can be time.Time, for example, but whatever okay if it has Equal().
-func Equal[T interface{ Equal(T) bool }](want T) itskit.Matcher[T] {
+func Equal[T any](want interface{ Equal(T) bool }) Matcher[T] {
 	return itskit.SimpleMatcher(
-		func(got T) bool { return want.Equal(got) },
+		want.Equal,
 		"(%+v).Equal(%+v)",
 		itskit.Want(want), itskit.Got,
 	)
@@ -162,7 +162,7 @@ func Equal[T interface{ Equal(T) bool }](want T) itskit.Matcher[T] {
 // - want T: expectation
 //
 // - equiv: function returns true if want matches with got.
-func EquivWith[T, U any](want T, equiv func(want T, got U) bool) itskit.Matcher[U] {
+func EquivWith[T, U any](want T, equiv func(want T, got U) bool) Matcher[U] {
 	return itskit.SimpleMatcher(
 		func(got U) bool { return equiv(want, got) },
 		"(%+v) equiv. (%+v)",
@@ -171,7 +171,7 @@ func EquivWith[T, U any](want T, equiv func(want T, got U) bool) itskit.Matcher[
 }
 
 // Error tests with errors.Is .
-func Error(want error) itskit.Matcher[error] {
+func Error(want error) Matcher[error] {
 	return itskit.SimpleMatcher[error](
 		func(got error) bool {
 			return errors.Is(got, want)
@@ -182,7 +182,7 @@ func Error(want error) itskit.Matcher[error] {
 }
 
 // ErrorAs tests with errors.As .
-func ErrorAs[T error]() itskit.Matcher[error] {
+func ErrorAs[T error]() Matcher[error] {
 	return itskit.SimpleMatcher[error](
 		func(got error) bool {
 			want := new(T)
@@ -194,7 +194,7 @@ func ErrorAs[T error]() itskit.Matcher[error] {
 }
 
 // always pass.
-func Always[T any]() itskit.Matcher[T] {
+func Always[T any]() Matcher[T] {
 	return itskit.SimpleMatcher(
 		func(T) bool { return true },
 		"(always pass)",
@@ -202,7 +202,7 @@ func Always[T any]() itskit.Matcher[T] {
 }
 
 // always fail.
-func Never[T any]() itskit.Matcher[T] {
+func Never[T any]() Matcher[T] {
 	return itskit.SimpleMatcher(
 		func(T) bool { return false },
 		"(never pass)",
@@ -210,7 +210,7 @@ func Never[T any]() itskit.Matcher[T] {
 }
 
 // StringHavingPrefix tests with strings.HasPrefix
-func StringHavingPrefix[T ~string](want string) itskit.Matcher[T] {
+func StringHavingPrefix[T ~string](want string) Matcher[T] {
 	return itskit.SimpleMatcher(
 		func(got T) bool {
 			return strings.HasPrefix((string)(got), want)
@@ -221,7 +221,7 @@ func StringHavingPrefix[T ~string](want string) itskit.Matcher[T] {
 }
 
 // StringHavingSuffix tests with strings.HasSuffix
-func StringHavingSuffix[T ~string](want string) itskit.Matcher[T] {
+func StringHavingSuffix[T ~string](want string) Matcher[T] {
 	return itskit.SimpleMatcher(
 		func(got T) bool {
 			return strings.HasSuffix((string)(got), want)
@@ -232,7 +232,7 @@ func StringHavingSuffix[T ~string](want string) itskit.Matcher[T] {
 }
 
 // StringContaining tests with strings.Contains
-func StringContaining[T ~string](want string) itskit.Matcher[T] {
+func StringContaining[T ~string](want string) Matcher[T] {
 	return itskit.SimpleMatcher(
 		func(got T) bool {
 			return strings.Contains((string)(got), want)
@@ -243,7 +243,7 @@ func StringContaining[T ~string](want string) itskit.Matcher[T] {
 }
 
 // StringEqualFold tests with strings.EqualFold
-func StringEqualFold[T ~string](want string) itskit.Matcher[T] {
+func StringEqualFold[T ~string](want string) Matcher[T] {
 	return itskit.SimpleMatcher(
 		func(got T) bool {
 			return strings.EqualFold((string)(got), want)
@@ -254,7 +254,7 @@ func StringEqualFold[T ~string](want string) itskit.Matcher[T] {
 }
 
 // BytesEqual tests with bytes.Equal
-func BytesEqual(want []byte) itskit.Matcher[[]byte] {
+func BytesEqual(want []byte) Matcher[[]byte] {
 	return itskit.SimpleMatcher(
 		func(got []byte) bool {
 			return bytes.Equal(got, want)
@@ -265,7 +265,7 @@ func BytesEqual(want []byte) itskit.Matcher[[]byte] {
 }
 
 // BytesHavingPrefix tests with bytes.HasPrefix
-func BytesHavingPrefix(want []byte) itskit.Matcher[[]byte] {
+func BytesHavingPrefix(want []byte) Matcher[[]byte] {
 	return itskit.SimpleMatcher(
 		func(got []byte) bool {
 			return bytes.HasPrefix(got, want)
@@ -276,7 +276,7 @@ func BytesHavingPrefix(want []byte) itskit.Matcher[[]byte] {
 }
 
 // BytesHavingSuffix tests with bytes.HasSuffix
-func BytesHavingSuffix(want []byte) itskit.Matcher[[]byte] {
+func BytesHavingSuffix(want []byte) Matcher[[]byte] {
 	return itskit.SimpleMatcher(
 		func(got []byte) bool {
 			return bytes.HasSuffix(got, want)
@@ -287,7 +287,7 @@ func BytesHavingSuffix(want []byte) itskit.Matcher[[]byte] {
 }
 
 // BytesContaining tests with bytes.Contains
-func BytesContaining(want []byte) itskit.Matcher[[]byte] {
+func BytesContaining(want []byte) Matcher[[]byte] {
 	return itskit.SimpleMatcher(
 		func(got []byte) bool {
 			return bytes.Contains(got, want)
@@ -298,7 +298,7 @@ func BytesContaining(want []byte) itskit.Matcher[[]byte] {
 }
 
 // NaN tests with math.IsNaN
-func NaN() itskit.Matcher[float64] {
+func NaN() Matcher[float64] {
 	return itskit.SimpleMatcher(
 		math.IsNaN,
 		"math.IsNaN(%f)",
@@ -309,7 +309,7 @@ func NaN() itskit.Matcher[float64] {
 // Inf tests with math.IsInf
 //
 // This matcher will pass either positive or negative infinity.
-func Inf() itskit.Matcher[float64] {
+func Inf() Matcher[float64] {
 	return itskit.SimpleMatcher(
 		func(got float64) bool {
 			return math.IsInf(got, 0)
@@ -326,7 +326,7 @@ type chanMatcher[T any] struct {
 // Closed tests wheather channel is closed or not.
 //
 // This matcher tries to receive from channel, it may cause sideeffect.
-func Closed[T any]() itskit.Matcher[<-chan T] {
+func Closed[T any]() Matcher[<-chan T] {
 	return chanMatcher[T]{
 		label: itskit.NewLabel("chan %T is %s.", *new(T), itskit.Placeholder),
 	}
@@ -360,7 +360,7 @@ func (c chanMatcher[T]) String() string {
 }
 
 // Type tests got value is a type.
-func Type[T any]() itskit.Matcher[any] {
+func Type[T any]() Matcher[any] {
 	return itskit.SimpleMatcher(
 		func(got any) bool {
 			_, ok := got.(T)
@@ -368,5 +368,31 @@ func Type[T any]() itskit.Matcher[any] {
 		},
 		"%+v is a %T",
 		itskit.Got, *new(T),
+	)
+}
+
+// Match matches with Match(T)bool method.
+//
+// # Example
+//
+//	Match[[]byte](regexp.MustCompile(`[Mm]atcher`))
+func Match[T any](m interface{ Match(T) bool }) Matcher[T] {
+	return itskit.SimpleMatcher(
+		m.Match,
+		"(%+v).Match(%+v)",
+		itskit.Want(m), itskit.Got,
+	)
+}
+
+// Match matches with Match(T)bool method.
+//
+// # Example
+//
+//	MatchString(regexp.MustCompile(`[Mm]atcher`))
+func MatchString(m interface{ MatchString(string) bool }) Matcher[string] {
+	return itskit.SimpleMatcher(
+		m.MatchString,
+		"(%+v).MatchString(%+v)",
+		itskit.Want(m), itskit.Got,
 	)
 }

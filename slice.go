@@ -11,7 +11,7 @@ import (
 )
 
 type sliceSpec[T any] struct {
-	spec     []itskit.Matcher[T]
+	matchers []Matcher[T]
 	template itskit.Label
 }
 
@@ -21,7 +21,7 @@ func (eq sliceSpec[T]) Write(w itsio.Writer) error {
 	}
 
 	iw := w.Indent()
-	for _, s := range eq.spec {
+	for _, s := range eq.matchers {
 		if err := s.Write(iw); err != nil {
 			return err
 		}
@@ -39,15 +39,21 @@ func (eq sliceSpec[T]) String() string {
 type sliceMatcher[T any] struct{ sliceSpec[T] }
 
 // Slice tests actual slice elements satisfies specs for same index.
-func Slice[T any](specs ...itskit.Matcher[T]) itskit.Matcher[[]T] {
+//
+// # Args
+//
+// - mathcers: matchers for each element.
+// Each matchers is tried multiple times with many element.
+// Do not use stateful matcher.
+func Slice[T any](matchers ...Matcher[T]) Matcher[[]T] {
 	return sliceMatcher[T]{
 		sliceSpec: sliceSpec[T]{
-			spec: specs,
+			matchers: matchers,
 			template: itskit.NewLabel(
 				"[]%T{ ... (len: %d, %d; +%d, -%d)",
 				*new(T),
 				itskit.Got,
-				itskit.Want(len(specs)),
+				itskit.Want(len(matchers)),
 				itskit.Placeholder,
 				itskit.Placeholder,
 			),
@@ -56,7 +62,13 @@ func Slice[T any](specs ...itskit.Matcher[T]) itskit.Matcher[[]T] {
 }
 
 func (eq sliceMatcher[T]) Match(actual []T) itskit.Match {
-	diffs := editorialgraph.New(eq.spec, actual)
+
+	m := make([]itskit.Matcher[T], len(eq.matchers))
+	for i, s := range eq.matchers {
+		m[i] = s
+	}
+
+	diffs := editorialgraph.New[T](m, actual)
 	nMiss := 0
 	nExtra := 0
 	submatches := []itskit.Match{}
@@ -80,9 +92,15 @@ func (eq sliceMatcher[T]) Match(actual []T) itskit.Match {
 type sliceUnorderedMatcher[T any] sliceSpec[T]
 
 // Set test that for each element in actual slice matches each spec.
-func SliceUnordered[T any](specs ...itskit.Matcher[T]) itskit.Matcher[[]T] {
+//
+// # Args
+//
+// - mathcers: matchers for each element.
+// Each matchers is tried multiple times with many element.
+// Do not use stateful matcher.
+func SliceUnordered[T any](specs ...Matcher[T]) Matcher[[]T] {
 	return sliceUnorderedMatcher[T]{
-		spec: specs,
+		matchers: specs,
 		template: itskit.NewLabel(
 			"[]%T{ ... (unordered; len: %d, %d; +%d, -%d)",
 			*new(T),
@@ -95,7 +113,11 @@ func SliceUnordered[T any](specs ...itskit.Matcher[T]) itskit.Matcher[[]T] {
 }
 
 func (ss sliceUnorderedMatcher[T]) Match(actual []T) itskit.Match {
-	diffs := set.Compare(actual, ss.spec)
+	ms := make([]itskit.Matcher[T], len(ss.matchers))
+	for i, m := range ss.matchers {
+		ms[i] = m
+	}
+	diffs := set.Compare(actual, ms)
 	matches := []itskit.Match{}
 	extra := 0
 	miss := 0
@@ -121,7 +143,7 @@ func (ss sliceUnorderedMatcher[T]) Write(ww itsio.Writer) error {
 		return err
 	}
 	iw := ww.Indent()
-	for _, s := range ss.spec {
+	for _, s := range ss.matchers {
 		if err := s.Write(iw); err != nil {
 			return err
 		}
@@ -136,9 +158,15 @@ func (ss sliceUnorderedMatcher[T]) String() string {
 type sliceContainedUnorderedMatcher[T any] sliceSpec[T]
 
 // SliceContainsUnordered test that actual slice contain elements satisfy each specs.
-func SliceUnorderedContaining[T any](spec ...itskit.Matcher[T]) itskit.Matcher[[]T] {
+//
+// # Args
+//
+// - mathcers: matchers for each element.
+// Each matchers is tried multiple times with many element.
+// Do not use stateful matcher.
+func SliceUnorderedContaining[T any](spec ...Matcher[T]) Matcher[[]T] {
 	return sliceContainedUnorderedMatcher[T]{
-		spec: spec,
+		matchers: spec,
 		template: itskit.NewLabel(
 			"[]%T{ ... (unordered, contain; len: %d, %d; -%d)",
 			*new(T),
@@ -150,7 +178,11 @@ func SliceUnorderedContaining[T any](spec ...itskit.Matcher[T]) itskit.Matcher[[
 }
 
 func (ss sliceContainedUnorderedMatcher[T]) Match(actual []T) itskit.Match {
-	diffs := set.Compare(actual, ss.spec)
+	ms := make([]itskit.Matcher[T], len(ss.matchers))
+	for i, m := range ss.matchers {
+		ms[i] = m
+	}
+	diffs := set.Compare(actual, ms)
 	matches := []itskit.Match{}
 	miss := 0
 	for _, d := range diffs {
@@ -173,7 +205,7 @@ func (ss sliceContainedUnorderedMatcher[T]) Write(ww itsio.Writer) error {
 		return err
 	}
 	iw := ww.Indent()
-	for _, s := range ss.spec {
+	for _, s := range ss.matchers {
 		if err := s.Write(iw); err != nil {
 			return err
 		}

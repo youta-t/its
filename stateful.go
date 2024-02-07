@@ -8,6 +8,7 @@ import (
 // Monotonic tests that the new got value matches with the last got value.
 //
 // Monotonis is stateful matcher.
+// Do not use this in slice related matcher.
 //
 // # Example
 //
@@ -24,7 +25,7 @@ import (
 // # Args
 //
 // - matcherFactory: factory function that creates new Matcher with new got.
-func Monotonic[T any](matcherFactory func(T) itskit.Matcher[T]) itskit.Matcher[T] {
+func Monotonic[T any](matcherFactory func(T) Matcher[T]) itskit.Matcher[T] {
 	return &monotonic[T]{
 		label:          itskit.NewLabel("// monotonic"),
 		matcherFactory: matcherFactory,
@@ -34,8 +35,8 @@ func Monotonic[T any](matcherFactory func(T) itskit.Matcher[T]) itskit.Matcher[T
 
 type monotonic[T any] struct {
 	label          itskit.Label
-	matcherFactory func(T) itskit.Matcher[T]
-	nextMatcher    itskit.Matcher[T]
+	matcherFactory func(T) Matcher[T]
+	nextMatcher    Matcher[T]
 	mathces        []itskit.Match
 }
 
@@ -62,6 +63,7 @@ func (mono *monotonic[T]) String() string {
 // Singuler tests that new got value DO NOT match with any former got values.
 //
 // Singuler is stateful matcher.
+// Do not use this in slice related matcher.
 //
 // # Example
 //
@@ -75,7 +77,7 @@ func (mono *monotonic[T]) String() string {
 // # Args
 //
 // - matcherFactory: factory function creates a new mathcer for new got.
-func Singuler[T any](matcherFactory func(T) itskit.Matcher[T]) itskit.Matcher[T] {
+func Singuler[T any](matcherFactory func(T) Matcher[T]) itskit.Matcher[T] {
 	return &singulerMatcher[T]{
 		label:          itskit.NewLabel("//do not match with values have been gotten"),
 		matcherFactory: matcherFactory,
@@ -84,8 +86,8 @@ func Singuler[T any](matcherFactory func(T) itskit.Matcher[T]) itskit.Matcher[T]
 
 type singulerMatcher[T any] struct {
 	label          itskit.Label
-	matcherFactory func(T) itskit.Matcher[T]
-	matchers       []itskit.Matcher[T]
+	matcherFactory func(T) Matcher[T]
+	matchers       []Matcher[T]
 	matches        []itskit.Match
 }
 

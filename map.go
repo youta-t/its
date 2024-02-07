@@ -17,16 +17,16 @@ func (a keyedMatch) less(b keyedMatch) bool {
 	return a.strkey < b.strkey
 }
 
-type mapSpec[K comparable, V any] map[K]itskit.Matcher[V]
+type mapSpec[K comparable, V any] map[K]Matcher[V]
 
 type mapMatcher[K comparable, V any] struct {
 	header itskit.Label
 	spec   mapSpec[K, V]
 }
 
-type MapSpec[K comparable, V any] map[K]itskit.Matcher[V]
+type MapSpec[K comparable, V any] map[K]Matcher[V]
 
-func Map[K comparable, V any](spec map[K]itskit.Matcher[V]) itskit.Matcher[map[K]V] {
+func Map[K comparable, V any](spec map[K]Matcher[V]) Matcher[map[K]V] {
 	return mapMatcher[K, V]{
 		header: itskit.NewLabel(
 			"map[%T]%T{... ( keys: %d, %d; +%d, -%d )",
@@ -150,7 +150,7 @@ type mapContainingMatcher[K comparable, V any] struct {
 	spec   mapSpec[K, V]
 }
 
-func MapContaining[K comparable, V any](spec map[K]itskit.Matcher[V]) itskit.Matcher[map[K]V] {
+func MapContaining[K comparable, V any](spec map[K]Matcher[V]) Matcher[map[K]V] {
 	return mapContainingMatcher[K, V]{
 		header: itskit.NewLabel(
 			"map[%T]%T{ ... (contain; keys %d, %d; -%d)",

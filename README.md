@@ -122,82 +122,6 @@ type MyStruct struct {
 Structer generates a file at `./gen/${the filename with go:generate}.go`.
 And the content will be:
 
-```go
-// Code generated -- DO NOT EDIT
-
-package gen
-
-import (
-	"strings"
-
-	itskit "github.com/youta-t/its/itskit"
-	itsio "github.com/youta-t/its/itskit/itsio"
-	testee "....../example/"
-)
-
-type MyStructSpec struct {
-	Name  itskit.Matcher[string]
-	Value itskit.Matcher[int]
-}
-
-type _MyStructMatcher struct {
-	fields []itskit.Matcher[testee.MyStruct]
-}
-
-func ItsMyStruct(want MyStructSpec) itskit.Matcher[testee.MyStruct] {
-	sub := []itskit.Matcher[testee.MyStruct]{}
-
-	sub = append(
-		sub,
-		itskit.Property(
-			".Name",
-			func(got testee.MyStruct) string { return got.Name },
-			want.Name,
-		),
-	)
-
-	sub = append(
-		sub,
-		itskit.Property(
-			".Value",
-			func(got testee.MyStruct) int { return got.Value },
-			want.Value,
-		),
-	)
-
-	return _MyStructMatcher{fields: sub}
-}
-
-func (m _MyStructMatcher) Match(got testee.MyStruct) itskit.Match {
-	ok := 0
-	sub := []itskit.Match{}
-	for _, f := range m.fields {
-		m := f.Match(got)
-		if m.Ok() {
-			ok += 1
-		}
-		sub = append(sub, m)
-	}
-
-	return itskit.NewMatch(
-		len(sub) == ok,
-		itskit.NewLabel("type MyStruct:").Fill(struct{}{}),
-		sub...,
-	)
-}
-
-func (m _MyStructMatcher) Write(ww itsio.Writer) error {
-	return itsio.WriteBlock(ww, "type MyStruct:", m.fields)
-}
-
-func (m _MyStructMatcher) String() string {
-	sb := new(strings.Builder)
-	w := itsio.Wrap(sb)
-	m.Write(w)
-	return sb.String()
-}
-```
-
 Notice of `MyStructSpec` and `ItsMyStruct` type, or more generally, `T_Spec` and `Its_T`.
 
 - `Its_T` type is the matcher for struct `T`.
@@ -207,11 +131,11 @@ Notice of `MyStructSpec` and `ItsMyStruct` type, or more generally, `T_Spec` and
 Use them as `gen.Its_T(T_Spec{ ... })`, like:
 
 ```go
-	in_gen.ItsMyStruct1(in_gen.MyStruct1Spec{
+	gen.ItsMyStruct1(gen.MyStructSpec{
 		Name: its.StringHavingPrefix[string]("its"),
 		Values: its.GreaterThan(3),
 	}).
-		Match(types.MyStruct1{
+		Match(types.MyStruct{
 			Name: "its a matching library",
 			Values: 300,
 		}).
@@ -313,7 +237,7 @@ func (epm eqeqPtrMatcher[T]) String() string {
 // EqEqPtr tests of pointer for comparable with
 //
 //	(want == got) || (*want == *got)
-func EqEqPtr[T comparable](want *T) itskit.Matcher[*T] {
+func EqEqPtr[T comparable](want *T) its.Matcher[*T] {
 	return eqeqPtrMatcher[T]{
 		label: itskit.NewLabel(
 			"%+v == %+v",

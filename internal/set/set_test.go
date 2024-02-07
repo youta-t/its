@@ -47,7 +47,7 @@ func TestCompair(t *testing.T) {
 	type Then []itskit.Matcher[diff.Diff]
 	theory := func(when When, then Then) func(*testing.T) {
 		return func(t *testing.T) {
-			diffs := set.Compare(when.values, when.specs)
+			diffs := set.Compare[int](when.values, when.specs)
 		SPEC:
 			for _, spec := range then {
 				for _, d := range diffs {

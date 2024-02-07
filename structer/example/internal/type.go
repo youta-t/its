@@ -4,14 +4,16 @@ package types
 
 import (
 	"io"
+	"time"
 
 	"github.com/youta-t/its/structer/example/internal/sub1"
 	"github.com/youta-t/its/structer/example/internal/sub2"
 )
 
 type MyStruct struct {
-	Name  string
-	Value int
+	Name      string
+	Value     []int
+	Timestamp time.Time
 }
 
 type MyStruct1 struct {

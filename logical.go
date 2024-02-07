@@ -8,7 +8,7 @@ import (
 // All tests actual passes all specs.
 //
 // If no matchers are given, it always pass.
-func All[T any](matchers ...itskit.Matcher[T]) itskit.Matcher[T] {
+func All[T any](matchers ...Matcher[T]) itskit.Matcher[T] {
 	return allMatcher[T]{
 		header: itskit.NewLabel(
 			"// all: (%d ok / %d matchers)",
@@ -20,7 +20,7 @@ func All[T any](matchers ...itskit.Matcher[T]) itskit.Matcher[T] {
 
 type allMatcher[T any] struct {
 	header itskit.Label
-	specs  []itskit.Matcher[T]
+	specs  []Matcher[T]
 }
 
 func (as allMatcher[T]) Match(actual T) itskit.Match {
@@ -61,7 +61,7 @@ func (as allMatcher[T]) String() string {
 // All tests actual passes at least one spec.
 //
 // If no matchers are given, it always fail.
-func Some[T any](matchers ...itskit.Matcher[T]) itskit.Matcher[T] {
+func Some[T any](matchers ...Matcher[T]) itskit.Matcher[T] {
 	return someMatcher[T]{
 		header: itskit.NewLabel(
 			"// some: (%d ok / %d matchers)",
@@ -73,7 +73,7 @@ func Some[T any](matchers ...itskit.Matcher[T]) itskit.Matcher[T] {
 
 type someMatcher[T any] struct {
 	header   itskit.Label
-	submatch []itskit.Matcher[T]
+	submatch []Matcher[T]
 }
 
 func (ss someMatcher[T]) Match(actual T) itskit.Match {
@@ -112,11 +112,11 @@ func (ss someMatcher[T]) String() string {
 
 type notMatcher[T any] struct {
 	hedaer  string
-	matcher itskit.Matcher[T]
+	matcher Matcher[T]
 }
 
 // Inverts matcher.
-func Not[T any](matcher itskit.Matcher[T]) itskit.Matcher[T] {
+func Not[T any](matcher Matcher[T]) itskit.Matcher[T] {
 	return notMatcher[T]{
 		hedaer:  "// not:",
 		matcher: matcher,
@@ -141,7 +141,7 @@ func (n notMatcher[T]) String() string {
 }
 
 // None tests got value does NOT match for all given matchers.
-func None[T any](matchers ...itskit.Matcher[T]) itskit.Matcher[T] {
+func None[T any](matchers ...Matcher[T]) itskit.Matcher[T] {
 	return noneMathcer[T]{
 		label:   itskit.NewLabel("// none of:"),
 		matcher: matchers,
@@ -150,7 +150,7 @@ func None[T any](matchers ...itskit.Matcher[T]) itskit.Matcher[T] {
 
 type noneMathcer[T any] struct {
 	label   itskit.Label
-	matcher []itskit.Matcher[T]
+	matcher []Matcher[T]
 }
 
 func (none noneMathcer[T]) Match(got T) itskit.Match {

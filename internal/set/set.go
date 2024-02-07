@@ -179,7 +179,7 @@ VALUE:
 		ret = append(ret, diff.ExtraItem(values[i_value]))
 	}
 	for i_spec := range s_node {
-		ret = append(ret, diff.MissingItem(specs[i_spec]))
+		ret = append(ret, diff.MissingItem[T](specs[i_spec]))
 	}
 	return ret
 }

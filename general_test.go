@@ -196,9 +196,9 @@ func ExampleEqual() {
 	}
 	t2 := t1.Add(5 * time.Minute) // = 2023-10-11T12:18:14
 
-	its.Equal(t1).Match(t2).OrError(t)
-	its.Equal(t1).Match(t1).OrError(t)
-	its.Equal(t2).Match(t1).OrError(t)
+	its.Equal[time.Time](t1).Match(t2).OrError(t)
+	its.Equal[time.Time](t1).Match(t1).OrError(t)
+	its.Equal[time.Time](t2).Match(t1).OrError(t)
 
 	// Output:
 	// ✘ (/* want */ 2023-10-11 12:13:14 +0000 +0000).Equal(/* got */ 2023-10-11 12:18:14 +0000 +0000)
