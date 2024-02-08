@@ -25,7 +25,7 @@ import (
 // # Args
 //
 // - matcherFactory: factory function that creates new Matcher with new got.
-func Monotonic[T any](matcherFactory func(T) Matcher[T]) itskit.Matcher[T] {
+func Monotonic[T any](matcherFactory func(T) Matcher[T]) Matcher[T] {
 	return &monotonic[T]{
 		label:          itskit.NewLabel("// monotonic"),
 		matcherFactory: matcherFactory,
@@ -77,7 +77,7 @@ func (mono *monotonic[T]) String() string {
 // # Args
 //
 // - matcherFactory: factory function creates a new mathcer for new got.
-func Singuler[T any](matcherFactory func(T) Matcher[T]) itskit.Matcher[T] {
+func Singuler[T any](matcherFactory func(T) Matcher[T]) Matcher[T] {
 	return &singulerMatcher[T]{
 		label:          itskit.NewLabel("//do not match with values have been gotten"),
 		matcherFactory: matcherFactory,
