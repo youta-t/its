@@ -4,7 +4,24 @@ its  --  A Matcher Library
 What it is? -- yes, it's its.
 ------------------------------
 
-`its` provides value matchers. For example, its has `its.EqEq` for `comparable`.
+`its` provides value matchers.
+
+Install
+---------
+
+```
+go get github.com/youta-t/its
+```
+
+Its requires go1.18+.
+
+Core package: `its`
+------------------
+
+`github.com/youta-t/its` package is core package.
+Built-in mathcers are here.
+
+For example, `its.EqEq` matcher is for `comparable`.
 
 ```go
 import "testing"
@@ -22,6 +39,9 @@ func TestAdd(t *testing.T) {
 ```
 
 It passes becauase `10 == 3 + 7` is true, as you see.
+
+All matchers have example. See them in pkg.go.dev:
+https://pkg.go.dev/github.com/youta-t/its and doc/getting-started.
 
 ### Nice message
 
@@ -50,10 +70,17 @@ provides,
 
 ```
 --- FAIL: TestAdd (0.00s)
-    .../example_test.go:33: ✘ /* got */ 11 == /* want */ 10
+    .../example_test.go:33:
+        ✘ /* got */ 11 == /* want */ 10
 ```
 
-Error message is tailored for each matchers. See examples to meet more matchers!
+Error message is tailored for each matchers.
+
+Generally, each messages start with...
+
+- `✔ `: passed matcher
+- `✘ `: failed matcher
+- `~ `: failed matcher, but not matter
 
 ### Composeable
 
@@ -102,148 +129,22 @@ provides,
 
 Not only `All`, there are `Some` (require match at least one) and `Not` (invert match).
 
-### Generate Struct Matcher: structer
+Generate Struct Matcher: structer
+---------------------------------
 
 its has a tool for `//go:generate` to generate matchers of struct, `github.com/youta-t/its/structer`.
 
-For example, given a snippet below,
+You can get matchers for structs in and not in your package.
 
-```go
-//go:generate go run github.com/youta-t/its/structer -dest gen
+See structer/README.md for more details.
 
-package ...
+DIY kit included
+-----------------
 
-type MyStruct struct {
-	Name   string
-	Value int
-}
-```
+Matcher developmenet kit, `itskit`, is included.
 
-Structer generates a file at `./gen/${the filename with go:generate}.go`.
-And the content will be:
+You can create your matcher from scratch in 50 lines or so.
+Or, in the simplest case, you need just 10 lines per one matcher.
 
-Notice of `MyStructSpec` and `ItsMyStruct` type, or more generally, `T_Spec` and `Its_T`.
+See doc/how-to-write-my-matcher.md to know how to.
 
-- `Its_T` type is the matcher for struct `T`.
-    - It is compliant with `itskit.Matcher[T]`.
-- `T_Spec` type is container of matchers for each field of `T`
-
-Use them as `gen.Its_T(T_Spec{ ... })`, like:
-
-```go
-	gen.ItsMyStruct1(gen.MyStructSpec{
-		Name: its.StringHavingPrefix[string]("its"),
-		Values: its.GreaterThan(3),
-	}).
-		Match(types.MyStruct{
-			Name: "its a matching library",
-			Values: 300,
-		}).
-		OrError(t)
-```
-
-### Easy DIY
-
-Matcher developmenet kit, `itskit`, is bundled.
-
-#### Simple matcher
-
-Using `itskit.SimpleMatcher`, you can jot down your matcher.
-
-```go
-package example_test
-
-import (
-	"testing"
-
-	"github.com/youta-t/its"
-	"github.com/youta-t/its/itskit"
-)
-
-// ...
-
-func TestEven(t *testing.T) {
-	itsEven := itskit.SimpleMatcher(
-        // when got is want?
-        func(got int) bool { return got%2 == 0 },
-
-        // format of error message
-        "%d is even",
-        itskit.Got, // ...and placeholder
-	)
-
-	itsEven.Match(7).OrError(t)
-	itsEven.Match(8).OrError(t)
-}
-```
-
-
-The example above provides log like below:
-
-```
---- FAIL: TestEven (0.00s)
-    .../example_test.go:43: 
-        ✘ /* got */ 7 is even
-```
-
-#### More matcher
-
-When you need more complex matchers, implement your Matcher.
-
-Only 3 methods are needed.
-
-- `Match[T](got T) itskit.Match` : determine whether the got value matchs or not.
-- `Write(itsio.Writer) error` : string expression of the matcher itself.
-- `String() string` : same above, but return string directly.
-
-For example: this is full implementation of `EqEqPtr` matcher.
-
-```go
-type eqeqPtrMatcher[T comparable] struct {
-	label itskit.Label
-	want  *T
-}
-
-func ptrLabel[T any](v *T) string {
-	if v == nil {
-		return "nil"
-	}
-	return fmt.Sprintf("&(%+v)", *v)
-}
-
-func (epm eqeqPtrMatcher[T]) Match(got *T) itskit.Match {
-	ok := false
-
-	if got == nil || epm.want == nil {
-		ok = got == nil && epm.want == nil
-	} else {
-		ok = *got == *epm.want
-	}
-
-	return itskit.NewMatch(
-		ok,
-		epm.label.Fill(ptrLabel(got)),
-	)
-}
-
-func (epm eqeqPtrMatcher[T]) Write(w itsio.Writer) error {
-	return epm.label.Write(w)
-}
-
-func (epm eqeqPtrMatcher[T]) String() string {
-	return itskit.MatcherToString[*T](epm)
-}
-
-// EqEqPtr tests of pointer for comparable with
-//
-//	(want == got) || (*want == *got)
-func EqEqPtr[T comparable](want *T) its.Matcher[*T] {
-	return eqeqPtrMatcher[T]{
-		label: itskit.NewLabel(
-			"%+v == %+v",
-			itskit.Got, itskit.Want(ptrLabel(want)),
-		),
-		want: want,
-	}
-}
-```
