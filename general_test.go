@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"regexp"
 	"time"
 
 	"github.com/youta-t/its"
@@ -196,9 +197,9 @@ func ExampleEqual() {
 	}
 	t2 := t1.Add(5 * time.Minute) // = 2023-10-11T12:18:14
 
-	its.Equal[time.Time](t1).Match(t2).OrError(t)
-	its.Equal[time.Time](t1).Match(t1).OrError(t)
-	its.Equal[time.Time](t2).Match(t1).OrError(t)
+	its.Equal(t1).Match(t2).OrError(t)
+	its.Equal(t1).Match(t1).OrError(t)
+	its.Equal(t2).Match(t1).OrError(t)
 
 	// Output:
 	// ✘ (/* want */ 2023-10-11 12:13:14 +0000 +0000).Equal(/* got */ 2023-10-11 12:18:14 +0000 +0000)
@@ -261,37 +262,31 @@ func ExampleNever() {
 }
 
 func ExampleStringHavingPrefix() {
-	its.StringHavingPrefix[string]("abc").Match("abcde").OrError(t)
-	its.StringHavingPrefix[string]("abc").Match("adcbe").OrError(t)
-
-	type MyString string
-	its.StringHavingPrefix[MyString]("abc").Match("abcde").OrError(t)
-	its.StringHavingPrefix[MyString]("abc").Match("adcbe").OrError(t)
+	its.StringHavingPrefix("abc").Match("abcde").OrError(t)
+	its.StringHavingPrefix("abc").Match("adcbe").OrError(t)
 
 	// Output:
-	// ✘ strings.HasPrefix(/* got */ "adcbe", /* want */ "abc")
-	//
 	// ✘ strings.HasPrefix(/* got */ "adcbe", /* want */ "abc")
 }
 
 func ExampleStringHavingSuffix() {
-	its.StringHavingSuffix[string]("cde").Match("abcde").OrError(t)
-	its.StringHavingSuffix[string]("cde").Match("adcbe").OrError(t)
+	its.StringHavingSuffix("cde").Match("abcde").OrError(t)
+	its.StringHavingSuffix("cde").Match("adcbe").OrError(t)
 	// Output:
 	// ✘ strings.HasSuffix(/* got */ "adcbe", /* want */ "cde")
 }
 
 func ExampleStringContaining() {
-	its.StringContaining[string]("bcd").Match("abcde").OrError(t)
-	its.StringContaining[string]("bcd").Match("adcbe").OrError(t)
+	its.StringContaining("bcd").Match("abcde").OrError(t)
+	its.StringContaining("bcd").Match("adcbe").OrError(t)
 	// Output:
 	// ✘ strings.Contains(/* got */ "adcbe", /* want */ "bcd")
 }
 
 func ExampleStringEqualFold() {
-	its.StringEqualFold[string]("abc").Match("abc").OrError(t)
-	its.StringEqualFold[string]("aBc").Match("AbC").OrError(t)
-	its.StringEqualFold[string]("abc").Match("αβγ").OrError(t)
+	its.StringEqualFold("abc").Match("abc").OrError(t)
+	its.StringEqualFold("aBc").Match("AbC").OrError(t)
+	its.StringEqualFold("abc").Match("αβγ").OrError(t)
 	// Output:
 	// ✘ strings.EqualFold(/* got */ "αβγ", /* want */ "abc")
 }
@@ -339,12 +334,12 @@ func ExampleInf() {
 	// ✘ math.IsInf(/* got */ 0.000000, 0)
 }
 
-func ExampleClosed() {
+func ExampleClosedChan() {
 	ch1 := make(chan int, 1)
 	close(ch1)
-	its.Closed[int]().Match(ch1).OrError(t)
+	its.ClosedChan[int]().Match(ch1).OrError(t)
 	ch2 := make(chan string, 1)
-	its.Closed[string]().Match(ch2).OrError(t)
+	its.ClosedChan[string]().Match(ch2).OrError(t)
 	// Output:
 	// ✘ chan string is not closed.
 }
@@ -360,4 +355,20 @@ func ExampleType() {
 	// ✘ /* got */ text value is a int
 	//
 	// ✘ /* got */ {Foo:42} is a int
+}
+
+func ExampleMatch() {
+	pattern := regexp.MustCompile(`^[a-z]([a-z0-9.-]+[a-z])?$`)
+	its.Match(pattern).Match([]byte("github.com")).OrError(t)
+	its.Match(pattern).Match([]byte("github.com/youta-t/its")).OrError(t)
+	// Output:
+	// ✘ (/* want */ ^[a-z]([a-z0-9.-]+[a-z])?$).Match(/* got */ [103 105 116 104 117 98 46 99 111 109 47 121 111 117 116 97 45 116 47 105 116 115])
+}
+
+func ExampleMatchString() {
+	pattern := regexp.MustCompile(`^[a-z]([a-z0-9.-]+[a-z])?$`)
+	its.MatchString(pattern).Match("github.com").OrError(t)
+	its.MatchString(pattern).Match("github.com/youta-t/its").OrError(t)
+	// Output:
+	// ✘ (/* want */ ^[a-z]([a-z0-9.-]+[a-z])?$).MatchString(/* got */ "github.com/youta-t/its")
 }

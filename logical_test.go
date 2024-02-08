@@ -4,15 +4,15 @@ import "github.com/youta-t/its"
 
 func ExampleAll() {
 	its.All(
-		its.StringHavingPrefix[string]("abc"),
-		its.StringContaining[string]("hij"),
-		its.StringHavingSuffix[string]("xyz"),
+		its.StringHavingPrefix("abc"),
+		its.StringContaining("hij"),
+		its.StringHavingSuffix("xyz"),
 	).Match("abc...fghijkl...xyz").OrError(t)
 
 	its.All(
-		its.StringHavingPrefix[string]("abc"),
-		its.StringContaining[string]("hij"),
-		its.StringHavingSuffix[string]("xyz"),
+		its.StringHavingPrefix("abc"),
+		its.StringContaining("hij"),
+		its.StringHavingSuffix("xyz"),
 	).Match("abc...fghIJkl...xyz").OrError(t)
 
 	// Output:
@@ -24,15 +24,15 @@ func ExampleAll() {
 
 func ExampleSome() {
 	its.Some(
-		its.StringHavingPrefix[string]("abc"),
-		its.StringContaining[string]("hij"),
-		its.StringHavingSuffix[string]("xyz"),
+		its.StringHavingPrefix("abc"),
+		its.StringContaining("hij"),
+		its.StringHavingSuffix("xyz"),
 	).Match("abc...fghIJkl...xyz").OrError(t)
 
 	its.Some(
-		its.StringHavingPrefix[string]("abc"),
-		its.StringContaining[string]("hij"),
-		its.StringHavingSuffix[string]("xyz"),
+		its.StringHavingPrefix("abc"),
+		its.StringContaining("hij"),
+		its.StringHavingSuffix("xyz"),
 	).Match("The quick brown fox jumps over the lazy dog").OrError(t)
 	// Output:
 	// ✘ // some: (0 ok / 3 matchers)

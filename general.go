@@ -145,7 +145,7 @@ func After[T interface{ After(T) bool }](want T) Matcher[T] {
 //	expcted.Equal(got)
 //
 // want value can be time.Time, for example, but whatever okay if it has Equal().
-func Equal[T any](want interface{ Equal(T) bool }) Matcher[T] {
+func Equal[T any, E interface{ Equal(T) bool }](want E) Matcher[T] {
 	return itskit.SimpleMatcher(
 		want.Equal,
 		"(%+v).Equal(%+v)",
@@ -210,9 +210,9 @@ func Never[T any]() Matcher[T] {
 }
 
 // StringHavingPrefix tests with strings.HasPrefix
-func StringHavingPrefix[T ~string](want string) Matcher[T] {
+func StringHavingPrefix(want string) Matcher[string] {
 	return itskit.SimpleMatcher(
-		func(got T) bool {
+		func(got string) bool {
 			return strings.HasPrefix((string)(got), want)
 		},
 		`strings.HasPrefix(%#v, %#v)`,
@@ -221,9 +221,9 @@ func StringHavingPrefix[T ~string](want string) Matcher[T] {
 }
 
 // StringHavingSuffix tests with strings.HasSuffix
-func StringHavingSuffix[T ~string](want string) Matcher[T] {
+func StringHavingSuffix(want string) Matcher[string] {
 	return itskit.SimpleMatcher(
-		func(got T) bool {
+		func(got string) bool {
 			return strings.HasSuffix((string)(got), want)
 		},
 		`strings.HasSuffix(%#v, %#v)`,
@@ -232,9 +232,9 @@ func StringHavingSuffix[T ~string](want string) Matcher[T] {
 }
 
 // StringContaining tests with strings.Contains
-func StringContaining[T ~string](want string) Matcher[T] {
+func StringContaining(want string) Matcher[string] {
 	return itskit.SimpleMatcher(
-		func(got T) bool {
+		func(got string) bool {
 			return strings.Contains((string)(got), want)
 		},
 		`strings.Contains(%#v, %#v)`,
@@ -243,9 +243,9 @@ func StringContaining[T ~string](want string) Matcher[T] {
 }
 
 // StringEqualFold tests with strings.EqualFold
-func StringEqualFold[T ~string](want string) Matcher[T] {
+func StringEqualFold(want string) Matcher[string] {
 	return itskit.SimpleMatcher(
-		func(got T) bool {
+		func(got string) bool {
 			return strings.EqualFold((string)(got), want)
 		},
 		`strings.EqualFold(%#v, %#v)`,
@@ -323,10 +323,10 @@ type chanMatcher[T any] struct {
 	label itskit.Label
 }
 
-// Closed tests wheather channel is closed or not.
+// ClosedChan tests wheather channel is closed or not.
 //
 // This matcher tries to receive from channel, it may cause sideeffect.
-func Closed[T any]() Matcher[<-chan T] {
+func ClosedChan[T any]() Matcher[<-chan T] {
 	return chanMatcher[T]{
 		label: itskit.NewLabel("chan %T is %s.", *new(T), itskit.Placeholder),
 	}
@@ -376,7 +376,7 @@ func Type[T any]() Matcher[any] {
 // # Example
 //
 //	Match[[]byte](regexp.MustCompile(`[Mm]atcher`))
-func Match[T any](m interface{ Match(T) bool }) Matcher[T] {
+func Match[T any, M interface{ Match(T) bool }](m M) Matcher[T] {
 	return itskit.SimpleMatcher(
 		m.Match,
 		"(%+v).Match(%+v)",
@@ -392,7 +392,7 @@ func Match[T any](m interface{ Match(T) bool }) Matcher[T] {
 func MatchString(m interface{ MatchString(string) bool }) Matcher[string] {
 	return itskit.SimpleMatcher(
 		m.MatchString,
-		"(%+v).MatchString(%+v)",
+		"(%+v).MatchString(%#v)",
 		itskit.Want(m), itskit.Got,
 	)
 }
