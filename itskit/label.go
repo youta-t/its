@@ -3,8 +3,11 @@ package itskit
 import (
 	"fmt"
 	"io"
+	"os"
+	"path/filepath"
 	"strings"
 
+	"github.com/youta-t/its/config"
 	"github.com/youta-t/its/itskit/itsio"
 )
 
@@ -65,6 +68,31 @@ func NewLabel(template string, params ...any) Label {
 		template: template,
 		params:   params,
 	}
+}
+
+// NewLabelWithLocation like NewLabel, but appends where this function is called.
+func NewLabelWithLocation(template string, params ...any) Label {
+	cancel := SkipStack()
+	defer cancel()
+
+	p := make([]any, len(params))
+	copy(p, params)
+
+	from := InvokedFrom()
+	file := from.File
+	line := from.Line
+
+	if config.FilepathReplace != "" {
+		if f, err := filepath.Rel(config.FilepathReplace, file); err == nil && !strings.HasPrefix(f, "..") {
+			file = strings.Join([]string{config.FilepathReplaceWith, f}, string(os.PathSeparator))
+		}
+	}
+
+	p = append(p, file, line)
+	return NewLabel(
+		template+"\t\t--- @ %s:%d",
+		p...,
+	)
 }
 
 func (c Label) Write(w itsio.Writer) error {
