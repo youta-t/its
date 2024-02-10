@@ -17,6 +17,9 @@ Now, showing "ApproxEq" matcher:
 
 ```go
 func ApproxEq(want float64, tolerance float64) its.Matcher[float64] {
+	cancel := itskit.SkipStack()
+	defer candel()
+
 	return itskit.SimpleMatcher(
 		func(got float64) bool {
 			d := want - got
@@ -41,6 +44,13 @@ Specials are found in the third. Values `its.Got` and `its.Want` appear.
 `its.Want` is a decorator. In message, it prefixes `/* want */`.
 Others are passed to formatter as it is.
 
+> **Note**
+>
+> `itskit.SkipStack()` marks this callstack to be skipped
+> to detect file:line where a Matcher is created.
+>
+> Doing that, your error message contains line where you call `ApproxEq`.
+
 Now, let us try `ApproxEq`.
 
 ```go
@@ -55,7 +65,7 @@ goes...
 ```
 --- FAIL: TestClose (0.00s)
     /path/to/example_test.go:82: 
-        ✘ /* got */ 0.100000 in /* want */ 0.120000±0.010000
+        ✘ /* got */ 0.100000 in /* want */ 0.120000±0.010000       --- @ /path/to/example_test.go:84
 ```
 
 It works!
@@ -113,7 +123,7 @@ func (y YourMatcher) Match(got SomeType) itskit.Match {
 }
 ```
 
-`itskit.NewLabel` is same as `itskit.SimpleMatcher`'s formatting arguments.
+`itskit.NewLabel` is like as `itskit.SimpleMatcher`'s formatting arguments.
 `.Fill` fills values known on matching timing, like the got value.
 In `Match`, you can build result messages in a dinamic way.
 
@@ -137,8 +147,11 @@ type YourMatcher struct {
 }
 
 func ItsYourMatcher(...) its.Matcher[SomeType] {
+    cancel := itskit.SkipStack()
+    defer cancel()
+
     return YourMatcher{
-        label: itskit.NewLabel(
+        label: itskit.NewLabelLocation(
             "...format string...",
             params...,
         ),
@@ -164,8 +177,11 @@ func (y YourMatcher) Write(w itsio.Writer) error {
 }
 ```
 
-At the last, `String` method can be implement with utility function.
-Do that
+Now, `itskit.NewLabelWithLocation` replaces `itskit.NewLabel`.
+The `WithLocation`-one suffixes file:line where the function is invoked.
+
+Finally, `String` method is needed. It can be implemented with utility function.
+Do:
 
 ```go
 func (y YourMatcher) String() string {
@@ -178,7 +194,7 @@ Now we have walked through of implementation a matcher from scratch.
 
 ### Bonus
 
-When creating `itskit.Label`, a plain placeholder, `itskit.Placeholder`, can be used.
+When creating `itskit.Label` or `itskit.LabelWithLocation`, a plain placeholder, `itskit.Placeholder`, can be used.
 This means "need some value, but it will determined at matching".
 
 In contrast of `itskit.Got`, `itskit.Placehodler` has no extra prefix.
@@ -186,7 +202,7 @@ In contrast of `itskit.Got`, `itskit.Placehodler` has no extra prefix.
 Once create `itskit.Label` with `itskit.Placeholder`, like
 
 ```go
-itskit.newLabel(
+itskit.NewLabel(
     "%d %s %d",
     itskit.Got, itskit.Placeholder, itskit.Want(want)
 )
@@ -199,3 +215,4 @@ Conclusion
 
 - For simple condition and simple label, `itskit.SimpleMatcher` is useful.
 - For complex matcher, write `its.Matcher[T]` from scratch.
+- In factory function, call `itskit.SkipStack()` for useful error logs.

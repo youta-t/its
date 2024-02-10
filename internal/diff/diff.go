@@ -1,6 +1,8 @@
 package diff
 
 import (
+	"strings"
+
 	"github.com/youta-t/its/itskit"
 )
 
@@ -44,43 +46,53 @@ func MissingItem[T any](m itskit.Matcher[T]) Diff {
 }
 
 func IsExtra[T any](value T) itskit.Matcher[Diff] {
-	expected := ExtraItem(value)
+	want := ExtraItem(value)
 	return itskit.SimpleMatcher(
 		func(s Diff) bool {
 			if s.Mode != Extra {
 				return false
 			}
-			return s.Match.String() == expected.Match.String()
+			// ignore file:line
+			dd, _, _ := strings.Cut(s.Match.String(), "--- @")
+			ww, _, _ := strings.Cut(want.Match.String(), "--- @")
+			return dd == ww
 		},
 		"(%s) matches (%s)",
-		itskit.Got, itskit.Want(expected),
+		itskit.Got, itskit.Want(want),
 	)
 }
 
 func IsMissing[T any](s itskit.Matcher[T]) itskit.Matcher[Diff] {
-	expected := MissingItem[T](s)
+	want := MissingItem[T](s)
 	return itskit.SimpleMatcher(
 		func(s Diff) bool {
 			if s.Mode != Missing {
 				return false
 			}
-			return s.Match.String() == expected.Match.String()
+			// ignore file:line
+			dd, _, _ := strings.Cut(s.Match.String(), "--- @")
+			ww, _, _ := strings.Cut(want.Match.String(), "--- @")
+			return dd == ww
 		},
 		"(%s) matches (%s)",
-		itskit.Got, itskit.Want(expected),
+		itskit.Got, itskit.Want(want),
 	)
 }
 
 func IsOk(m itskit.Match) itskit.Matcher[Diff] {
-	expected := OkItem(m)
+	want := OkItem(m)
 	return itskit.SimpleMatcher(
 		func(d Diff) bool {
 			if d.Mode != Ok {
 				return false
 			}
-			return d.Match.String() == expected.Match.String()
+
+			// ignore file:line
+			dd, _, _ := strings.Cut(d.Match.String(), "--- @")
+			ww, _, _ := strings.Cut(want.Match.String(), "--- @")
+			return dd == ww
 		},
 		"(%s) matches (%s)",
-		itskit.Got, itskit.Want(expected),
+		itskit.Got, itskit.Want(want),
 	)
 }

@@ -34,22 +34,22 @@ func ExampleSlice() {
 	).OrError(t)
 
 	// Output:
-	// ✘ []int{ ... (len: /* got */ 3, /* want */ 3; +1, -1)
-	//     ✘ - /* got */ ?? == /* want */ 2
-	//     ✔ /* got */ 1 == /* want */ 1
+	// ✘ []int{ ... (len: /* got */ 3, /* want */ 3; +1, -1)		--- @ ./slice_test.go:16
+	//     ✘ - /* got */ ?? == /* want */ 2		--- @ ./slice_test.go:17
+	//     ✔ /* got */ 1 == /* want */ 1		--- @ ./slice_test.go:17
 	//     ✘ + /* got */ 2
-	//     ✔ /* got */ 3 == /* want */ 3
+	//     ✔ /* got */ 3 == /* want */ 3		--- @ ./slice_test.go:17
 	//
-	// ✘ []int{ ... (len: /* got */ 3, /* want */ 4; +0, -1)
-	//     ✔ /* got */ 1 == /* want */ 1
-	//     ✔ /* got */ 2 == /* want */ 2
-	//     ✔ /* got */ 3 == /* want */ 3
-	//     ✘ - /* got */ ?? == /* want */ 3
+	// ✘ []int{ ... (len: /* got */ 3, /* want */ 4; +0, -1)		--- @ ./slice_test.go:23
+	//     ✔ /* got */ 1 == /* want */ 1		--- @ ./slice_test.go:24
+	//     ✔ /* got */ 2 == /* want */ 2		--- @ ./slice_test.go:24
+	//     ✔ /* got */ 3 == /* want */ 3		--- @ ./slice_test.go:24
+	//     ✘ - /* got */ ?? == /* want */ 3		--- @ ./slice_test.go:24
 	//
-	// ✘ []int{ ... (len: /* got */ 4, /* want */ 3; +1, -0)
-	//     ✔ /* got */ 1 == /* want */ 1
-	//     ✔ /* got */ 2 == /* want */ 2
-	//     ✔ /* got */ 3 == /* want */ 3
+	// ✘ []int{ ... (len: /* got */ 4, /* want */ 3; +1, -0)		--- @ ./slice_test.go:30
+	//     ✔ /* got */ 1 == /* want */ 1		--- @ ./slice_test.go:31
+	//     ✔ /* got */ 2 == /* want */ 2		--- @ ./slice_test.go:31
+	//     ✔ /* got */ 3 == /* want */ 3		--- @ ./slice_test.go:31
 	//     ✘ + /* got */ 3
 }
 
@@ -83,16 +83,16 @@ func ExampleSliceUnordered() {
 	).OrError(t)
 
 	// Output:
-	// ✘ []int{ ... (unordered; len: /* want */ 3, /* got */ 4; +1, -0)
-	//     ✔ /* got */ 1 == /* want */ 1
-	//     ✔ /* got */ 2 == /* want */ 2
-	//     ✔ /* got */ 3 == /* want */ 3
+	// ✘ []int{ ... (unordered; len: /* want */ 3, /* got */ 4; +1, -0)		--- @ ./slice_test.go:72
+	//     ✔ /* got */ 1 == /* want */ 1		--- @ ./slice_test.go:73
+	//     ✔ /* got */ 2 == /* want */ 2		--- @ ./slice_test.go:73
+	//     ✔ /* got */ 3 == /* want */ 3		--- @ ./slice_test.go:73
 	//     ✘ + /* got */ 42
 	//
-	// ✘ []int{ ... (unordered; len: /* want */ 3, /* got */ 2; +0, -1)
-	//     ✔ /* got */ 1 == /* want */ 1
-	//     ✔ /* got */ 2 == /* want */ 2
-	//     ✘ - /* got */ ?? == /* want */ 3
+	// ✘ []int{ ... (unordered; len: /* want */ 3, /* got */ 2; +0, -1)		--- @ ./slice_test.go:79
+	//     ✔ /* got */ 1 == /* want */ 1		--- @ ./slice_test.go:80
+	//     ✔ /* got */ 2 == /* want */ 2		--- @ ./slice_test.go:80
+	//     ✘ - /* got */ ?? == /* want */ 3		--- @ ./slice_test.go:80
 }
 
 func ExampleSliceUnorderedContaining() {
@@ -125,8 +125,8 @@ func ExampleSliceUnorderedContaining() {
 	).OrError(t)
 
 	// Output:
-	// ✘ []int{ ... (unordered, contain; len: /* got */ 2, /* want */ 3; -1)
-	//     ✔ /* got */ 1 == /* want */ 1
-	//     ✔ /* got */ 2 == /* want */ 2
-	//     ✘ - /* got */ ?? == /* want */ 3
+	// ✘ []int{ ... (unordered, contain; len: /* got */ 2, /* want */ 3; -1)		--- @ ./slice_test.go:121
+	//     ✔ /* got */ 1 == /* want */ 1		--- @ ./slice_test.go:122
+	//     ✔ /* got */ 2 == /* want */ 2		--- @ ./slice_test.go:122
+	//     ✘ - /* got */ ?? == /* want */ 3		--- @ ./slice_test.go:122
 }

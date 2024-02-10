@@ -26,8 +26,10 @@ import (
 //
 // - matcherFactory: factory function that creates new Matcher with new got.
 func Monotonic[T any](matcherFactory func(T) Matcher[T]) Matcher[T] {
+	cancel := itskit.SkipStack()
+	defer cancel()
 	return &monotonic[T]{
-		label:          itskit.NewLabel("// monotonic"),
+		label:          itskit.NewLabelWithLocation("// monotonic"),
 		matcherFactory: matcherFactory,
 		nextMatcher:    Always[T](),
 	}
@@ -41,6 +43,8 @@ type monotonic[T any] struct {
 }
 
 func (mono *monotonic[T]) Match(got T) itskit.Match {
+	cancel := itskit.SkipStack()
+	defer cancel()
 	match := mono.nextMatcher.Match(got)
 	mono.mathces = append(mono.mathces, match)
 	mono.nextMatcher = mono.matcherFactory(got)
@@ -78,8 +82,10 @@ func (mono *monotonic[T]) String() string {
 //
 // - matcherFactory: factory function creates a new mathcer for new got.
 func Singuler[T any](matcherFactory func(T) Matcher[T]) Matcher[T] {
+	cancel := itskit.SkipStack()
+	defer cancel()
 	return &singulerMatcher[T]{
-		label:          itskit.NewLabel("//do not match with values have been gotten"),
+		label:          itskit.NewLabelWithLocation("//do not match with values have been gotten"),
 		matcherFactory: matcherFactory,
 	}
 }
@@ -92,6 +98,9 @@ type singulerMatcher[T any] struct {
 }
 
 func (uniq *singulerMatcher[T]) Match(got T) itskit.Match {
+	cancel := itskit.SkipStack()
+	defer cancel()
+
 	var match itskit.Match
 	if len(uniq.matchers) == 0 {
 		match = Always[T]().Match(got)

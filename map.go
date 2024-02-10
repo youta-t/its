@@ -27,8 +27,11 @@ type mapMatcher[K comparable, V any] struct {
 type MapSpec[K comparable, V any] map[K]Matcher[V]
 
 func Map[K comparable, V any](spec map[K]Matcher[V]) Matcher[map[K]V] {
+	cancel := itskit.SkipStack()
+	defer cancel()
+
 	return mapMatcher[K, V]{
-		header: itskit.NewLabel(
+		header: itskit.NewLabelWithLocation(
 			"map[%T]%T{... ( keys: %d, %d; +%d, -%d )",
 			*new(K), *new(V), itskit.Got, itskit.Want(len(spec)),
 			itskit.Placeholder, itskit.Placeholder,
@@ -151,8 +154,11 @@ type mapContainingMatcher[K comparable, V any] struct {
 }
 
 func MapContaining[K comparable, V any](spec map[K]Matcher[V]) Matcher[map[K]V] {
+	cancel := itskit.SkipStack()
+	defer cancel()
+
 	return mapContainingMatcher[K, V]{
-		header: itskit.NewLabel(
+		header: itskit.NewLabelWithLocation(
 			"map[%T]%T{ ... (contain; keys %d, %d; -%d)",
 			*new(K), *new(V),
 			itskit.Got, itskit.Want(len(spec)), itskit.Placeholder,

@@ -43,9 +43,12 @@ func SimpleMatcher[T any](
 	msg string,
 	params ...any,
 ) Matcher[T] {
+	cancel := SkipStack()
+	defer cancel()
+
 	return &simpleMatcher[T]{
 		fn:    predicator,
-		label: NewLabel(msg, params...),
+		label: NewLabelWithLocation(msg, params...),
 	}
 }
 
