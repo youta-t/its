@@ -22,10 +22,14 @@ type MyStructSpec struct {
 }
 
 type _MyStructMatcher struct {
+	label  itskit.Label
 	fields []its.Matcher[testee.MyStruct]
 }
 
 func ItsMyStruct(want MyStructSpec) its.Matcher[testee.MyStruct] {
+	cancel := itskit.SkipStack()
+	defer cancel()
+
 	sub := []its.Matcher[testee.MyStruct]{}
 
 	{
@@ -85,7 +89,10 @@ func ItsMyStruct(want MyStructSpec) its.Matcher[testee.MyStruct] {
 		)
 	}
 
-	return _MyStructMatcher{fields: sub}
+	return _MyStructMatcher{
+		label:  itskit.NewLabelWithLocation("type MyStruct:"),
+		fields: sub,
+	}
 }
 
 func (m _MyStructMatcher) Match(got testee.MyStruct) itskit.Match {
@@ -101,7 +108,7 @@ func (m _MyStructMatcher) Match(got testee.MyStruct) itskit.Match {
 
 	return itskit.NewMatch(
 		len(sub) == ok,
-		itskit.NewLabel("type MyStruct:").Fill(struct{}{}),
+		m.label.Fill(got),
 		sub...,
 	)
 }
@@ -124,10 +131,14 @@ type MyStruct1Spec struct {
 }
 
 type _MyStruct1Matcher struct {
+	label  itskit.Label
 	fields []its.Matcher[testee.MyStruct1]
 }
 
 func ItsMyStruct1(want MyStruct1Spec) its.Matcher[testee.MyStruct1] {
+	cancel := itskit.SkipStack()
+	defer cancel()
+
 	sub := []its.Matcher[testee.MyStruct1]{}
 
 	{
@@ -187,7 +198,10 @@ func ItsMyStruct1(want MyStruct1Spec) its.Matcher[testee.MyStruct1] {
 		)
 	}
 
-	return _MyStruct1Matcher{fields: sub}
+	return _MyStruct1Matcher{
+		label:  itskit.NewLabelWithLocation("type MyStruct1:"),
+		fields: sub,
+	}
 }
 
 func (m _MyStruct1Matcher) Match(got testee.MyStruct1) itskit.Match {
@@ -203,7 +217,7 @@ func (m _MyStruct1Matcher) Match(got testee.MyStruct1) itskit.Match {
 
 	return itskit.NewMatch(
 		len(sub) == ok,
-		itskit.NewLabel("type MyStruct1:").Fill(struct{}{}),
+		m.label.Fill(got),
 		sub...,
 	)
 }
@@ -250,10 +264,14 @@ type TSpec[P any] struct {
 }
 
 type _TMatcher[P any] struct {
+	label  itskit.Label
 	fields []its.Matcher[testee.T[P]]
 }
 
 func ItsT[P any](want TSpec[P]) its.Matcher[testee.T[P]] {
+	cancel := itskit.SkipStack()
+	defer cancel()
+
 	sub := []its.Matcher[testee.T[P]]{}
 
 	{
@@ -713,7 +731,10 @@ func ItsT[P any](want TSpec[P]) its.Matcher[testee.T[P]] {
 		)
 	}
 
-	return _TMatcher[P]{fields: sub}
+	return _TMatcher[P]{
+		label:  itskit.NewLabelWithLocation("type T:"),
+		fields: sub,
+	}
 }
 
 func (m _TMatcher[P]) Match(got testee.T[P]) itskit.Match {
@@ -729,7 +750,7 @@ func (m _TMatcher[P]) Match(got testee.T[P]) itskit.Match {
 
 	return itskit.NewMatch(
 		len(sub) == ok,
-		itskit.NewLabel("type T:").Fill(struct{}{}),
+		m.label.Fill(got),
 		sub...,
 	)
 }

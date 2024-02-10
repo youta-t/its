@@ -11,11 +11,11 @@ func ExampleMonotonic() {
 	itsDictinoalyOrder.Match("bacon").OrError(t)
 	itsDictinoalyOrder.Match("castard").OrError(t)
 	// Output:
-	// ✘ // monotonic
-	//     ✔ (always pass)
-	//     ✔ /* want */ apple < /* got */ banana
-	//     ✔ /* want */ banana < /* got */ cherry
-	//     ✘ /* want */ cherry < /* got */ bacon
+	// ✘ // monotonic		--- @ ./stateful_test.go:6
+	//     ✔ (always pass)		--- @ ./stateful_test.go:6
+	//     ✔ /* want */ apple < /* got */ banana		--- @ ./stateful_test.go:8
+	//     ✔ /* want */ banana < /* got */ cherry		--- @ ./stateful_test.go:9
+	//     ✘ /* want */ cherry < /* got */ bacon		--- @ ./stateful_test.go:10
 }
 
 func ExampleSinguler() {
@@ -26,15 +26,15 @@ func ExampleSinguler() {
 	itsUniqueId.Match("id: b").OrError(t)
 	itsUniqueId.Match("id: e").OrError(t)
 	// Output:
-	// ✘ //do not match with values have been gotten
-	//     ✔ (always pass)
-	//     ✔ // none of:
-	//         ~ /* got */ id: b == /* want */ id: a
-	//     ✔ // none of:
-	//         ~ /* got */ id: c == /* want */ id: a
-	//         ~ /* got */ id: c == /* want */ id: b
-	//     ✘ // none of:
-	//         ✘ /* got */ id: b == /* want */ id: a
-	//         ✔ /* got */ id: b == /* want */ id: b
-	//         ✘ /* got */ id: b == /* want */ id: c
+	// ✘ //do not match with values have been gotten		--- @ ./stateful_test.go:22
+	//     ✔ (always pass)		--- @ ./stateful_test.go:23
+	//     ✔ // none of:		--- @ ./stateful_test.go:24
+	//         ~ /* got */ id: b == /* want */ id: a		--- @ ./stateful_test.go:23
+	//     ✔ // none of:		--- @ ./stateful_test.go:25
+	//         ~ /* got */ id: c == /* want */ id: a		--- @ ./stateful_test.go:23
+	//         ~ /* got */ id: c == /* want */ id: b		--- @ ./stateful_test.go:24
+	//     ✘ // none of:		--- @ ./stateful_test.go:26
+	//         ✘ /* got */ id: b == /* want */ id: a		--- @ ./stateful_test.go:23
+	//         ✔ /* got */ id: b == /* want */ id: b		--- @ ./stateful_test.go:24
+	//         ✘ /* got */ id: b == /* want */ id: c		--- @ ./stateful_test.go:25
 }

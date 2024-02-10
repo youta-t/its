@@ -34,7 +34,6 @@ func TestEditorialGraph(t *testing.T) {
 				}
 			}
 		}
-
 	}
 
 	t.Run("all match", theory(

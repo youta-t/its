@@ -193,10 +193,14 @@ type {{ .Name }}Spec{{ .GenericExpr true }} struct {
 }
 
 type _{{ .Name }}Matcher{{ .GenericExpr true }} struct {
+	label  itskit.Label
 	fields []its.Matcher[{{ .Expr }}]
 }
 
 func Its{{ .Name }}{{ .GenericExpr true }}(want {{ .Name }}Spec{{ .GenericExpr false }}) its.Matcher[{{ .Expr }}] {
+	cancel := itskit.SkipStack()
+	defer cancel()
+
 	sub := []its.Matcher[{{ .Expr }}]{}
 	{{ range .Body.Fields }}
 	{
@@ -219,7 +223,10 @@ func Its{{ .Name }}{{ .GenericExpr true }}(want {{ .Name }}Spec{{ .GenericExpr f
 	}
 	{{ end }}
 
-	return _{{ .Name }}Matcher{{ .GenericExpr false }}{ fields: sub }
+	return _{{ .Name }}Matcher{{ .GenericExpr false }}{
+		label: itskit.NewLabelWithLocation("type {{ .Name }}:"),
+		fields: sub,
+	}
 }
 
 func (m _{{ .Name }}Matcher{{ .GenericExpr false }}) Match(got {{ .Expr }}) itskit.Match {
@@ -235,7 +242,7 @@ func (m _{{ .Name }}Matcher{{ .GenericExpr false }}) Match(got {{ .Expr }}) itsk
 
 	return itskit.NewMatch(
 		len(sub) == ok,
-		itskit.NewLabel("type {{ .Name }}:").Fill(struct{}{}),
+		m.label.Fill(got),
 		sub...,
 	)
 }

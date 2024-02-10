@@ -43,6 +43,8 @@ type monotonic[T any] struct {
 }
 
 func (mono *monotonic[T]) Match(got T) itskit.Match {
+	cancel := itskit.SkipStack()
+	defer cancel()
 	match := mono.nextMatcher.Match(got)
 	mono.mathces = append(mono.mathces, match)
 	mono.nextMatcher = mono.matcherFactory(got)
@@ -96,6 +98,9 @@ type singulerMatcher[T any] struct {
 }
 
 func (uniq *singulerMatcher[T]) Match(got T) itskit.Match {
+	cancel := itskit.SkipStack()
+	defer cancel()
+
 	var match itskit.Match
 	if len(uniq.matchers) == 0 {
 		match = Always[T]().Match(got)
