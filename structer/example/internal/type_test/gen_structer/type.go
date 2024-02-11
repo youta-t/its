@@ -1,7 +1,6 @@
 // Code generated -- DO NOT EDIT
 
-package gen
-
+package gen_structer
 import (
 	"strings"
 
@@ -9,258 +8,44 @@ import (
 	config "github.com/youta-t/its/config"
 	itskit "github.com/youta-t/its/itskit"
 	itsio "github.com/youta-t/its/itskit/itsio"
-	testee "github.com/youta-t/its/structer/example/internal"
-	u_sub1 "github.com/youta-t/its/structer/example/internal/sub1"
-	u_sub2 "github.com/youta-t/its/structer/example/internal/sub2"
-	u_time "time"
+	u_sub1 "github.com/youta-t/its/structer/example/internal/type_test/sub1"
+	u_sub2 "github.com/youta-t/its/structer/example/internal/type_test/sub2"
+	testee "github.com/youta-t/its/structer/example/internal/type_test"
+	
 )
 
-type MyStructSpec struct {
-	Name      its.Matcher[string]
-	Value     its.Matcher[[]int]
-	Timestamp its.Matcher[u_time.Time]
-}
-
-type _MyStructMatcher struct {
-	label  itskit.Label
-	fields []its.Matcher[testee.MyStruct]
-}
-
-func ItsMyStruct(want MyStructSpec) its.Matcher[testee.MyStruct] {
-	cancel := itskit.SkipStack()
-	defer cancel()
-
-	sub := []its.Matcher[testee.MyStruct]{}
-
-	{
-		matcher := want.Name
-		if matcher == nil {
-			if config.StrictModeForStruct {
-				matcher = its.Never[string]()
-			} else {
-				matcher = its.Always[string]()
-			}
-		}
-		sub = append(
-			sub,
-			itskit.Property[testee.MyStruct, string](
-				".Name",
-				func(got testee.MyStruct) string { return got.Name },
-				matcher,
-			),
-		)
-	}
-
-	{
-		matcher := want.Value
-		if matcher == nil {
-			if config.StrictModeForStruct {
-				matcher = its.Never[[]int]()
-			} else {
-				matcher = its.Always[[]int]()
-			}
-		}
-		sub = append(
-			sub,
-			itskit.Property[testee.MyStruct, []int](
-				".Value",
-				func(got testee.MyStruct) []int { return got.Value },
-				matcher,
-			),
-		)
-	}
-
-	{
-		matcher := want.Timestamp
-		if matcher == nil {
-			if config.StrictModeForStruct {
-				matcher = its.Never[u_time.Time]()
-			} else {
-				matcher = its.Always[u_time.Time]()
-			}
-		}
-		sub = append(
-			sub,
-			itskit.Property[testee.MyStruct, u_time.Time](
-				".Timestamp",
-				func(got testee.MyStruct) u_time.Time { return got.Timestamp },
-				matcher,
-			),
-		)
-	}
-
-	return _MyStructMatcher{
-		label:  itskit.NewLabelWithLocation("type MyStruct:"),
-		fields: sub,
-	}
-}
-
-func (m _MyStructMatcher) Match(got testee.MyStruct) itskit.Match {
-	ok := 0
-	sub := []itskit.Match{}
-	for _, f := range m.fields {
-		m := f.Match(got)
-		if m.Ok() {
-			ok += 1
-		}
-		sub = append(sub, m)
-	}
-
-	return itskit.NewMatch(
-		len(sub) == ok,
-		m.label.Fill(got),
-		sub...,
-	)
-}
-
-func (m _MyStructMatcher) Write(ww itsio.Writer) error {
-	return itsio.WriteBlock(ww, "type MyStruct:", m.fields)
-}
-
-func (m _MyStructMatcher) String() string {
-	sb := new(strings.Builder)
-	w := itsio.Wrap(sb)
-	m.Write(w)
-	return sb.String()
-}
-
-type MyStruct1Spec struct {
-	Name   its.Matcher[string]
-	Values its.Matcher[[]int]
-	Sub1   its.Matcher[u_sub1.Sub1]
-}
-
-type _MyStruct1Matcher struct {
-	label  itskit.Label
-	fields []its.Matcher[testee.MyStruct1]
-}
-
-func ItsMyStruct1(want MyStruct1Spec) its.Matcher[testee.MyStruct1] {
-	cancel := itskit.SkipStack()
-	defer cancel()
-
-	sub := []its.Matcher[testee.MyStruct1]{}
-
-	{
-		matcher := want.Name
-		if matcher == nil {
-			if config.StrictModeForStruct {
-				matcher = its.Never[string]()
-			} else {
-				matcher = its.Always[string]()
-			}
-		}
-		sub = append(
-			sub,
-			itskit.Property[testee.MyStruct1, string](
-				".Name",
-				func(got testee.MyStruct1) string { return got.Name },
-				matcher,
-			),
-		)
-	}
-
-	{
-		matcher := want.Values
-		if matcher == nil {
-			if config.StrictModeForStruct {
-				matcher = its.Never[[]int]()
-			} else {
-				matcher = its.Always[[]int]()
-			}
-		}
-		sub = append(
-			sub,
-			itskit.Property[testee.MyStruct1, []int](
-				".Values",
-				func(got testee.MyStruct1) []int { return got.Values },
-				matcher,
-			),
-		)
-	}
-
-	{
-		matcher := want.Sub1
-		if matcher == nil {
-			if config.StrictModeForStruct {
-				matcher = its.Never[u_sub1.Sub1]()
-			} else {
-				matcher = its.Always[u_sub1.Sub1]()
-			}
-		}
-		sub = append(
-			sub,
-			itskit.Property[testee.MyStruct1, u_sub1.Sub1](
-				".Sub1",
-				func(got testee.MyStruct1) u_sub1.Sub1 { return got.Sub1 },
-				matcher,
-			),
-		)
-	}
-
-	return _MyStruct1Matcher{
-		label:  itskit.NewLabelWithLocation("type MyStruct1:"),
-		fields: sub,
-	}
-}
-
-func (m _MyStruct1Matcher) Match(got testee.MyStruct1) itskit.Match {
-	ok := 0
-	sub := []itskit.Match{}
-	for _, f := range m.fields {
-		m := f.Match(got)
-		if m.Ok() {
-			ok += 1
-		}
-		sub = append(sub, m)
-	}
-
-	return itskit.NewMatch(
-		len(sub) == ok,
-		m.label.Fill(got),
-		sub...,
-	)
-}
-
-func (m _MyStruct1Matcher) Write(ww itsio.Writer) error {
-	return itsio.WriteBlock(ww, "type MyStruct1:", m.fields)
-}
-
-func (m _MyStruct1Matcher) String() string {
-	sb := new(strings.Builder)
-	w := itsio.Wrap(sb)
-	m.Write(w)
-	return sb.String()
-}
 
 type TSpec[P any] struct {
-	F0  its.Matcher[string]
-	F1  its.Matcher[*string]
-	F2  its.Matcher[u_sub1.Sub1]
-	F3  its.Matcher[*u_sub1.Sub1]
-	F4  its.Matcher[testee.G[int]]
-	F5  its.Matcher[testee.H[int, bool]]
-	F6  its.Matcher[[]testee.U]
-	F7  its.Matcher[[]int]
-	F8  its.Matcher[[2]testee.U]
-	F9  its.Matcher[[2]int]
-	F10 its.Matcher[func(int, bool) (string, error)]
+	F0 its.Matcher[string]
+	F1 its.Matcher[*string]
+	F2 its.Matcher[u_sub1.Sub1]
+	F3 its.Matcher[*u_sub1.Sub1]
+	F4 its.Matcher[testee.G[int]]
+	F5 its.Matcher[testee.H[int, bool]]
+	F5_5 its.Matcher[testee.G[testee.G[int]]]
+	F6 its.Matcher[[]testee.U]
+	F7 its.Matcher[[]int]
+	F8 its.Matcher[[2]testee.U]
+	F9 its.Matcher[[2]int]
+	F10 its.Matcher[func(arg0 int, arg1 bool) ( string,  error)]
 	F11 its.Matcher[map[string]int]
 	F12 its.Matcher[map[string]testee.U]
 	F13 its.Matcher[map[testee.U]int]
 	F14 its.Matcher[chan int]
 	F15 its.Matcher[<-chan int]
 	F16 its.Matcher[chan<- int]
-	F17 its.Matcher[struct {
-		Inline string
-	}]
-	F18 its.Matcher[interface {
-		M(string, testee.X, ...int) (int, error)
-	}]
-	U    its.Matcher[testee.U]
-	X    its.Matcher[*testee.X]
+	F17 its.Matcher[struct{
+	Inline string
+}]
+	F18 its.Matcher[interface{
+	M(arg0 string, arg1 testee.X, vararg ...int) ( int,  error)
+}]
+	F19 its.Matcher[testee.G[testee.G[int]]]
+	U its.Matcher[testee.U]
+	X its.Matcher[*testee.X]
 	Sub2 its.Matcher[u_sub2.Sub2]
-	G    its.Matcher[testee.G[int]]
+	G its.Matcher[testee.G[int]]
+	
 }
 
 type _TMatcher[P any] struct {
@@ -273,7 +58,7 @@ func ItsT[P any](want TSpec[P]) its.Matcher[testee.T[P]] {
 	defer cancel()
 
 	sub := []its.Matcher[testee.T[P]]{}
-
+	
 	{
 		matcher := want.F0
 		if matcher == nil {
@@ -292,7 +77,7 @@ func ItsT[P any](want TSpec[P]) its.Matcher[testee.T[P]] {
 			),
 		)
 	}
-
+	
 	{
 		matcher := want.F1
 		if matcher == nil {
@@ -311,7 +96,7 @@ func ItsT[P any](want TSpec[P]) its.Matcher[testee.T[P]] {
 			),
 		)
 	}
-
+	
 	{
 		matcher := want.F2
 		if matcher == nil {
@@ -330,7 +115,7 @@ func ItsT[P any](want TSpec[P]) its.Matcher[testee.T[P]] {
 			),
 		)
 	}
-
+	
 	{
 		matcher := want.F3
 		if matcher == nil {
@@ -349,7 +134,7 @@ func ItsT[P any](want TSpec[P]) its.Matcher[testee.T[P]] {
 			),
 		)
 	}
-
+	
 	{
 		matcher := want.F4
 		if matcher == nil {
@@ -368,7 +153,7 @@ func ItsT[P any](want TSpec[P]) its.Matcher[testee.T[P]] {
 			),
 		)
 	}
-
+	
 	{
 		matcher := want.F5
 		if matcher == nil {
@@ -387,7 +172,26 @@ func ItsT[P any](want TSpec[P]) its.Matcher[testee.T[P]] {
 			),
 		)
 	}
-
+	
+	{
+		matcher := want.F5_5
+		if matcher == nil {
+			if config.StrictModeForStruct {
+				matcher = its.Never[testee.G[testee.G[int]]]()
+			} else {
+				matcher = its.Always[testee.G[testee.G[int]]]()
+			}
+		}
+		sub = append(
+			sub,
+			itskit.Property[testee.T[P], testee.G[testee.G[int]]](
+				".F5_5",
+				func(got testee.T[P]) testee.G[testee.G[int]] { return got.F5_5 },
+				matcher,
+			),
+		)
+	}
+	
 	{
 		matcher := want.F6
 		if matcher == nil {
@@ -406,7 +210,7 @@ func ItsT[P any](want TSpec[P]) its.Matcher[testee.T[P]] {
 			),
 		)
 	}
-
+	
 	{
 		matcher := want.F7
 		if matcher == nil {
@@ -425,7 +229,7 @@ func ItsT[P any](want TSpec[P]) its.Matcher[testee.T[P]] {
 			),
 		)
 	}
-
+	
 	{
 		matcher := want.F8
 		if matcher == nil {
@@ -444,7 +248,7 @@ func ItsT[P any](want TSpec[P]) its.Matcher[testee.T[P]] {
 			),
 		)
 	}
-
+	
 	{
 		matcher := want.F9
 		if matcher == nil {
@@ -463,26 +267,26 @@ func ItsT[P any](want TSpec[P]) its.Matcher[testee.T[P]] {
 			),
 		)
 	}
-
+	
 	{
 		matcher := want.F10
 		if matcher == nil {
 			if config.StrictModeForStruct {
-				matcher = its.Never[func(int, bool) (string, error)]()
+				matcher = its.Never[func(arg0 int, arg1 bool) ( string,  error)]()
 			} else {
-				matcher = its.Always[func(int, bool) (string, error)]()
+				matcher = its.Always[func(arg0 int, arg1 bool) ( string,  error)]()
 			}
 		}
 		sub = append(
 			sub,
-			itskit.Property[testee.T[P], func(int, bool) (string, error)](
+			itskit.Property[testee.T[P], func(arg0 int, arg1 bool) ( string,  error)](
 				".F10",
-				func(got testee.T[P]) func(int, bool) (string, error) { return got.F10 },
+				func(got testee.T[P]) func(arg0 int, arg1 bool) ( string,  error) { return got.F10 },
 				matcher,
 			),
 		)
 	}
-
+	
 	{
 		matcher := want.F11
 		if matcher == nil {
@@ -501,7 +305,7 @@ func ItsT[P any](want TSpec[P]) its.Matcher[testee.T[P]] {
 			),
 		)
 	}
-
+	
 	{
 		matcher := want.F12
 		if matcher == nil {
@@ -520,7 +324,7 @@ func ItsT[P any](want TSpec[P]) its.Matcher[testee.T[P]] {
 			),
 		)
 	}
-
+	
 	{
 		matcher := want.F13
 		if matcher == nil {
@@ -539,7 +343,7 @@ func ItsT[P any](want TSpec[P]) its.Matcher[testee.T[P]] {
 			),
 		)
 	}
-
+	
 	{
 		matcher := want.F14
 		if matcher == nil {
@@ -558,7 +362,7 @@ func ItsT[P any](want TSpec[P]) its.Matcher[testee.T[P]] {
 			),
 		)
 	}
-
+	
 	{
 		matcher := want.F15
 		if matcher == nil {
@@ -577,7 +381,7 @@ func ItsT[P any](want TSpec[P]) its.Matcher[testee.T[P]] {
 			),
 		)
 	}
-
+	
 	{
 		matcher := want.F16
 		if matcher == nil {
@@ -596,65 +400,80 @@ func ItsT[P any](want TSpec[P]) its.Matcher[testee.T[P]] {
 			),
 		)
 	}
-
+	
 	{
 		matcher := want.F17
 		if matcher == nil {
 			if config.StrictModeForStruct {
-				matcher = its.Never[struct {
-					Inline string
-				}]()
+				matcher = its.Never[struct{
+	Inline string
+}]()
 			} else {
-				matcher = its.Always[struct {
-					Inline string
-				}]()
+				matcher = its.Always[struct{
+	Inline string
+}]()
 			}
 		}
 		sub = append(
 			sub,
-			itskit.Property[testee.T[P], struct {
-				Inline string
-			}](
+			itskit.Property[testee.T[P], struct{
+	Inline string
+}](
 				".F17",
-				func(got testee.T[P]) struct {
-					Inline string
-				} {
-					return got.F17
-				},
+				func(got testee.T[P]) struct{
+	Inline string
+} { return got.F17 },
 				matcher,
 			),
 		)
 	}
-
+	
 	{
 		matcher := want.F18
 		if matcher == nil {
 			if config.StrictModeForStruct {
-				matcher = its.Never[interface {
-					M(string, testee.X, ...int) (int, error)
-				}]()
+				matcher = its.Never[interface{
+	M(arg0 string, arg1 testee.X, vararg ...int) ( int,  error)
+}]()
 			} else {
-				matcher = its.Always[interface {
-					M(string, testee.X, ...int) (int, error)
-				}]()
+				matcher = its.Always[interface{
+	M(arg0 string, arg1 testee.X, vararg ...int) ( int,  error)
+}]()
 			}
 		}
 		sub = append(
 			sub,
-			itskit.Property[testee.T[P], interface {
-				M(string, testee.X, ...int) (int, error)
-			}](
+			itskit.Property[testee.T[P], interface{
+	M(arg0 string, arg1 testee.X, vararg ...int) ( int,  error)
+}](
 				".F18",
-				func(got testee.T[P]) interface {
-					M(string, testee.X, ...int) (int, error)
-				} {
-					return got.F18
-				},
+				func(got testee.T[P]) interface{
+	M(arg0 string, arg1 testee.X, vararg ...int) ( int,  error)
+} { return got.F18 },
 				matcher,
 			),
 		)
 	}
-
+	
+	{
+		matcher := want.F19
+		if matcher == nil {
+			if config.StrictModeForStruct {
+				matcher = its.Never[testee.G[testee.G[int]]]()
+			} else {
+				matcher = its.Always[testee.G[testee.G[int]]]()
+			}
+		}
+		sub = append(
+			sub,
+			itskit.Property[testee.T[P], testee.G[testee.G[int]]](
+				".F19",
+				func(got testee.T[P]) testee.G[testee.G[int]] { return got.F19 },
+				matcher,
+			),
+		)
+	}
+	
 	{
 		matcher := want.U
 		if matcher == nil {
@@ -673,7 +492,7 @@ func ItsT[P any](want TSpec[P]) its.Matcher[testee.T[P]] {
 			),
 		)
 	}
-
+	
 	{
 		matcher := want.X
 		if matcher == nil {
@@ -692,7 +511,7 @@ func ItsT[P any](want TSpec[P]) its.Matcher[testee.T[P]] {
 			),
 		)
 	}
-
+	
 	{
 		matcher := want.Sub2
 		if matcher == nil {
@@ -711,7 +530,7 @@ func ItsT[P any](want TSpec[P]) its.Matcher[testee.T[P]] {
 			),
 		)
 	}
-
+	
 	{
 		matcher := want.G
 		if matcher == nil {
@@ -730,9 +549,10 @@ func ItsT[P any](want TSpec[P]) its.Matcher[testee.T[P]] {
 			),
 		)
 	}
+	
 
 	return _TMatcher[P]{
-		label:  itskit.NewLabelWithLocation("type T:"),
+		label: itskit.NewLabelWithLocation("type T:"),
 		fields: sub,
 	}
 }
@@ -765,3 +585,240 @@ func (m _TMatcher[P]) String() string {
 	m.Write(w)
 	return sb.String()
 }
+
+
+type USpec struct {
+	FieldU1 its.Matcher[bool]
+	
+}
+
+type _UMatcher struct {
+	label  itskit.Label
+	fields []its.Matcher[testee.U]
+}
+
+func ItsU(want USpec) its.Matcher[testee.U] {
+	cancel := itskit.SkipStack()
+	defer cancel()
+
+	sub := []its.Matcher[testee.U]{}
+	
+	{
+		matcher := want.FieldU1
+		if matcher == nil {
+			if config.StrictModeForStruct {
+				matcher = its.Never[bool]()
+			} else {
+				matcher = its.Always[bool]()
+			}
+		}
+		sub = append(
+			sub,
+			itskit.Property[testee.U, bool](
+				".FieldU1",
+				func(got testee.U) bool { return got.FieldU1 },
+				matcher,
+			),
+		)
+	}
+	
+
+	return _UMatcher{
+		label: itskit.NewLabelWithLocation("type U:"),
+		fields: sub,
+	}
+}
+
+func (m _UMatcher) Match(got testee.U) itskit.Match {
+	ok := 0
+	sub := []itskit.Match{}
+	for _, f := range m.fields {
+		m := f.Match(got)
+		if m.Ok() {
+			ok += 1
+		}
+		sub = append(sub, m)
+	}
+
+	return itskit.NewMatch(
+		len(sub) == ok,
+		m.label.Fill(got),
+		sub...,
+	)
+}
+
+func (m _UMatcher) Write(ww itsio.Writer) error {
+	return itsio.WriteBlock(ww, "type U:", m.fields)
+}
+
+func (m _UMatcher) String() string {
+	sb := new(strings.Builder)
+	w := itsio.Wrap(sb)
+	m.Write(w)
+	return sb.String()
+}
+
+
+type GSpec[H any] struct {
+	Fx its.Matcher[H]
+	
+}
+
+type _GMatcher[H any] struct {
+	label  itskit.Label
+	fields []its.Matcher[testee.G[H]]
+}
+
+func ItsG[H any](want GSpec[H]) its.Matcher[testee.G[H]] {
+	cancel := itskit.SkipStack()
+	defer cancel()
+
+	sub := []its.Matcher[testee.G[H]]{}
+	
+	{
+		matcher := want.Fx
+		if matcher == nil {
+			if config.StrictModeForStruct {
+				matcher = its.Never[H]()
+			} else {
+				matcher = its.Always[H]()
+			}
+		}
+		sub = append(
+			sub,
+			itskit.Property[testee.G[H], H](
+				".Fx",
+				func(got testee.G[H]) H { return got.Fx },
+				matcher,
+			),
+		)
+	}
+	
+
+	return _GMatcher[H]{
+		label: itskit.NewLabelWithLocation("type G:"),
+		fields: sub,
+	}
+}
+
+func (m _GMatcher[H]) Match(got testee.G[H]) itskit.Match {
+	ok := 0
+	sub := []itskit.Match{}
+	for _, f := range m.fields {
+		m := f.Match(got)
+		if m.Ok() {
+			ok += 1
+		}
+		sub = append(sub, m)
+	}
+
+	return itskit.NewMatch(
+		len(sub) == ok,
+		m.label.Fill(got),
+		sub...,
+	)
+}
+
+func (m _GMatcher[H]) Write(ww itsio.Writer) error {
+	return itsio.WriteBlock(ww, "type G:", m.fields)
+}
+
+func (m _GMatcher[H]) String() string {
+	sb := new(strings.Builder)
+	w := itsio.Wrap(sb)
+	m.Write(w)
+	return sb.String()
+}
+
+
+type HSpec[T any, U any] struct {
+	Fx its.Matcher[T]
+	Fy its.Matcher[U]
+	
+}
+
+type _HMatcher[T any, U any] struct {
+	label  itskit.Label
+	fields []its.Matcher[testee.H[T, U]]
+}
+
+func ItsH[T any, U any](want HSpec[T, U]) its.Matcher[testee.H[T, U]] {
+	cancel := itskit.SkipStack()
+	defer cancel()
+
+	sub := []its.Matcher[testee.H[T, U]]{}
+	
+	{
+		matcher := want.Fx
+		if matcher == nil {
+			if config.StrictModeForStruct {
+				matcher = its.Never[T]()
+			} else {
+				matcher = its.Always[T]()
+			}
+		}
+		sub = append(
+			sub,
+			itskit.Property[testee.H[T, U], T](
+				".Fx",
+				func(got testee.H[T, U]) T { return got.Fx },
+				matcher,
+			),
+		)
+	}
+	
+	{
+		matcher := want.Fy
+		if matcher == nil {
+			if config.StrictModeForStruct {
+				matcher = its.Never[U]()
+			} else {
+				matcher = its.Always[U]()
+			}
+		}
+		sub = append(
+			sub,
+			itskit.Property[testee.H[T, U], U](
+				".Fy",
+				func(got testee.H[T, U]) U { return got.Fy },
+				matcher,
+			),
+		)
+	}
+	
+
+	return _HMatcher[T, U]{
+		label: itskit.NewLabelWithLocation("type H:"),
+		fields: sub,
+	}
+}
+
+func (m _HMatcher[T, U]) Match(got testee.H[T, U]) itskit.Match {
+	ok := 0
+	sub := []itskit.Match{}
+	for _, f := range m.fields {
+		m := f.Match(got)
+		if m.Ok() {
+			ok += 1
+		}
+		sub = append(sub, m)
+	}
+
+	return itskit.NewMatch(
+		len(sub) == ok,
+		m.label.Fill(got),
+		sub...,
+	)
+}
+
+func (m _HMatcher[T, U]) Write(ww itsio.Writer) error {
+	return itsio.WriteBlock(ww, "type H:", m.fields)
+}
+
+func (m _HMatcher[T, U]) String() string {
+	sb := new(strings.Builder)
+	w := itsio.Wrap(sb)
+	m.Write(w)
+	return sb.String()
+}
+

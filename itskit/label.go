@@ -3,11 +3,8 @@ package itskit
 import (
 	"fmt"
 	"io"
-	"os"
-	"path/filepath"
 	"strings"
 
-	"github.com/youta-t/its/config"
 	"github.com/youta-t/its/itskit/itsio"
 )
 
@@ -79,18 +76,9 @@ func NewLabelWithLocation(template string, params ...any) Label {
 	copy(p, params)
 
 	from := InvokedFrom()
-	file := from.File
-	line := from.Line
-
-	if config.FilepathReplace != "" {
-		if f, err := filepath.Rel(config.FilepathReplace, file); err == nil && !strings.HasPrefix(f, "..") {
-			file = strings.Join([]string{config.FilepathReplaceWith, f}, string(os.PathSeparator))
-		}
-	}
-
-	p = append(p, file, line)
+	p = append(p, from)
 	return NewLabel(
-		template+"\t\t--- @ %s:%d",
+		template+"\t\t--- @ %s",
 		p...,
 	)
 }

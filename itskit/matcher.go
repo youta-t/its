@@ -70,7 +70,7 @@ func (ss *simpleMatcher[T]) String() string {
 }
 
 type propMatcher[T, U any] struct {
-	description string
+	description Label
 	prop        func(T) U
 	m           Matcher[U]
 }
@@ -89,22 +89,54 @@ func Property[T, U any](
 	prop func(T) U,
 	m Matcher[U],
 ) Matcher[T] {
-	return propMatcher[T, U]{description: description, prop: prop, m: m}
+	return propMatcher[T, U]{
+		description: NewLabel(description + " :"), prop: prop, m: m,
+	}
 }
 
 func (k propMatcher[T, U]) Match(actual T) Match {
 	p := k.prop(actual)
 	match := k.m.Match(p)
-	return NewMatch(match.Ok(), k.description+" :", match)
+	return NewMatch(match.Ok(), k.description.Fill(actual), match)
 }
 
 func (k propMatcher[T, U]) Write(w itsio.Writer) error {
-	if err := w.WriteStringln(k.description + " :"); err != nil {
+	if err := k.description.Write(w); err != nil {
 		return err
 	}
 	return k.m.Write(w.Indent())
 }
 
 func (k propMatcher[T, U]) String() string {
+	return MatcherToString[T](k)
+}
+
+type namedMatcher[T any] struct {
+	name Label
+	m    Matcher[T]
+}
+
+func Named[T any, M Matcher[T]](
+	name string,
+	m M,
+) Matcher[T] {
+	return namedMatcher[T]{
+		name: NewLabel(name + " :"),
+		m:    m,
+	}
+}
+
+func (n namedMatcher[T]) Match(got T) Match {
+	return n.m.Match(got)
+}
+
+func (k namedMatcher[T]) Write(w itsio.Writer) error {
+	if err := k.name.Write(w); err != nil {
+		return err
+	}
+	return k.m.Write(w.Indent())
+}
+
+func (k namedMatcher[T]) String() string {
 	return MatcherToString[T](k)
 }

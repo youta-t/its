@@ -2,8 +2,13 @@ package itskit
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"runtime"
+	"strings"
 	"sync"
+
+	"github.com/youta-t/its/config"
 )
 
 var skipstack = map[uintptr]struct{}{}
@@ -71,6 +76,11 @@ func InvokedFrom() Location {
 			continue
 		}
 
+		if config.FilepathReplace != "" {
+			if f, err := filepath.Rel(config.FilepathReplace, file); err == nil && !strings.HasPrefix(f, "..") {
+				file = strings.Join([]string{config.FilepathReplaceWith, f}, string(os.PathSeparator))
+			}
+		}
 		return Location{File: file, Line: line}
 	}
 }

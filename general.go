@@ -453,3 +453,13 @@ func MatchString(m interface{ MatchString(string) bool }) Matcher[string] {
 		itskit.Want(m), itskit.Got,
 	)
 }
+
+func Nil() Matcher[any] {
+	cancel := itskit.SkipStack()
+	defer cancel()
+	return itskit.SimpleMatcher(
+		func(got any) bool { return got == nil },
+		"(%+v) is nil",
+		itskit.Got,
+	)
+}
