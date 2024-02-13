@@ -9,8 +9,10 @@ import (
 //
 // If no matchers are given, it always pass.
 func All[T any](matchers ...Matcher[T]) itskit.Matcher[T] {
+	cancel := itskit.SkipStack()
+	defer cancel()
 	return allMatcher[T]{
-		header: itskit.NewLabel(
+		header: itskit.NewLabelWithLocation(
 			"// all: (%d ok / %d matchers)",
 			itskit.Placeholder, len(matchers),
 		),
@@ -62,8 +64,10 @@ func (as allMatcher[T]) String() string {
 //
 // If no matchers are given, it always fail.
 func Some[T any](matchers ...Matcher[T]) itskit.Matcher[T] {
+	cancel := itskit.SkipStack()
+	defer cancel()
 	return someMatcher[T]{
-		header: itskit.NewLabel(
+		header: itskit.NewLabelWithLocation(
 			"// some: (%d ok / %d matchers)",
 			itskit.Placeholder, len(matchers),
 		),
@@ -111,25 +115,27 @@ func (ss someMatcher[T]) String() string {
 }
 
 type notMatcher[T any] struct {
-	hedaer  string
+	hedaer  itskit.Label
 	matcher Matcher[T]
 }
 
 // Inverts matcher.
 func Not[T any](matcher Matcher[T]) itskit.Matcher[T] {
+	cancel := itskit.SkipStack()
+	defer cancel()
 	return notMatcher[T]{
-		hedaer:  "// not:",
+		hedaer:  itskit.NewLabelWithLocation("// not:"),
 		matcher: matcher,
 	}
 }
 
 func (n notMatcher[T]) Match(actual T) itskit.Match {
 	m := n.matcher.Match(actual)
-	return itskit.NewMatch(!m.Ok(), n.hedaer, m)
+	return itskit.NewMatch(!m.Ok(), n.hedaer.Fill(actual), m)
 }
 
 func (n notMatcher[T]) Write(ww itsio.Writer) error {
-	if err := ww.WriteStringln(n.hedaer); err != nil {
+	if err := n.hedaer.Write(ww); err != nil {
 		return err
 	}
 	in := ww.Indent()
@@ -142,8 +148,10 @@ func (n notMatcher[T]) String() string {
 
 // None tests got value does NOT match for all given matchers.
 func None[T any](matchers ...Matcher[T]) itskit.Matcher[T] {
+	cancel := itskit.SkipStack()
+	defer cancel()
 	return noneMathcer[T]{
-		label:   itskit.NewLabel("// none of:"),
+		label:   itskit.NewLabelWithLocation("// none of:"),
 		matcher: matchers,
 	}
 }

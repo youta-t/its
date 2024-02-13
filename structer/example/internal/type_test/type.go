@@ -1,32 +1,13 @@
-//go:generate go run github.com/youta-t/its/structer -s MyStruct -s MyStruct1 -s T -dest gen
+//go:generate go run github.com/youta-t/its/structer
 //go:generate gofmt -w ./gen/type.go
 package types
 
 import (
 	"io"
-	"time"
 
-	"github.com/youta-t/its/structer/example/internal/sub1"
-	"github.com/youta-t/its/structer/example/internal/sub2"
+	"github.com/youta-t/its/structer/example/internal/type_test/sub1"
+	"github.com/youta-t/its/structer/example/internal/type_test/sub2"
 )
-
-type MyStruct struct {
-	Name      string
-	Value     []int
-	Timestamp time.Time
-}
-
-type MyStruct1 struct {
-	Name   string
-	Values []int
-	Sub1   sub1.Sub1
-}
-
-type MyStruct2 struct {
-	Name   string
-	Values []int
-	Sub1   sub2.Sub2
-}
 
 // perfect example
 type T[P any] struct {
@@ -39,8 +20,9 @@ type T[P any] struct {
 	F3 *sub1.Sub1
 
 	// type parametered
-	F4 G[int]
-	F5 H[int, bool]
+	F4   G[int]
+	F5   H[int, bool]
+	F5_5 G[G[int]]
 
 	// slice
 	F6 []U
@@ -73,6 +55,7 @@ type T[P any] struct {
 		M(string, X, ...int) (int, error)
 		io.Writer
 	}
+	F19 G[G[int]]
 
 	// embedded
 	U

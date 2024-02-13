@@ -21,9 +21,9 @@ func ExampleEqEq() {
 	its.EqEq(MyType{Foo: 42}).Match(MyType{Foo: 24}).OrError(t) // also fail!
 
 	// Output:
-	// ✘ /* got */ 49 == /* want */ 42
+	// ✘ /* got */ 49 == /* want */ 42		--- @ ./general_test.go:15
 	//
-	// ✘ /* got */ {Foo:24} == /* want */ {Foo:42}
+	// ✘ /* got */ {Foo:24} == /* want */ {Foo:42}		--- @ ./general_test.go:21
 }
 
 func ExampleEqEqPtr() {
@@ -40,11 +40,11 @@ func ExampleEqEqPtr() {
 	its.EqEqPtr[int](nil).Match(nil).OrError(t) // pass.
 
 	// Output:
-	// ✘ /* got */ &(24) == /* want */ &(42)
+	// ✘ /* got */ &(24) == /* want */ &(42)		--- @ ./general_test.go:36
 	//
-	// ✘ /* got */ &(24) == /* want */ nil
+	// ✘ /* got */ &(24) == /* want */ nil		--- @ ./general_test.go:38
 	//
-	// ✘ /* got */ nil == /* want */ &(42)
+	// ✘ /* got */ nil == /* want */ &(42)		--- @ ./general_test.go:39
 }
 
 func ExampleGreaterThan() {
@@ -62,17 +62,17 @@ func ExampleGreaterThan() {
 	its.GreaterThan("aab").Match("aaa").OrError(t) // fail.
 
 	// Output:
-	// ✘ /* want */ 11 < /* got */ 10
+	// ✘ /* want */ 11 < /* got */ 10		--- @ ./general_test.go:53
 	//
-	// ✘ /* want */ 10 < /* got */ 10
+	// ✘ /* want */ 10 < /* got */ 10		--- @ ./general_test.go:54
 	//
-	// ✘ /* want */ 1 < /* got */ 1
+	// ✘ /* want */ 1 < /* got */ 1		--- @ ./general_test.go:57
 	//
-	// ✘ /* want */ 1.1 < /* got */ 1
+	// ✘ /* want */ 1.1 < /* got */ 1		--- @ ./general_test.go:58
 	//
-	// ✘ /* want */ aaa < /* got */ aaa
+	// ✘ /* want */ aaa < /* got */ aaa		--- @ ./general_test.go:61
 	//
-	// ✘ /* want */ aab < /* got */ aaa
+	// ✘ /* want */ aab < /* got */ aaa		--- @ ./general_test.go:62
 }
 
 func ExampleGreaterEq() {
@@ -90,11 +90,11 @@ func ExampleGreaterEq() {
 	its.GreaterEq("aab").Match("aaa").OrError(t) // fail.
 
 	// Output:
-	// ✘ /* want */ 11 <= /* got */ 10
+	// ✘ /* want */ 11 <= /* got */ 10		--- @ ./general_test.go:81
 	//
-	// ✘ /* want */ 1.1 <= /* got */ 1
+	// ✘ /* want */ 1.1 <= /* got */ 1		--- @ ./general_test.go:86
 	//
-	// ✘ /* want */ aab <= /* got */ aaa
+	// ✘ /* want */ aab <= /* got */ aaa		--- @ ./general_test.go:90
 }
 
 func ExampleLesserThan() {
@@ -112,17 +112,17 @@ func ExampleLesserThan() {
 	its.LesserThan("aab").Match("aaa").OrError(t) // pass.
 
 	// Output:
-	// ✘ /* want */ 10 > /* got */ 11
+	// ✘ /* want */ 10 > /* got */ 11		--- @ ./general_test.go:102
 	//
-	// ✘ /* want */ 10 > /* got */ 10
+	// ✘ /* want */ 10 > /* got */ 10		--- @ ./general_test.go:104
 	//
-	// ✘ /* want */ 1 > /* got */ 1.1
+	// ✘ /* want */ 1 > /* got */ 1.1		--- @ ./general_test.go:106
 	//
-	// ✘ /* want */ 1 > /* got */ 1
+	// ✘ /* want */ 1 > /* got */ 1		--- @ ./general_test.go:107
 	//
-	// ✘ /* want */ aaa > /* got */ aab
+	// ✘ /* want */ aaa > /* got */ aab		--- @ ./general_test.go:110
 	//
-	// ✘ /* want */ aaa > /* got */ aaa
+	// ✘ /* want */ aaa > /* got */ aaa		--- @ ./general_test.go:111
 }
 
 func ExampleLesserEq() {
@@ -140,11 +140,11 @@ func ExampleLesserEq() {
 	its.LesserEq("aab").Match("aaa").OrError(t) // fail.
 
 	// Output:
-	// ✘ /* want */ 10 >= /* got */ 11
+	// ✘ /* want */ 10 >= /* got */ 11		--- @ ./general_test.go:130
 	//
-	// ✘ /* want */ 1 >= /* got */ 1.1
+	// ✘ /* want */ 1 >= /* got */ 1.1		--- @ ./general_test.go:134
 	//
-	// ✘ /* want */ aaa >= /* got */ aab
+	// ✘ /* want */ aaa >= /* got */ aab		--- @ ./general_test.go:138
 }
 
 func ExampleBefore() {
@@ -162,9 +162,9 @@ func ExampleBefore() {
 	its.Before(t2).Match(t1).OrError(t)
 
 	// Output:
-	// ✘ (/* got */ 2023-10-11 12:18:14 +0000 +0000).Before(/* want */ 2023-10-11 12:13:14 +0000 +0000)
+	// ✘ (/* got */ 2023-10-11 12:18:14 +0000 +0000).Before(/* want */ 2023-10-11 12:13:14 +0000 +0000)		--- @ ./general_test.go:160
 	//
-	// ✘ (/* got */ 2023-10-11 12:13:14 +0000 +0000).Before(/* want */ 2023-10-11 12:13:14 +0000 +0000)
+	// ✘ (/* got */ 2023-10-11 12:13:14 +0000 +0000).Before(/* want */ 2023-10-11 12:13:14 +0000 +0000)		--- @ ./general_test.go:161
 }
 
 func ExampleAfter() {
@@ -182,9 +182,9 @@ func ExampleAfter() {
 	its.After(t2).Match(t1).OrError(t)
 
 	// Output:
-	// ✘ (/* got */ 2023-10-11 12:13:14 +0000 +0000).After(/* want */ 2023-10-11 12:13:14 +0000 +0000)
+	// ✘ (/* got */ 2023-10-11 12:13:14 +0000 +0000).After(/* want */ 2023-10-11 12:13:14 +0000 +0000)		--- @ ./general_test.go:181
 	//
-	// ✘ (/* got */ 2023-10-11 12:13:14 +0000 +0000).After(/* want */ 2023-10-11 12:18:14 +0000 +0000)
+	// ✘ (/* got */ 2023-10-11 12:13:14 +0000 +0000).After(/* want */ 2023-10-11 12:18:14 +0000 +0000)		--- @ ./general_test.go:182
 }
 
 func ExampleEqual() {
@@ -202,9 +202,9 @@ func ExampleEqual() {
 	its.Equal(t2).Match(t1).OrError(t)
 
 	// Output:
-	// ✘ (/* want */ 2023-10-11 12:13:14 +0000 +0000).Equal(/* got */ 2023-10-11 12:18:14 +0000 +0000)
+	// ✘ (/* want */ 2023-10-11 12:13:14 +0000 +0000).Equal(/* got */ 2023-10-11 12:18:14 +0000 +0000)		--- @ ./general_test.go:200
 	//
-	// ✘ (/* want */ 2023-10-11 12:18:14 +0000 +0000).Equal(/* got */ 2023-10-11 12:13:14 +0000 +0000)
+	// ✘ (/* want */ 2023-10-11 12:18:14 +0000 +0000).Equal(/* got */ 2023-10-11 12:13:14 +0000 +0000)		--- @ ./general_test.go:202
 }
 
 func ExampleEquivWith() {
@@ -218,7 +218,7 @@ func ExampleEquivWith() {
 	).Match("40").OrError(t)
 
 	// Output:
-	// ✘ (/* want */ 42) equiv. (/* got */ 40)
+	// ✘ (/* want */ 42) equiv. (/* got */ 40)		--- @ ./general_test.go:216
 }
 
 func ExampleError() {
@@ -230,7 +230,7 @@ func ExampleError() {
 	its.Error(e2).Match(e1).OrError(t)
 
 	// Output:
-	// ✘ errors.Is(/* got */ error, /* want */ wrapped: error)
+	// ✘ errors.Is(/* got */ error, /* want */ wrapped: error)		--- @ ./general_test.go:230
 }
 
 type CustomError string
@@ -247,7 +247,7 @@ func ExampleErrorAs() {
 	its.ErrorAs[CustomError]().Match(otherErr).OrError(t)
 
 	// Output:
-	// ✘ want := new(its_test.CustomError); errors.As(/* got */ error by error.New, want)
+	// ✘ want := new(its_test.CustomError); errors.As(/* got */ error by error.New, want)		--- @ ./general_test.go:247
 }
 
 func ExampleAlways() {
@@ -258,7 +258,7 @@ func ExampleAlways() {
 func ExampleNever() {
 	its.Never[any]().Match(struct{ Arbitary string }{}).OrError(t)
 	// Output:
-	// ✘ (never pass)
+	// ✘ (never pass)		--- @ ./general_test.go:259
 }
 
 func ExampleStringHavingPrefix() {
@@ -266,21 +266,21 @@ func ExampleStringHavingPrefix() {
 	its.StringHavingPrefix("abc").Match("adcbe").OrError(t)
 
 	// Output:
-	// ✘ strings.HasPrefix(/* got */ "adcbe", /* want */ "abc")
+	// ✘ strings.HasPrefix(/* got */ "adcbe", /* want */ "abc")		--- @ ./general_test.go:266
 }
 
 func ExampleStringHavingSuffix() {
 	its.StringHavingSuffix("cde").Match("abcde").OrError(t)
 	its.StringHavingSuffix("cde").Match("adcbe").OrError(t)
 	// Output:
-	// ✘ strings.HasSuffix(/* got */ "adcbe", /* want */ "cde")
+	// ✘ strings.HasSuffix(/* got */ "adcbe", /* want */ "cde")		--- @ ./general_test.go:274
 }
 
 func ExampleStringContaining() {
 	its.StringContaining("bcd").Match("abcde").OrError(t)
 	its.StringContaining("bcd").Match("adcbe").OrError(t)
 	// Output:
-	// ✘ strings.Contains(/* got */ "adcbe", /* want */ "bcd")
+	// ✘ strings.Contains(/* got */ "adcbe", /* want */ "bcd")		--- @ ./general_test.go:281
 }
 
 func ExampleStringEqualFold() {
@@ -288,42 +288,42 @@ func ExampleStringEqualFold() {
 	its.StringEqualFold("aBc").Match("AbC").OrError(t)
 	its.StringEqualFold("abc").Match("αβγ").OrError(t)
 	// Output:
-	// ✘ strings.EqualFold(/* got */ "αβγ", /* want */ "abc")
+	// ✘ strings.EqualFold(/* got */ "αβγ", /* want */ "abc")		--- @ ./general_test.go:289
 }
 
 func ExampleBytesEqual() {
 	its.BytesEqual([]byte("abc")).Match([]byte("abc")).OrError(t)
 	its.BytesEqual([]byte("abc")).Match([]byte("acb")).OrError(t)
 	// Output:
-	// ✘ bytes.Equal(/* got */ []byte{0x61, 0x63, 0x62}, /* want */ []byte{0x61, 0x62, 0x63})
+	// ✘ bytes.Equal(/* got */ []byte{0x61, 0x63, 0x62}, /* want */ []byte{0x61, 0x62, 0x63})		--- @ ./general_test.go:296
 }
 
 func ExampleBytesHavingPrefix() {
 	its.BytesHavingPrefix([]byte("abc")).Match([]byte("abcde")).OrError(t)
 	its.BytesHavingPrefix([]byte("abc")).Match([]byte("adcbe")).OrError(t)
 	// Output:
-	// ✘ bytes.HasPrefix(/* got */ []byte{0x61, 0x64, 0x63, 0x62, 0x65}, /* want */ []byte{0x61, 0x62, 0x63})
+	// ✘ bytes.HasPrefix(/* got */ []byte{0x61, 0x64, 0x63, 0x62, 0x65}, /* want */ []byte{0x61, 0x62, 0x63})		--- @ ./general_test.go:303
 }
 
 func ExampleBytesHavingSuffix() {
 	its.BytesHavingSuffix([]byte("cde")).Match([]byte("abcde")).OrError(t)
 	its.BytesHavingSuffix([]byte("cde")).Match([]byte("adcbe")).OrError(t)
 	// Output:
-	// ✘ bytes.HasSuffix(/* got */ []byte{0x61, 0x64, 0x63, 0x62, 0x65}, /* want */ []byte{0x63, 0x64, 0x65})
+	// ✘ bytes.HasSuffix(/* got */ []byte{0x61, 0x64, 0x63, 0x62, 0x65}, /* want */ []byte{0x63, 0x64, 0x65})		--- @ ./general_test.go:310
 }
 
 func ExampleBytesContaining() {
 	its.BytesContaining([]byte("bcd")).Match([]byte("abcde")).OrError(t)
 	its.BytesContaining([]byte("bcd")).Match([]byte("adcbe")).OrError(t)
 	// Output:
-	// ✘ bytes.Contains(/* got */ []byte{0x61, 0x64, 0x63, 0x62, 0x65}, /* want */ []byte{0x62, 0x63, 0x64})
+	// ✘ bytes.Contains(/* got */ []byte{0x61, 0x64, 0x63, 0x62, 0x65}, /* want */ []byte{0x62, 0x63, 0x64})		--- @ ./general_test.go:317
 }
 
 func ExampleNaN() {
 	its.NaN().Match(math.NaN()).OrError(t)
 	its.NaN().Match(42).OrError(t)
 	// Output:
-	// ✘ math.IsNaN(/* got */ 42.000000)
+	// ✘ math.IsNaN(/* got */ 42.000000)		--- @ ./general_test.go:324
 }
 
 func ExampleInf() {
@@ -331,7 +331,7 @@ func ExampleInf() {
 	its.Inf().Match(math.Inf(-1)).OrError(t)
 	its.Inf().Match(0).OrError(t)
 	// Output:
-	// ✘ math.IsInf(/* got */ 0.000000, 0)
+	// ✘ math.IsInf(/* got */ 0.000000, 0)		--- @ ./general_test.go:332
 }
 
 func ExampleClosedChan() {
@@ -341,7 +341,7 @@ func ExampleClosedChan() {
 	ch2 := make(chan string, 1)
 	its.ClosedChan[string]().Match(ch2).OrError(t)
 	// Output:
-	// ✘ chan string is not closed.
+	// ✘ chan string is not closed.		--- @ ./general_test.go:342
 }
 
 func ExampleType() {
@@ -352,9 +352,9 @@ func ExampleType() {
 	}
 	its.Type[int]().Match(T{Foo: 42}).OrError(t)
 	// Output:
-	// ✘ /* got */ text value is a int
+	// ✘ /* got */ text value is a int		--- @ ./general_test.go:349
 	//
-	// ✘ /* got */ {Foo:42} is a int
+	// ✘ /* got */ {Foo:42} is a int		--- @ ./general_test.go:353
 }
 
 func ExampleMatch() {
@@ -362,7 +362,7 @@ func ExampleMatch() {
 	its.Match(pattern).Match([]byte("github.com")).OrError(t)
 	its.Match(pattern).Match([]byte("github.com/youta-t/its")).OrError(t)
 	// Output:
-	// ✘ (/* want */ ^[a-z]([a-z0-9.-]+[a-z])?$).Match(/* got */ [103 105 116 104 117 98 46 99 111 109 47 121 111 117 116 97 45 116 47 105 116 115])
+	// ✘ (/* want */ ^[a-z]([a-z0-9.-]+[a-z])?$).Match(/* got */ [103 105 116 104 117 98 46 99 111 109 47 121 111 117 116 97 45 116 47 105 116 115])		--- @ ./general_test.go:363
 }
 
 func ExampleMatchString() {
@@ -370,5 +370,5 @@ func ExampleMatchString() {
 	its.MatchString(pattern).Match("github.com").OrError(t)
 	its.MatchString(pattern).Match("github.com/youta-t/its").OrError(t)
 	// Output:
-	// ✘ (/* want */ ^[a-z]([a-z0-9.-]+[a-z])?$).MatchString(/* got */ "github.com/youta-t/its")
+	// ✘ (/* want */ ^[a-z]([a-z0-9.-]+[a-z])?$).MatchString(/* got */ "github.com/youta-t/its")		--- @ ./general_test.go:371
 }

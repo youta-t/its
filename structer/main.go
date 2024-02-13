@@ -8,12 +8,13 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strings"
 	"text/template"
 
-	"github.com/youta-t/its/structer/internal"
-	"github.com/youta-t/its/structer/internal/try"
+	parser "github.com/youta-t/its/internal/parser"
+	"github.com/youta-t/its/internal/try"
 )
 
 /*
@@ -57,7 +58,8 @@ func main() {
 This is designed to be used as go:generate.
 
 It generates a file with same name as a file having go:generate directive.
-The new file, has "Matcher" and "Spec" types, is placed in "./gen" directory (by default).
+The new file, has "Matcher" and "Spec" types, is placed in "./gen_structer" directory (by default).
+
 `,
 			shortname,
 		)
@@ -72,7 +74,7 @@ The new file, has "Matcher" and "Spec" types, is placed in "./gen" directory (by
 	flag.BoolVar(sourceAsPackage, "p", false, "alias of -as-package")
 
 	psource := flag.String("source", invokedFrom, "recognise source as package path. If not set, use environmental variable GOFILE.")
-	pdest := flag.String("dest", "./gen", "directory where new file to be created at")
+	pdest := flag.String("dest", "./gen_structer", "directory where new file to be created at")
 
 	flag.Parse()
 
@@ -104,20 +106,20 @@ The new file, has "Matcher" and "Spec" types, is placed in "./gen" directory (by
 	}
 
 	for _, s := range sources {
-		f := try.To(internal.Parse(s)).OrFatal(logger)
+		f := try.To(parser.Parse(s)).OrFatal(logger)
 		newFile := generatingFile{
 			PackageName: path.Base(dest),
 		}
-		requiredImports := map[string]*internal.Import{
+		requiredImports := map[string]*parser.Import{
 			"its":    {Name: "its", Path: "github.com/youta-t/its"},
 			"itskit": {Name: "itskit", Path: "github.com/youta-t/its/itskit"},
 			"itsio":  {Name: "itsio", Path: "github.com/youta-t/its/itskit/itsio"},
 			"config": {Name: "config", Path: "github.com/youta-t/its/config"},
 		}
-		usedImports := map[string]*internal.Import{}
+		usedImports := map[string]*parser.Import{}
 
-		for i := range f.Structs {
-			s := f.Structs[i]
+		for i := range f.Types.Structs {
+			s := f.Types.Structs[i]
 
 			if _, ok := targetStructs[s.Name]; len(targetStructs) != 0 && !ok {
 				continue
@@ -139,6 +141,15 @@ The new file, has "Matcher" and "Spec" types, is placed in "./gen" directory (by
 		for i := range requiredImports {
 			newFile.Imports = append(newFile.Imports, requiredImports[i])
 		}
+		slices.SortFunc(newFile.Imports, func(a, b *parser.Import) int {
+			if a.Path < b.Path {
+				return -1
+			}
+			if b.Path < a.Path {
+				return 1
+			}
+			return 0
+		})
 
 		for i := range usedImports {
 			imp := usedImports[i]
@@ -150,28 +161,43 @@ The new file, has "Matcher" and "Spec" types, is placed in "./gen" directory (by
 			newFile.Imports = append(newFile.Imports, imp)
 		}
 
-		if err := os.MkdirAll(dest, os.ModeDir|os.ModePerm); err != nil {
-			logger.Fatal(err)
-		}
-		t := template.New("")
-		t = try.To(t.Parse(tpl)).OrFatal(logger)
-
-		newFilename := filepath.Join(dest, filepath.Base(s))
-		gen := try.To(os.OpenFile(
-			newFilename, os.O_TRUNC|os.O_RDWR|os.O_CREATE, os.ModePerm,
-		)).OrFatal(logger)
-		defer gen.Close()
-		if err := t.Execute(gen, newFile); err != nil {
+		err := writeFile(filepath.Join(dest, s), newFile)
+		if err != nil {
 			logger.Fatal(err)
 		}
 	}
+
 	os.Exit(0)
+}
+
+func writeFile(dest string, newFile generatingFile) error {
+	d := filepath.Dir(dest)
+	if err := os.MkdirAll(d, os.ModeDir|os.ModePerm); err != nil {
+		return err
+	}
+	t := template.New("")
+	t, err := t.Parse(tpl)
+	if err != nil {
+		return err
+	}
+
+	gen, err := os.OpenFile(
+		dest, os.O_TRUNC|os.O_RDWR|os.O_CREATE, os.ModePerm,
+	)
+	if err != nil {
+		return err
+	}
+	defer gen.Close()
+	if err := t.Execute(gen, newFile); err != nil {
+		return err
+	}
+	return nil
 }
 
 type generatingFile struct {
 	PackageName string
-	Imports     []*internal.Import
-	Structs     []*internal.StructDecl
+	Imports     []*parser.Import
+	Structs     []*parser.TypeStructDecl
 }
 
 const tpl = `// Code generated -- DO NOT EDIT
@@ -193,10 +219,14 @@ type {{ .Name }}Spec{{ .GenericExpr true }} struct {
 }
 
 type _{{ .Name }}Matcher{{ .GenericExpr true }} struct {
+	label  itskit.Label
 	fields []its.Matcher[{{ .Expr }}]
 }
 
 func Its{{ .Name }}{{ .GenericExpr true }}(want {{ .Name }}Spec{{ .GenericExpr false }}) its.Matcher[{{ .Expr }}] {
+	cancel := itskit.SkipStack()
+	defer cancel()
+
 	sub := []its.Matcher[{{ .Expr }}]{}
 	{{ range .Body.Fields }}
 	{
@@ -219,7 +249,10 @@ func Its{{ .Name }}{{ .GenericExpr true }}(want {{ .Name }}Spec{{ .GenericExpr f
 	}
 	{{ end }}
 
-	return _{{ .Name }}Matcher{{ .GenericExpr false }}{ fields: sub }
+	return _{{ .Name }}Matcher{{ .GenericExpr false }}{
+		label: itskit.NewLabelWithLocation("type {{ .Name }}:"),
+		fields: sub,
+	}
 }
 
 func (m _{{ .Name }}Matcher{{ .GenericExpr false }}) Match(got {{ .Expr }}) itskit.Match {
@@ -235,7 +268,7 @@ func (m _{{ .Name }}Matcher{{ .GenericExpr false }}) Match(got {{ .Expr }}) itsk
 
 	return itskit.NewMatch(
 		len(sub) == ok,
-		itskit.NewLabel("type {{ .Name }}:").Fill(struct{}{}),
+		m.label.Fill(got),
 		sub...,
 	)
 }

@@ -136,7 +136,18 @@ its has a tool for `//go:generate` to generate matchers of struct, `github.com/y
 
 You can get matchers for structs in and not in your package.
 
-See structer/README.md for more details.
+See [structer/README.md](./structer/README.md) for more details.
+
+Generate Mocks: mocker
+----------------------
+
+There are another `//go:generate` feature to generate mocks of functions and interfaces, `github.com/youta-t/its/mocker`.
+
+You can mock builders for each `type ... interface` and `type ... func`.
+
+And more, there are "scenario" test feature to check injected functions are called in exact order.
+
+See [mocker/README.md](./mocker/README.md) for more details.
 
 DIY kit included
 -----------------

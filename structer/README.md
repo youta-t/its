@@ -10,11 +10,12 @@ structer is a matcher generator for any struct.
 This is designed to be used as go:generate.
 
 It generates a file with same name as a file having go:generate directive.
-The new file, has "Matcher" and "Spec" types, is placed in "./gen" directory (by default).
+The new file, has "Matcher" and "Spec" types, is placed in "./gen_structer" directory (by default).
+
   -as-package
         handle -source as package path
   -dest string
-        directory where new file to be created at (default "./gen")
+        directory where new file to be created at (default "./gen_structer")
   -p    alias of -as-package
   -s value
         alias of -struct

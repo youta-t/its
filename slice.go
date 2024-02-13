@@ -46,10 +46,12 @@ type sliceMatcher[T any] struct{ sliceSpec[T] }
 // Each matchers is tried multiple times with many element.
 // Do not use stateful matcher.
 func Slice[T any](matchers ...Matcher[T]) Matcher[[]T] {
+	cancel := itskit.SkipStack()
+	defer cancel()
 	return sliceMatcher[T]{
 		sliceSpec: sliceSpec[T]{
 			matchers: matchers,
-			template: itskit.NewLabel(
+			template: itskit.NewLabelWithLocation(
 				"[]%T{ ... (len: %d, %d; +%d, -%d)",
 				*new(T),
 				itskit.Got,
@@ -99,9 +101,11 @@ type sliceUnorderedMatcher[T any] sliceSpec[T]
 // Each matchers is tried multiple times with many element.
 // Do not use stateful matcher.
 func SliceUnordered[T any](specs ...Matcher[T]) Matcher[[]T] {
+	cancel := itskit.SkipStack()
+	defer cancel()
 	return sliceUnorderedMatcher[T]{
 		matchers: specs,
-		template: itskit.NewLabel(
+		template: itskit.NewLabelWithLocation(
 			"[]%T{ ... (unordered; len: %d, %d; +%d, -%d)",
 			*new(T),
 			itskit.Want(len(specs)),
@@ -165,9 +169,11 @@ type sliceContainedUnorderedMatcher[T any] sliceSpec[T]
 // Each matchers is tried multiple times with many element.
 // Do not use stateful matcher.
 func SliceUnorderedContaining[T any](spec ...Matcher[T]) Matcher[[]T] {
+	cancel := itskit.SkipStack()
+	defer cancel()
 	return sliceContainedUnorderedMatcher[T]{
 		matchers: spec,
-		template: itskit.NewLabel(
+		template: itskit.NewLabelWithLocation(
 			"[]%T{ ... (unordered, contain; len: %d, %d; -%d)",
 			*new(T),
 			itskit.Got,

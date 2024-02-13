@@ -67,6 +67,22 @@ func NewLabel(template string, params ...any) Label {
 	}
 }
 
+// NewLabelWithLocation like NewLabel, but appends where this function is called.
+func NewLabelWithLocation(template string, params ...any) Label {
+	cancel := SkipStack()
+	defer cancel()
+
+	p := make([]any, len(params))
+	copy(p, params)
+
+	from := InvokedFrom()
+	p = append(p, from)
+	return NewLabel(
+		template+"\t\t--- @ %s",
+		p...,
+	)
+}
+
 func (c Label) Write(w itsio.Writer) error {
 	if err := w.WriteStringln(fmt.Sprintf(c.template, c.params...)); err != nil {
 		return err
