@@ -13,7 +13,7 @@ Install
 go get github.com/youta-t/its
 ```
 
-Its requires go1.18+.
+Its requires go1.21+.
 
 Core package: `its`
 ------------------
