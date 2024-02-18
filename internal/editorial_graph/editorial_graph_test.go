@@ -36,6 +36,42 @@ func TestEditorialGraph(t *testing.T) {
 		}
 	}
 
+	t.Run("empty", theory(
+		When{
+			values: []string{},
+			specs:  []itskit.Matcher[string]{},
+		},
+		Then{
+			matches: []itskit.Matcher[diff.Diff]{},
+		},
+	))
+
+	t.Run("empty values", theory(
+		When{
+			values: []string{},
+			specs: []itskit.Matcher[string]{
+				its.EqEq("a"),
+			},
+		},
+		Then{
+			matches: []itskit.Matcher[diff.Diff]{
+				diff.IsMissing(its.EqEq("a")),
+			},
+		},
+	))
+
+	t.Run("empty matchers", theory(
+		When{
+			values: []string{"a"},
+			specs:  []itskit.Matcher[string]{},
+		},
+		Then{
+			matches: []itskit.Matcher[diff.Diff]{
+				diff.IsExtra("a"),
+			},
+		},
+	))
+
 	t.Run("all match", theory(
 		When{
 			values: strings.Split("abcdefg", ""),
@@ -107,7 +143,7 @@ func TestEditorialGraph(t *testing.T) {
 				diff.IsOk(its.EqEq("a").Match("a")),
 				diff.IsOk(its.EqEq("b").Match("b")),
 				diff.IsOk(its.EqEq("c").Match("c")),
-				diff.IsMissing[string](its.EqEq("d")),
+				diff.IsMissing(its.EqEq("d")),
 				diff.IsOk(its.EqEq("e").Match("e")),
 				diff.IsOk(its.EqEq("f").Match("f")),
 				diff.IsOk(its.EqEq("g").Match("g")),
@@ -134,11 +170,11 @@ func TestEditorialGraph(t *testing.T) {
 				diff.IsExtra("a"),
 				diff.IsOk(its.EqEq("b").Match("b")),
 				diff.IsOk(its.EqEq("c").Match("c")),
-				diff.IsMissing[string](its.EqEq("d")),
+				diff.IsMissing(its.EqEq("d")),
 				diff.IsExtra("x"),
 				diff.IsOk(its.EqEq("e").Match("e")),
 				diff.IsOk(its.EqEq("f").Match("f")),
-				diff.IsMissing[string](its.EqEq("g")),
+				diff.IsMissing(its.EqEq("g")),
 			},
 		},
 	))

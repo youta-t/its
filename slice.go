@@ -116,12 +116,12 @@ func SliceUnordered[T any](specs ...Matcher[T]) Matcher[[]T] {
 	}
 }
 
-func (ss sliceUnorderedMatcher[T]) Match(actual []T) itskit.Match {
+func (ss sliceUnorderedMatcher[T]) Match(got []T) itskit.Match {
 	ms := make([]itskit.Matcher[T], len(ss.matchers))
 	for i, m := range ss.matchers {
 		ms[i] = m
 	}
-	diffs := set.Compare(actual, ms)
+	diffs := set.Compare(got, ms)
 	matches := []itskit.Match{}
 	extra := 0
 	miss := 0
@@ -137,7 +137,7 @@ func (ss sliceUnorderedMatcher[T]) Match(actual []T) itskit.Match {
 
 	return itskit.NewMatch(
 		extra == 0 && miss == 0,
-		ss.template.Fill(len(actual), extra, miss),
+		ss.template.Fill(len(got), extra, miss),
 		matches...,
 	)
 }
@@ -159,7 +159,7 @@ func (ss sliceUnorderedMatcher[T]) String() string {
 	return itskit.MatcherToString[[]T](ss)
 }
 
-type sliceContainedUnorderedMatcher[T any] sliceSpec[T]
+type sliceUnorderedContainingMatcher[T any] sliceSpec[T]
 
 // SliceContainsUnordered test that actual slice contain elements satisfy each specs.
 //
@@ -171,7 +171,7 @@ type sliceContainedUnorderedMatcher[T any] sliceSpec[T]
 func SliceUnorderedContaining[T any](spec ...Matcher[T]) Matcher[[]T] {
 	cancel := itskit.SkipStack()
 	defer cancel()
-	return sliceContainedUnorderedMatcher[T]{
+	return sliceUnorderedContainingMatcher[T]{
 		matchers: spec,
 		template: itskit.NewLabelWithLocation(
 			"[]%T{ ... (unordered, contain; len: %d, %d; -%d)",
@@ -183,7 +183,7 @@ func SliceUnorderedContaining[T any](spec ...Matcher[T]) Matcher[[]T] {
 	}
 }
 
-func (ss sliceContainedUnorderedMatcher[T]) Match(actual []T) itskit.Match {
+func (ss sliceUnorderedContainingMatcher[T]) Match(actual []T) itskit.Match {
 	ms := make([]itskit.Matcher[T], len(ss.matchers))
 	for i, m := range ss.matchers {
 		ms[i] = m
@@ -206,7 +206,7 @@ func (ss sliceContainedUnorderedMatcher[T]) Match(actual []T) itskit.Match {
 	)
 }
 
-func (ss sliceContainedUnorderedMatcher[T]) Write(ww itsio.Writer) error {
+func (ss sliceUnorderedContainingMatcher[T]) Write(ww itsio.Writer) error {
 	if err := ss.template.Write(ww); err != nil {
 		return err
 	}
@@ -219,6 +219,6 @@ func (ss sliceContainedUnorderedMatcher[T]) Write(ww itsio.Writer) error {
 	return nil
 }
 
-func (ss sliceContainedUnorderedMatcher[T]) String() string {
+func (ss sliceUnorderedContainingMatcher[T]) String() string {
 	return itskit.MatcherToString[[]T](ss)
 }

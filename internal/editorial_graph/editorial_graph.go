@@ -17,6 +17,9 @@ type diffTrace struct {
 
 func New[A any](ss []itskit.Matcher[A], as []A) []diff.Diff {
 	// based Myers Algorithm.
+	if len(ss) == 0 && len(as) == 0 {
+		return []diff.Diff{}
+	}
 
 	head := []diffTrace{
 		{
