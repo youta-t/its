@@ -372,3 +372,63 @@ func ExampleMatchString() {
 	// Output:
 	// ✘ (/* want */ ^[a-z]([a-z0-9.-]+[a-z])?$).MatchString(/* got */ "github.com/youta-t/its")		--- @ ./general_test.go:371
 }
+
+func ExampleNil_pass() {
+	var none *int
+	its.Nil[*int]().Match(none).OrError(t)
+
+	var chNil chan int = nil
+	its.Nil[chan int]().Match(chNil).OrError(t)
+
+	var fnNil func()
+	its.Nil[func()]().Match(fnNil).OrError(t)
+
+	its.Nil[any]().Match(nil).OrError(t)
+	its.Nil[error]().Match(nil).OrError(t)
+
+	var mapNil map[string]int
+	its.Nil[map[string]int]().Match(mapNil).OrError(t)
+
+	var sliceNil []int
+	its.Nil[[]int]().Match(sliceNil).OrError(t)
+
+	// Output:
+}
+
+func ExampleNil_fail() {
+	three := 3
+	its.Nil[*int]().Match(&three).OrError(t)
+
+	chNonNil := make(chan int)
+	its.Nil[chan int]().Match(chNonNil).OrError(t)
+
+	funNonNil := func() {}
+	its.Nil[func()]().Match(funNonNil).OrError(t)
+
+	its.Nil[any]().Match(struct{}{}).OrError(t)
+	its.Nil[error]().Match(errors.New("error")).OrError(t)
+
+	mapNonNil := map[string]int{}
+	its.Nil[map[string]int]().Match(mapNonNil).OrError(t)
+
+	sliceNonNil := []int{}
+	its.Nil[[]int]().Match(sliceNonNil).OrError(t)
+
+	its.Nil[int]().Match(3).OrError(t)
+	// Output:
+	// ✘ (/* got */ 3) is nil		--- @ ./general_test.go:400
+	//
+	// ✘ (/* got */ chan int) is nil		--- @ ./general_test.go:403
+	//
+	// ✘ (/* got */ func()) is nil		--- @ ./general_test.go:406
+	//
+	// ✘ (/* got */ {}) is nil		--- @ ./general_test.go:408
+	//
+	// ✘ (/* got */ error) is nil		--- @ ./general_test.go:409
+	//
+	// ✘ (/* got */ map[]) is nil		--- @ ./general_test.go:412
+	//
+	// ✘ (/* got */ []) is nil		--- @ ./general_test.go:415
+	//
+	// ✘ (/* got */ 3) is nil		--- @ ./general_test.go:417
+}
