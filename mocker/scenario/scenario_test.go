@@ -186,7 +186,7 @@ func Example_scenario_passed() {
 
 	testee := example.UpdateUser(sess, registry)
 
-	its.Nil().Match(testee("fake-cookie", "Richard Roe")).OrError(t)
+	its.Nil[error]().Match(testee("fake-cookie", "Richard Roe")).OrError(t)
 	// Output:
 }
 
@@ -233,7 +233,7 @@ func Example_scenario_failed_by_wrong_arg() {
 
 	testee := example.UpdateUser(sess, registry)
 
-	its.Nil().Match(testee("fake-cookie", "Richard Roe")).OrError(t)
+	its.Nil[error]().Match(testee("fake-cookie", "Richard Roe")).OrError(t)
 	// Output:
 	// ✘ func UserRegistry_Update		--- @ ./mocker/scenario/scenario_test.go:217
 	//     ✘ type User:		--- @ ./mocker/scenario/scenario_test.go:218
@@ -286,7 +286,7 @@ func Example_scenario_failed_by_wrong_call_order() {
 
 	testee := example.UpdateUser(sess, registry)
 
-	its.Nil().Match(testee("fake-cookie", "Richard Roe")).OrError(t)
+	its.Nil[error]().Match(testee("fake-cookie", "Richard Roe")).OrError(t)
 	// Output:
 	// ✘ // scenario error: call order is out of plan		--- @ ./mocker/internal/example/scenario.go:26
 	//     ✘ wanted to be called: ./mocker/scenario/scenario_test.go:250
@@ -349,7 +349,7 @@ func Example_scenario_failed_by_plans_incompleted() {
 
 	testee := example.UpdateUser(sess, registry)
 
-	its.Nil().Match(testee("fake-cookie", "Richard Roe")).OrError(t)
+	its.Nil[error]().Match(testee("fake-cookie", "Richard Roe")).OrError(t)
 	// Output:
 	// ✘ // there are functions planned but not called		--- @ ./mocker/scenario/scenario_test.go:356
 	//     ✘ ./mocker/scenario/scenario_test.go:338
