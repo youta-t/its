@@ -432,3 +432,20 @@ func ExampleNil_fail() {
 	//
 	// ✘ (/* got */ 3) is nil		--- @ ./general_test.go:417
 }
+
+func ExamplePointer() {
+	got := 42
+	its.Pointer(its.EqEq(42)).Match(&got).OrError(t)
+
+	got = 40
+	its.Pointer(its.EqEq(42)).Match(&got).OrError(t)
+
+	var ptrgot *int
+	its.Pointer(its.EqEq(42)).Match(ptrgot).OrError(t)
+	// Output:
+	// ✘ /* got */ *int is not nil,		--- @ ./general_test.go:441
+	//     ✘ /* got */ 40 == /* want */ 42		--- @ ./general_test.go:441
+	//
+	// ✘ /* got */ nil is not nil,		--- @ ./general_test.go:444
+	//     ✘ /* got */ ?? == /* want */ 42		--- @ ./general_test.go:444
+}
