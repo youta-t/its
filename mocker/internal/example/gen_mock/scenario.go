@@ -59,13 +59,13 @@ func NewSessionStoreCall(
 	}
 }
 
-type _SessionStoreBehaviour  struct {
+type SessionStoreBehaviour  struct {
 	name itskit.Label
 	spec _SessionStoreCallSpec
 	effect func(cookie string) (userId string, ok bool)
 }
 
-func (b _SessionStoreBehaviour) Mock(t interface { Error(...any) }) func(cookie string) (userId string, ok bool) {
+func (b SessionStoreBehaviour) Mock(t interface { Error(...any) }) func(cookie string) (userId string, ok bool) {
 	return func (
 		
 		arg0 string,
@@ -114,7 +114,7 @@ func (c _SessionStoreCall) ThenReturn(
 
 	ret1 bool,
 
-)_SessionStoreBehaviour {
+) SessionStoreBehaviour {
 	return c.ThenEffect(func(
 		
 		string,
@@ -131,8 +131,8 @@ func (c _SessionStoreCall) ThenReturn(
 	})
 }
 
-func (c _SessionStoreCall) ThenEffect(effect func(cookie string) (userId string, ok bool)) _SessionStoreBehaviour {
-	return _SessionStoreBehaviour {
+func (c _SessionStoreCall) ThenEffect(effect func(cookie string) (userId string, ok bool)) SessionStoreBehaviour {
+	return SessionStoreBehaviour {
 		name: c.name,
 		spec: c.spec,
 		effect: effect,
@@ -192,13 +192,13 @@ func NewUserRegistry_GetCall(
 	}
 }
 
-type _UserRegistry_GetBehaviour  struct {
+type UserRegistry_GetBehaviour  struct {
 	name itskit.Label
 	spec _UserRegistry_GetCallSpec
 	effect func(userId string) ( testee.User,  error)
 }
 
-func (b _UserRegistry_GetBehaviour) Mock(t interface { Error(...any) }) func(userId string) ( testee.User,  error) {
+func (b UserRegistry_GetBehaviour) Mock(t interface { Error(...any) }) func(userId string) ( testee.User,  error) {
 	return func (
 		
 		arg0 string,
@@ -247,7 +247,7 @@ func (c _UserRegistry_GetCall) ThenReturn(
 
 	ret1 error,
 
-)_UserRegistry_GetBehaviour {
+) UserRegistry_GetBehaviour {
 	return c.ThenEffect(func(
 		
 		string,
@@ -264,8 +264,8 @@ func (c _UserRegistry_GetCall) ThenReturn(
 	})
 }
 
-func (c _UserRegistry_GetCall) ThenEffect(effect func(userId string) ( testee.User,  error)) _UserRegistry_GetBehaviour {
-	return _UserRegistry_GetBehaviour {
+func (c _UserRegistry_GetCall) ThenEffect(effect func(userId string) ( testee.User,  error)) UserRegistry_GetBehaviour {
+	return UserRegistry_GetBehaviour {
 		name: c.name,
 		spec: c.spec,
 		effect: effect,
@@ -321,13 +321,13 @@ func NewUserRegistry_UpdateCall(
 	}
 }
 
-type _UserRegistry_UpdateBehaviour  struct {
+type UserRegistry_UpdateBehaviour  struct {
 	name itskit.Label
 	spec _UserRegistry_UpdateCallSpec
 	effect func(arg0 testee.User) error
 }
 
-func (b _UserRegistry_UpdateBehaviour) Mock(t interface { Error(...any) }) func(arg0 testee.User) error {
+func (b UserRegistry_UpdateBehaviour) Mock(t interface { Error(...any) }) func(arg0 testee.User) error {
 	return func (
 		
 		arg0 testee.User,
@@ -373,7 +373,7 @@ func (c _UserRegistry_UpdateCall) ThenReturn(
 
 	ret0 error,
 
-)_UserRegistry_UpdateBehaviour {
+) UserRegistry_UpdateBehaviour {
 	return c.ThenEffect(func(
 		
 		testee.User,
@@ -389,8 +389,8 @@ func (c _UserRegistry_UpdateCall) ThenReturn(
 	})
 }
 
-func (c _UserRegistry_UpdateCall) ThenEffect(effect func(arg0 testee.User) error) _UserRegistry_UpdateBehaviour {
-	return _UserRegistry_UpdateBehaviour {
+func (c _UserRegistry_UpdateCall) ThenEffect(effect func(arg0 testee.User) error) UserRegistry_UpdateBehaviour {
+	return UserRegistry_UpdateBehaviour {
 		name: c.name,
 		spec: c.spec,
 		effect: effect,
@@ -446,13 +446,13 @@ func NewUserRegistry_DeleteCall(
 	}
 }
 
-type _UserRegistry_DeleteBehaviour  struct {
+type UserRegistry_DeleteBehaviour  struct {
 	name itskit.Label
 	spec _UserRegistry_DeleteCallSpec
 	effect func(arg0 testee.User) error
 }
 
-func (b _UserRegistry_DeleteBehaviour) Mock(t interface { Error(...any) }) func(arg0 testee.User) error {
+func (b UserRegistry_DeleteBehaviour) Mock(t interface { Error(...any) }) func(arg0 testee.User) error {
 	return func (
 		
 		arg0 testee.User,
@@ -498,7 +498,7 @@ func (c _UserRegistry_DeleteCall) ThenReturn(
 
 	ret0 error,
 
-)_UserRegistry_DeleteBehaviour {
+) UserRegistry_DeleteBehaviour {
 	return c.ThenEffect(func(
 		
 		testee.User,
@@ -514,8 +514,8 @@ func (c _UserRegistry_DeleteCall) ThenReturn(
 	})
 }
 
-func (c _UserRegistry_DeleteCall) ThenEffect(effect func(arg0 testee.User) error) _UserRegistry_DeleteBehaviour {
-	return _UserRegistry_DeleteBehaviour {
+func (c _UserRegistry_DeleteCall) ThenEffect(effect func(arg0 testee.User) error) UserRegistry_DeleteBehaviour {
+	return UserRegistry_DeleteBehaviour {
 		name: c.name,
 		spec: c.spec,
 		effect: effect,

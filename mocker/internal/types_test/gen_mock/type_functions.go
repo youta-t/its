@@ -42,13 +42,13 @@ func NewF1Call(
 	}
 }
 
-type _F1Behaviour  struct {
+type F1Behaviour  struct {
 	name itskit.Label
 	spec _F1CallSpec
 	effect func()
 }
 
-func (b _F1Behaviour) Mock(t interface { Error(...any) }) func() {
+func (b F1Behaviour) Mock(t interface { Error(...any) }) func() {
 	return func (
 		
 		
@@ -73,7 +73,7 @@ func (b _F1Behaviour) Mock(t interface { Error(...any) }) func() {
 
 func (c _F1Call) ThenReturn(
 
-)_F1Behaviour {
+) F1Behaviour {
 	return c.ThenEffect(func(
 		
 		
@@ -82,8 +82,8 @@ func (c _F1Call) ThenReturn(
 	})
 }
 
-func (c _F1Call) ThenEffect(effect func()) _F1Behaviour {
-	return _F1Behaviour {
+func (c _F1Call) ThenEffect(effect func()) F1Behaviour {
+	return F1Behaviour {
 		name: c.name,
 		spec: c.spec,
 		effect: effect,
@@ -130,13 +130,13 @@ func NewF2Call(
 	}
 }
 
-type _F2Behaviour  struct {
+type F2Behaviour  struct {
 	name itskit.Label
 	spec _F2CallSpec
 	effect func() int
 }
 
-func (b _F2Behaviour) Mock(t interface { Error(...any) }) func() int {
+func (b F2Behaviour) Mock(t interface { Error(...any) }) func() int {
 	return func (
 		
 		
@@ -166,7 +166,7 @@ func (c _F2Call) ThenReturn(
 
 	ret0 int,
 
-)_F2Behaviour {
+) F2Behaviour {
 	return c.ThenEffect(func(
 		
 		
@@ -180,8 +180,8 @@ func (c _F2Call) ThenReturn(
 	})
 }
 
-func (c _F2Call) ThenEffect(effect func() int) _F2Behaviour {
-	return _F2Behaviour {
+func (c _F2Call) ThenEffect(effect func() int) F2Behaviour {
+	return F2Behaviour {
 		name: c.name,
 		spec: c.spec,
 		effect: effect,
@@ -232,13 +232,13 @@ func NewF3Call(
 	}
 }
 
-type _F3Behaviour  struct {
+type F3Behaviour  struct {
 	name itskit.Label
 	spec _F3CallSpec
 	effect func() ( int,  string)
 }
 
-func (b _F3Behaviour) Mock(t interface { Error(...any) }) func() ( int,  string) {
+func (b F3Behaviour) Mock(t interface { Error(...any) }) func() ( int,  string) {
 	return func (
 		
 		
@@ -271,7 +271,7 @@ func (c _F3Call) ThenReturn(
 
 	ret1 string,
 
-)_F3Behaviour {
+) F3Behaviour {
 	return c.ThenEffect(func(
 		
 		
@@ -286,8 +286,8 @@ func (c _F3Call) ThenReturn(
 	})
 }
 
-func (c _F3Call) ThenEffect(effect func() ( int,  string)) _F3Behaviour {
-	return _F3Behaviour {
+func (c _F3Call) ThenEffect(effect func() ( int,  string)) F3Behaviour {
+	return F3Behaviour {
 		name: c.name,
 		spec: c.spec,
 		effect: effect,
@@ -338,13 +338,13 @@ func NewF4Call(
 	}
 }
 
-type _F4Behaviour  struct {
+type F4Behaviour  struct {
 	name itskit.Label
 	spec _F4CallSpec
 	effect func() (i int, s string)
 }
 
-func (b _F4Behaviour) Mock(t interface { Error(...any) }) func() (i int, s string) {
+func (b F4Behaviour) Mock(t interface { Error(...any) }) func() (i int, s string) {
 	return func (
 		
 		
@@ -377,7 +377,7 @@ func (c _F4Call) ThenReturn(
 
 	ret1 string,
 
-)_F4Behaviour {
+) F4Behaviour {
 	return c.ThenEffect(func(
 		
 		
@@ -392,8 +392,8 @@ func (c _F4Call) ThenReturn(
 	})
 }
 
-func (c _F4Call) ThenEffect(effect func() (i int, s string)) _F4Behaviour {
-	return _F4Behaviour {
+func (c _F4Call) ThenEffect(effect func() (i int, s string)) F4Behaviour {
+	return F4Behaviour {
 		name: c.name,
 		spec: c.spec,
 		effect: effect,
@@ -454,13 +454,13 @@ func NewF5Call(
 	}
 }
 
-type _F5Behaviour  struct {
+type F5Behaviour  struct {
 	name itskit.Label
 	spec _F5CallSpec
 	effect func(arg0 int, arg1 string)
 }
 
-func (b _F5Behaviour) Mock(t interface { Error(...any) }) func(arg0 int, arg1 string) {
+func (b F5Behaviour) Mock(t interface { Error(...any) }) func(arg0 int, arg1 string) {
 	return func (
 		
 		arg0 int,
@@ -517,7 +517,7 @@ func (b _F5Behaviour) Mock(t interface { Error(...any) }) func(arg0 int, arg1 st
 
 func (c _F5Call) ThenReturn(
 
-)_F5Behaviour {
+) F5Behaviour {
 	return c.ThenEffect(func(
 		
 		int,
@@ -530,8 +530,8 @@ func (c _F5Call) ThenReturn(
 	})
 }
 
-func (c _F5Call) ThenEffect(effect func(arg0 int, arg1 string)) _F5Behaviour {
-	return _F5Behaviour {
+func (c _F5Call) ThenEffect(effect func(arg0 int, arg1 string)) F5Behaviour {
+	return F5Behaviour {
 		name: c.name,
 		spec: c.spec,
 		effect: effect,
@@ -586,13 +586,13 @@ func NewF6Call(
 	}
 }
 
-type _F6Behaviour  struct {
+type F6Behaviour  struct {
 	name itskit.Label
 	spec _F6CallSpec
 	effect func(arg0 int, vararg ...string)
 }
 
-func (b _F6Behaviour) Mock(t interface { Error(...any) }) func(arg0 int, vararg ...string) {
+func (b F6Behaviour) Mock(t interface { Error(...any) }) func(arg0 int, vararg ...string) {
 	return func (
 		
 		arg0 int,
@@ -647,7 +647,7 @@ func (b _F6Behaviour) Mock(t interface { Error(...any) }) func(arg0 int, vararg 
 
 func (c _F6Call) ThenReturn(
 
-)_F6Behaviour {
+) F6Behaviour {
 	return c.ThenEffect(func(
 		
 		int,
@@ -658,8 +658,8 @@ func (c _F6Call) ThenReturn(
 	})
 }
 
-func (c _F6Call) ThenEffect(effect func(arg0 int, vararg ...string)) _F6Behaviour {
-	return _F6Behaviour {
+func (c _F6Call) ThenEffect(effect func(arg0 int, vararg ...string)) F6Behaviour {
+	return F6Behaviour {
 		name: c.name,
 		spec: c.spec,
 		effect: effect,
@@ -705,13 +705,13 @@ func NewF7Call(vararg its.Matcher[[]string],
 	}
 }
 
-type _F7Behaviour  struct {
+type F7Behaviour  struct {
 	name itskit.Label
 	spec _F7CallSpec
 	effect func(vararg ...string)
 }
 
-func (b _F7Behaviour) Mock(t interface { Error(...any) }) func(vararg ...string) {
+func (b F7Behaviour) Mock(t interface { Error(...any) }) func(vararg ...string) {
 	return func (
 		
 		vararg ...string,
@@ -750,7 +750,7 @@ func (b _F7Behaviour) Mock(t interface { Error(...any) }) func(vararg ...string)
 
 func (c _F7Call) ThenReturn(
 
-)_F7Behaviour {
+) F7Behaviour {
 	return c.ThenEffect(func(
 		
 		...string,
@@ -759,8 +759,8 @@ func (c _F7Call) ThenReturn(
 	})
 }
 
-func (c _F7Call) ThenEffect(effect func(vararg ...string)) _F7Behaviour {
-	return _F7Behaviour {
+func (c _F7Call) ThenEffect(effect func(vararg ...string)) F7Behaviour {
+	return F7Behaviour {
 		name: c.name,
 		spec: c.spec,
 		effect: effect,
@@ -821,13 +821,13 @@ func NewF8Call(
 	}
 }
 
-type _F8Behaviour  struct {
+type F8Behaviour  struct {
 	name itskit.Label
 	spec _F8CallSpec
 	effect func(i int, s string)
 }
 
-func (b _F8Behaviour) Mock(t interface { Error(...any) }) func(i int, s string) {
+func (b F8Behaviour) Mock(t interface { Error(...any) }) func(i int, s string) {
 	return func (
 		
 		arg0 int,
@@ -884,7 +884,7 @@ func (b _F8Behaviour) Mock(t interface { Error(...any) }) func(i int, s string) 
 
 func (c _F8Call) ThenReturn(
 
-)_F8Behaviour {
+) F8Behaviour {
 	return c.ThenEffect(func(
 		
 		int,
@@ -897,8 +897,8 @@ func (c _F8Call) ThenReturn(
 	})
 }
 
-func (c _F8Call) ThenEffect(effect func(i int, s string)) _F8Behaviour {
-	return _F8Behaviour {
+func (c _F8Call) ThenEffect(effect func(i int, s string)) F8Behaviour {
+	return F8Behaviour {
 		name: c.name,
 		spec: c.spec,
 		effect: effect,
@@ -953,13 +953,13 @@ func NewF9Call(
 	}
 }
 
-type _F9Behaviour  struct {
+type F9Behaviour  struct {
 	name itskit.Label
 	spec _F9CallSpec
 	effect func(i int, ss ...string)
 }
 
-func (b _F9Behaviour) Mock(t interface { Error(...any) }) func(i int, ss ...string) {
+func (b F9Behaviour) Mock(t interface { Error(...any) }) func(i int, ss ...string) {
 	return func (
 		
 		arg0 int,
@@ -1014,7 +1014,7 @@ func (b _F9Behaviour) Mock(t interface { Error(...any) }) func(i int, ss ...stri
 
 func (c _F9Call) ThenReturn(
 
-)_F9Behaviour {
+) F9Behaviour {
 	return c.ThenEffect(func(
 		
 		int,
@@ -1025,8 +1025,8 @@ func (c _F9Call) ThenReturn(
 	})
 }
 
-func (c _F9Call) ThenEffect(effect func(i int, ss ...string)) _F9Behaviour {
-	return _F9Behaviour {
+func (c _F9Call) ThenEffect(effect func(i int, ss ...string)) F9Behaviour {
+	return F9Behaviour {
 		name: c.name,
 		spec: c.spec,
 		effect: effect,
@@ -1072,13 +1072,13 @@ func NewF10Call(ss its.Matcher[[]string],
 	}
 }
 
-type _F10Behaviour  struct {
+type F10Behaviour  struct {
 	name itskit.Label
 	spec _F10CallSpec
 	effect func(ss ...string)
 }
 
-func (b _F10Behaviour) Mock(t interface { Error(...any) }) func(ss ...string) {
+func (b F10Behaviour) Mock(t interface { Error(...any) }) func(ss ...string) {
 	return func (
 		
 		vararg ...string,
@@ -1117,7 +1117,7 @@ func (b _F10Behaviour) Mock(t interface { Error(...any) }) func(ss ...string) {
 
 func (c _F10Call) ThenReturn(
 
-)_F10Behaviour {
+) F10Behaviour {
 	return c.ThenEffect(func(
 		
 		...string,
@@ -1126,8 +1126,8 @@ func (c _F10Call) ThenReturn(
 	})
 }
 
-func (c _F10Call) ThenEffect(effect func(ss ...string)) _F10Behaviour {
-	return _F10Behaviour {
+func (c _F10Call) ThenEffect(effect func(ss ...string)) F10Behaviour {
+	return F10Behaviour {
 		name: c.name,
 		spec: c.spec,
 		effect: effect,
@@ -1188,13 +1188,13 @@ func NewF11Call(
 	}
 }
 
-type _F11Behaviour  struct {
+type F11Behaviour  struct {
 	name itskit.Label
 	spec _F11CallSpec
 	effect func(arg0 int, arg1 string)
 }
 
-func (b _F11Behaviour) Mock(t interface { Error(...any) }) func(arg0 int, arg1 string) {
+func (b F11Behaviour) Mock(t interface { Error(...any) }) func(arg0 int, arg1 string) {
 	return func (
 		
 		arg0 int,
@@ -1251,7 +1251,7 @@ func (b _F11Behaviour) Mock(t interface { Error(...any) }) func(arg0 int, arg1 s
 
 func (c _F11Call) ThenReturn(
 
-)_F11Behaviour {
+) F11Behaviour {
 	return c.ThenEffect(func(
 		
 		int,
@@ -1264,8 +1264,8 @@ func (c _F11Call) ThenReturn(
 	})
 }
 
-func (c _F11Call) ThenEffect(effect func(arg0 int, arg1 string)) _F11Behaviour {
-	return _F11Behaviour {
+func (c _F11Call) ThenEffect(effect func(arg0 int, arg1 string)) F11Behaviour {
+	return F11Behaviour {
 		name: c.name,
 		spec: c.spec,
 		effect: effect,
@@ -1320,13 +1320,13 @@ func NewF12Call(
 	}
 }
 
-type _F12Behaviour  struct {
+type F12Behaviour  struct {
 	name itskit.Label
 	spec _F12CallSpec
 	effect func(arg0 int, vararg ...string)
 }
 
-func (b _F12Behaviour) Mock(t interface { Error(...any) }) func(arg0 int, vararg ...string) {
+func (b F12Behaviour) Mock(t interface { Error(...any) }) func(arg0 int, vararg ...string) {
 	return func (
 		
 		arg0 int,
@@ -1381,7 +1381,7 @@ func (b _F12Behaviour) Mock(t interface { Error(...any) }) func(arg0 int, vararg
 
 func (c _F12Call) ThenReturn(
 
-)_F12Behaviour {
+) F12Behaviour {
 	return c.ThenEffect(func(
 		
 		int,
@@ -1392,8 +1392,8 @@ func (c _F12Call) ThenReturn(
 	})
 }
 
-func (c _F12Call) ThenEffect(effect func(arg0 int, vararg ...string)) _F12Behaviour {
-	return _F12Behaviour {
+func (c _F12Call) ThenEffect(effect func(arg0 int, vararg ...string)) F12Behaviour {
+	return F12Behaviour {
 		name: c.name,
 		spec: c.spec,
 		effect: effect,
@@ -1439,13 +1439,13 @@ func NewF13Call(vararg its.Matcher[[]string],
 	}
 }
 
-type _F13Behaviour  struct {
+type F13Behaviour  struct {
 	name itskit.Label
 	spec _F13CallSpec
 	effect func(vararg ...string)
 }
 
-func (b _F13Behaviour) Mock(t interface { Error(...any) }) func(vararg ...string) {
+func (b F13Behaviour) Mock(t interface { Error(...any) }) func(vararg ...string) {
 	return func (
 		
 		vararg ...string,
@@ -1484,7 +1484,7 @@ func (b _F13Behaviour) Mock(t interface { Error(...any) }) func(vararg ...string
 
 func (c _F13Call) ThenReturn(
 
-)_F13Behaviour {
+) F13Behaviour {
 	return c.ThenEffect(func(
 		
 		...string,
@@ -1493,8 +1493,8 @@ func (c _F13Call) ThenReturn(
 	})
 }
 
-func (c _F13Call) ThenEffect(effect func(vararg ...string)) _F13Behaviour {
-	return _F13Behaviour {
+func (c _F13Call) ThenEffect(effect func(vararg ...string)) F13Behaviour {
+	return F13Behaviour {
 		name: c.name,
 		spec: c.spec,
 		effect: effect,
@@ -1559,13 +1559,13 @@ func NewF14Call(
 	}
 }
 
-type _F14Behaviour  struct {
+type F14Behaviour  struct {
 	name itskit.Label
 	spec _F14CallSpec
 	effect func(arg0 int, arg1 string) (f float64)
 }
 
-func (b _F14Behaviour) Mock(t interface { Error(...any) }) func(arg0 int, arg1 string) (f float64) {
+func (b F14Behaviour) Mock(t interface { Error(...any) }) func(arg0 int, arg1 string) (f float64) {
 	return func (
 		
 		arg0 int,
@@ -1627,7 +1627,7 @@ func (c _F14Call) ThenReturn(
 
 	ret0 float64,
 
-)_F14Behaviour {
+) F14Behaviour {
 	return c.ThenEffect(func(
 		
 		int,
@@ -1645,8 +1645,8 @@ func (c _F14Call) ThenReturn(
 	})
 }
 
-func (c _F14Call) ThenEffect(effect func(arg0 int, arg1 string) (f float64)) _F14Behaviour {
-	return _F14Behaviour {
+func (c _F14Call) ThenEffect(effect func(arg0 int, arg1 string) (f float64)) F14Behaviour {
+	return F14Behaviour {
 		name: c.name,
 		spec: c.spec,
 		effect: effect,
@@ -1705,13 +1705,13 @@ func NewF15Call(
 	}
 }
 
-type _F15Behaviour  struct {
+type F15Behaviour  struct {
 	name itskit.Label
 	spec _F15CallSpec
 	effect func(i int, ss ...string) float64
 }
 
-func (b _F15Behaviour) Mock(t interface { Error(...any) }) func(i int, ss ...string) float64 {
+func (b F15Behaviour) Mock(t interface { Error(...any) }) func(i int, ss ...string) float64 {
 	return func (
 		
 		arg0 int,
@@ -1771,7 +1771,7 @@ func (c _F15Call) ThenReturn(
 
 	ret0 float64,
 
-)_F15Behaviour {
+) F15Behaviour {
 	return c.ThenEffect(func(
 		
 		int,
@@ -1787,8 +1787,8 @@ func (c _F15Call) ThenReturn(
 	})
 }
 
-func (c _F15Call) ThenEffect(effect func(i int, ss ...string) float64) _F15Behaviour {
-	return _F15Behaviour {
+func (c _F15Call) ThenEffect(effect func(i int, ss ...string) float64) F15Behaviour {
+	return F15Behaviour {
 		name: c.name,
 		spec: c.spec,
 		effect: effect,
@@ -1844,13 +1844,13 @@ func NewF16Call[T any](
 	}
 }
 
-type _F16Behaviour [T any] struct {
+type F16Behaviour [T any] struct {
 	name itskit.Label
 	spec _F16CallSpec[T]
 	effect func(arg0 testee.F16[T]) T
 }
 
-func (b _F16Behaviour[T]) Mock(t interface { Error(...any) }) func(arg0 testee.F16[T]) T {
+func (b F16Behaviour[T]) Mock(t interface { Error(...any) }) func(arg0 testee.F16[T]) T {
 	return func (
 		
 		arg0 testee.F16[T],
@@ -1896,7 +1896,7 @@ func (c _F16Call[T]) ThenReturn(
 
 	ret0 T,
 
-)_F16Behaviour[T] {
+) F16Behaviour[T] {
 	return c.ThenEffect(func(
 		
 		testee.F16[T],
@@ -1912,8 +1912,8 @@ func (c _F16Call[T]) ThenReturn(
 	})
 }
 
-func (c _F16Call[T]) ThenEffect(effect func(arg0 testee.F16[T]) T) _F16Behaviour[T] {
-	return _F16Behaviour[T] {
+func (c _F16Call[T]) ThenEffect(effect func(arg0 testee.F16[T]) T) F16Behaviour[T] {
+	return F16Behaviour[T] {
 		name: c.name,
 		spec: c.spec,
 		effect: effect,
@@ -1979,7 +1979,7 @@ func NewF17Call[T struct{
 	}
 }
 
-type _F17Behaviour [T struct{
+type F17Behaviour [T struct{
 	Foo int
 }] struct {
 	name itskit.Label
@@ -1987,7 +1987,7 @@ type _F17Behaviour [T struct{
 	effect func(arg0 T) T
 }
 
-func (b _F17Behaviour[T]) Mock(t interface { Error(...any) }) func(arg0 T) T {
+func (b F17Behaviour[T]) Mock(t interface { Error(...any) }) func(arg0 T) T {
 	return func (
 		
 		arg0 T,
@@ -2033,7 +2033,7 @@ func (c _F17Call[T]) ThenReturn(
 
 	ret0 T,
 
-)_F17Behaviour[T] {
+) F17Behaviour[T] {
 	return c.ThenEffect(func(
 		
 		T,
@@ -2049,8 +2049,8 @@ func (c _F17Call[T]) ThenReturn(
 	})
 }
 
-func (c _F17Call[T]) ThenEffect(effect func(arg0 T) T) _F17Behaviour[T] {
-	return _F17Behaviour[T] {
+func (c _F17Call[T]) ThenEffect(effect func(arg0 T) T) F17Behaviour[T] {
+	return F17Behaviour[T] {
 		name: c.name,
 		spec: c.spec,
 		effect: effect,
@@ -2106,13 +2106,13 @@ func NewF18Call[T any, U any](
 	}
 }
 
-type _F18Behaviour [T any, U any] struct {
+type F18Behaviour [T any, U any] struct {
 	name itskit.Label
 	spec _F18CallSpec[T, U]
 	effect func(arg0 func(arg0 T, arg1 U)) func(arg0 T, arg1 U)
 }
 
-func (b _F18Behaviour[T, U]) Mock(t interface { Error(...any) }) func(arg0 func(arg0 T, arg1 U)) func(arg0 T, arg1 U) {
+func (b F18Behaviour[T, U]) Mock(t interface { Error(...any) }) func(arg0 func(arg0 T, arg1 U)) func(arg0 T, arg1 U) {
 	return func (
 		
 		arg0 func(arg0 T, arg1 U),
@@ -2158,7 +2158,7 @@ func (c _F18Call[T, U]) ThenReturn(
 
 	ret0 func(arg0 T, arg1 U),
 
-)_F18Behaviour[T, U] {
+) F18Behaviour[T, U] {
 	return c.ThenEffect(func(
 		
 		func(arg0 T, arg1 U),
@@ -2174,8 +2174,8 @@ func (c _F18Call[T, U]) ThenReturn(
 	})
 }
 
-func (c _F18Call[T, U]) ThenEffect(effect func(arg0 func(arg0 T, arg1 U)) func(arg0 T, arg1 U)) _F18Behaviour[T, U] {
-	return _F18Behaviour[T, U] {
+func (c _F18Call[T, U]) ThenEffect(effect func(arg0 func(arg0 T, arg1 U)) func(arg0 T, arg1 U)) F18Behaviour[T, U] {
+	return F18Behaviour[T, U] {
 		name: c.name,
 		spec: c.spec,
 		effect: effect,
@@ -2231,13 +2231,13 @@ func NewF19Call[T ~int](
 	}
 }
 
-type _F19Behaviour [T ~int] struct {
+type F19Behaviour [T ~int] struct {
 	name itskit.Label
 	spec _F19CallSpec[T]
 	effect func(arg0 testee.F16[T]) T
 }
 
-func (b _F19Behaviour[T]) Mock(t interface { Error(...any) }) func(arg0 testee.F16[T]) T {
+func (b F19Behaviour[T]) Mock(t interface { Error(...any) }) func(arg0 testee.F16[T]) T {
 	return func (
 		
 		arg0 testee.F16[T],
@@ -2283,7 +2283,7 @@ func (c _F19Call[T]) ThenReturn(
 
 	ret0 T,
 
-)_F19Behaviour[T] {
+) F19Behaviour[T] {
 	return c.ThenEffect(func(
 		
 		testee.F16[T],
@@ -2299,8 +2299,8 @@ func (c _F19Call[T]) ThenReturn(
 	})
 }
 
-func (c _F19Call[T]) ThenEffect(effect func(arg0 testee.F16[T]) T) _F19Behaviour[T] {
-	return _F19Behaviour[T] {
+func (c _F19Call[T]) ThenEffect(effect func(arg0 testee.F16[T]) T) F19Behaviour[T] {
+	return F19Behaviour[T] {
 		name: c.name,
 		spec: c.spec,
 		effect: effect,
@@ -2356,13 +2356,13 @@ func NewF20Call[T ~int | int8 | ~int16 | int32](
 	}
 }
 
-type _F20Behaviour [T ~int | int8 | ~int16 | int32] struct {
+type F20Behaviour [T ~int | int8 | ~int16 | int32] struct {
 	name itskit.Label
 	spec _F20CallSpec[T]
 	effect func(arg0 T) T
 }
 
-func (b _F20Behaviour[T]) Mock(t interface { Error(...any) }) func(arg0 T) T {
+func (b F20Behaviour[T]) Mock(t interface { Error(...any) }) func(arg0 T) T {
 	return func (
 		
 		arg0 T,
@@ -2408,7 +2408,7 @@ func (c _F20Call[T]) ThenReturn(
 
 	ret0 T,
 
-)_F20Behaviour[T] {
+) F20Behaviour[T] {
 	return c.ThenEffect(func(
 		
 		T,
@@ -2424,8 +2424,8 @@ func (c _F20Call[T]) ThenReturn(
 	})
 }
 
-func (c _F20Call[T]) ThenEffect(effect func(arg0 T) T) _F20Behaviour[T] {
-	return _F20Behaviour[T] {
+func (c _F20Call[T]) ThenEffect(effect func(arg0 T) T) F20Behaviour[T] {
+	return F20Behaviour[T] {
 		name: c.name,
 		spec: c.spec,
 		effect: effect,

@@ -43,13 +43,13 @@ func NewI0_M0Call(
 	}
 }
 
-type _I0_M0Behaviour  struct {
+type I0_M0Behaviour  struct {
 	name itskit.Label
 	spec _I0_M0CallSpec
 	effect func()
 }
 
-func (b _I0_M0Behaviour) Mock(t interface { Error(...any) }) func() {
+func (b I0_M0Behaviour) Mock(t interface { Error(...any) }) func() {
 	return func (
 		
 		
@@ -74,7 +74,7 @@ func (b _I0_M0Behaviour) Mock(t interface { Error(...any) }) func() {
 
 func (c _I0_M0Call) ThenReturn(
 
-)_I0_M0Behaviour {
+) I0_M0Behaviour {
 	return c.ThenEffect(func(
 		
 		
@@ -83,8 +83,8 @@ func (c _I0_M0Call) ThenReturn(
 	})
 }
 
-func (c _I0_M0Call) ThenEffect(effect func()) _I0_M0Behaviour {
-	return _I0_M0Behaviour {
+func (c _I0_M0Call) ThenEffect(effect func()) I0_M0Behaviour {
+	return I0_M0Behaviour {
 		name: c.name,
 		spec: c.spec,
 		effect: effect,
@@ -153,13 +153,13 @@ func NewI0_M1Call(
 	}
 }
 
-type _I0_M1Behaviour  struct {
+type I0_M1Behaviour  struct {
 	name itskit.Label
 	spec _I0_M1CallSpec
 	effect func(arg0 int, arg1 string) ( bool,  error)
 }
 
-func (b _I0_M1Behaviour) Mock(t interface { Error(...any) }) func(arg0 int, arg1 string) ( bool,  error) {
+func (b I0_M1Behaviour) Mock(t interface { Error(...any) }) func(arg0 int, arg1 string) ( bool,  error) {
 	return func (
 		
 		arg0 int,
@@ -224,7 +224,7 @@ func (c _I0_M1Call) ThenReturn(
 
 	ret1 error,
 
-)_I0_M1Behaviour {
+) I0_M1Behaviour {
 	return c.ThenEffect(func(
 		
 		int,
@@ -243,8 +243,8 @@ func (c _I0_M1Call) ThenReturn(
 	})
 }
 
-func (c _I0_M1Call) ThenEffect(effect func(arg0 int, arg1 string) ( bool,  error)) _I0_M1Behaviour {
-	return _I0_M1Behaviour {
+func (c _I0_M1Call) ThenEffect(effect func(arg0 int, arg1 string) ( bool,  error)) I0_M1Behaviour {
+	return I0_M1Behaviour {
 		name: c.name,
 		spec: c.spec,
 		effect: effect,
@@ -313,13 +313,13 @@ func NewI0_M2Call(
 	}
 }
 
-type _I0_M2Behaviour  struct {
+type I0_M2Behaviour  struct {
 	name itskit.Label
 	spec _I0_M2CallSpec
 	effect func(i int, s string) (ok bool, err error)
 }
 
-func (b _I0_M2Behaviour) Mock(t interface { Error(...any) }) func(i int, s string) (ok bool, err error) {
+func (b I0_M2Behaviour) Mock(t interface { Error(...any) }) func(i int, s string) (ok bool, err error) {
 	return func (
 		
 		arg0 int,
@@ -384,7 +384,7 @@ func (c _I0_M2Call) ThenReturn(
 
 	ret1 error,
 
-)_I0_M2Behaviour {
+) I0_M2Behaviour {
 	return c.ThenEffect(func(
 		
 		int,
@@ -403,8 +403,8 @@ func (c _I0_M2Call) ThenReturn(
 	})
 }
 
-func (c _I0_M2Call) ThenEffect(effect func(i int, s string) (ok bool, err error)) _I0_M2Behaviour {
-	return _I0_M2Behaviour {
+func (c _I0_M2Call) ThenEffect(effect func(i int, s string) (ok bool, err error)) I0_M2Behaviour {
+	return I0_M2Behaviour {
 		name: c.name,
 		spec: c.spec,
 		effect: effect,
@@ -467,13 +467,13 @@ func NewI0_M3Call(
 	}
 }
 
-type _I0_M3Behaviour  struct {
+type I0_M3Behaviour  struct {
 	name itskit.Label
 	spec _I0_M3CallSpec
 	effect func(i int, s ...string) (ok bool, err error)
 }
 
-func (b _I0_M3Behaviour) Mock(t interface { Error(...any) }) func(i int, s ...string) (ok bool, err error) {
+func (b I0_M3Behaviour) Mock(t interface { Error(...any) }) func(i int, s ...string) (ok bool, err error) {
 	return func (
 		
 		arg0 int,
@@ -536,7 +536,7 @@ func (c _I0_M3Call) ThenReturn(
 
 	ret1 error,
 
-)_I0_M3Behaviour {
+) I0_M3Behaviour {
 	return c.ThenEffect(func(
 		
 		int,
@@ -553,8 +553,8 @@ func (c _I0_M3Call) ThenReturn(
 	})
 }
 
-func (c _I0_M3Call) ThenEffect(effect func(i int, s ...string) (ok bool, err error)) _I0_M3Behaviour {
-	return _I0_M3Behaviour {
+func (c _I0_M3Call) ThenEffect(effect func(i int, s ...string) (ok bool, err error)) I0_M3Behaviour {
+	return I0_M3Behaviour {
 		name: c.name,
 		spec: c.spec,
 		effect: effect,
@@ -604,13 +604,13 @@ func NewI0_M4Call(s its.Matcher[[]string],
 	}
 }
 
-type _I0_M4Behaviour  struct {
+type I0_M4Behaviour  struct {
 	name itskit.Label
 	spec _I0_M4CallSpec
 	effect func(s ...string) bool
 }
 
-func (b _I0_M4Behaviour) Mock(t interface { Error(...any) }) func(s ...string) bool {
+func (b I0_M4Behaviour) Mock(t interface { Error(...any) }) func(s ...string) bool {
 	return func (
 		
 		vararg ...string,
@@ -654,7 +654,7 @@ func (c _I0_M4Call) ThenReturn(
 
 	ret0 bool,
 
-)_I0_M4Behaviour {
+) I0_M4Behaviour {
 	return c.ThenEffect(func(
 		
 		...string,
@@ -668,8 +668,8 @@ func (c _I0_M4Call) ThenReturn(
 	})
 }
 
-func (c _I0_M4Call) ThenEffect(effect func(s ...string) bool) _I0_M4Behaviour {
-	return _I0_M4Behaviour {
+func (c _I0_M4Call) ThenEffect(effect func(s ...string) bool) I0_M4Behaviour {
+	return I0_M4Behaviour {
 		name: c.name,
 		spec: c.spec,
 		effect: effect,
@@ -738,13 +738,13 @@ func NewI1_M0Call[S u_sub.T, T u_sub.T, U testee.X[T]](
 	}
 }
 
-type _I1_M0Behaviour [S u_sub.T, T u_sub.T, U testee.X[T]] struct {
+type I1_M0Behaviour [S u_sub.T, T u_sub.T, U testee.X[T]] struct {
 	name itskit.Label
 	spec _I1_M0CallSpec[S, T, U]
 	effect func(arg0 S, arg1 T) ( U,  error)
 }
 
-func (b _I1_M0Behaviour[S, T, U]) Mock(t interface { Error(...any) }) func(arg0 S, arg1 T) ( U,  error) {
+func (b I1_M0Behaviour[S, T, U]) Mock(t interface { Error(...any) }) func(arg0 S, arg1 T) ( U,  error) {
 	return func (
 		
 		arg0 S,
@@ -809,7 +809,7 @@ func (c _I1_M0Call[S, T, U]) ThenReturn(
 
 	ret1 error,
 
-)_I1_M0Behaviour[S, T, U] {
+) I1_M0Behaviour[S, T, U] {
 	return c.ThenEffect(func(
 		
 		S,
@@ -828,8 +828,8 @@ func (c _I1_M0Call[S, T, U]) ThenReturn(
 	})
 }
 
-func (c _I1_M0Call[S, T, U]) ThenEffect(effect func(arg0 S, arg1 T) ( U,  error)) _I1_M0Behaviour[S, T, U] {
-	return _I1_M0Behaviour[S, T, U] {
+func (c _I1_M0Call[S, T, U]) ThenEffect(effect func(arg0 S, arg1 T) ( U,  error)) I1_M0Behaviour[S, T, U] {
+	return I1_M0Behaviour[S, T, U] {
 		name: c.name,
 		spec: c.spec,
 		effect: effect,
@@ -881,13 +881,13 @@ func NewI1_M1Call[S u_sub.T](
 	}
 }
 
-type _I1_M1Behaviour [S u_sub.T] struct {
+type I1_M1Behaviour [S u_sub.T] struct {
 	name itskit.Label
 	spec _I1_M1CallSpec[S]
 	effect func(arg0 S)
 }
 
-func (b _I1_M1Behaviour[S]) Mock(t interface { Error(...any) }) func(arg0 S) {
+func (b I1_M1Behaviour[S]) Mock(t interface { Error(...any) }) func(arg0 S) {
 	return func (
 		
 		arg0 S,
@@ -928,7 +928,7 @@ func (b _I1_M1Behaviour[S]) Mock(t interface { Error(...any) }) func(arg0 S) {
 
 func (c _I1_M1Call[S]) ThenReturn(
 
-)_I1_M1Behaviour[S] {
+) I1_M1Behaviour[S] {
 	return c.ThenEffect(func(
 		
 		S,
@@ -939,8 +939,8 @@ func (c _I1_M1Call[S]) ThenReturn(
 	})
 }
 
-func (c _I1_M1Call[S]) ThenEffect(effect func(arg0 S)) _I1_M1Behaviour[S] {
-	return _I1_M1Behaviour[S] {
+func (c _I1_M1Call[S]) ThenEffect(effect func(arg0 S)) I1_M1Behaviour[S] {
+	return I1_M1Behaviour[S] {
 		name: c.name,
 		spec: c.spec,
 		effect: effect,
@@ -987,13 +987,13 @@ func NewI1_M2Call[T u_sub.T, U testee.X[T]](
 	}
 }
 
-type _I1_M2Behaviour [T u_sub.T, U testee.X[T]] struct {
+type I1_M2Behaviour [T u_sub.T, U testee.X[T]] struct {
 	name itskit.Label
 	spec _I1_M2CallSpec[T, U]
 	effect func() U
 }
 
-func (b _I1_M2Behaviour[T, U]) Mock(t interface { Error(...any) }) func() U {
+func (b I1_M2Behaviour[T, U]) Mock(t interface { Error(...any) }) func() U {
 	return func (
 		
 		
@@ -1023,7 +1023,7 @@ func (c _I1_M2Call[T, U]) ThenReturn(
 
 	ret0 U,
 
-)_I1_M2Behaviour[T, U] {
+) I1_M2Behaviour[T, U] {
 	return c.ThenEffect(func(
 		
 		
@@ -1037,8 +1037,8 @@ func (c _I1_M2Call[T, U]) ThenReturn(
 	})
 }
 
-func (c _I1_M2Call[T, U]) ThenEffect(effect func() U) _I1_M2Behaviour[T, U] {
-	return _I1_M2Behaviour[T, U] {
+func (c _I1_M2Call[T, U]) ThenEffect(effect func() U) I1_M2Behaviour[T, U] {
+	return I1_M2Behaviour[T, U] {
 		name: c.name,
 		spec: c.spec,
 		effect: effect,
@@ -1094,13 +1094,13 @@ func NewI2_M0Call[T ~string](
 	}
 }
 
-type _I2_M0Behaviour [T ~string] struct {
+type I2_M0Behaviour [T ~string] struct {
 	name itskit.Label
 	spec _I2_M0CallSpec[T]
 	effect func(arg0 T) T
 }
 
-func (b _I2_M0Behaviour[T]) Mock(t interface { Error(...any) }) func(arg0 T) T {
+func (b I2_M0Behaviour[T]) Mock(t interface { Error(...any) }) func(arg0 T) T {
 	return func (
 		
 		arg0 T,
@@ -1146,7 +1146,7 @@ func (c _I2_M0Call[T]) ThenReturn(
 
 	ret0 T,
 
-)_I2_M0Behaviour[T] {
+) I2_M0Behaviour[T] {
 	return c.ThenEffect(func(
 		
 		T,
@@ -1162,8 +1162,8 @@ func (c _I2_M0Call[T]) ThenReturn(
 	})
 }
 
-func (c _I2_M0Call[T]) ThenEffect(effect func(arg0 T) T) _I2_M0Behaviour[T] {
-	return _I2_M0Behaviour[T] {
+func (c _I2_M0Call[T]) ThenEffect(effect func(arg0 T) T) I2_M0Behaviour[T] {
+	return I2_M0Behaviour[T] {
 		name: c.name,
 		spec: c.spec,
 		effect: effect,

@@ -8,9 +8,9 @@ import (
 	config "github.com/youta-t/its/config"
 	itskit "github.com/youta-t/its/itskit"
 	itsio "github.com/youta-t/its/itskit/itsio"
+	testee "github.com/youta-t/its/structer/example/internal/type_test"
 	u_sub1 "github.com/youta-t/its/structer/example/internal/type_test/sub1"
 	u_sub2 "github.com/youta-t/its/structer/example/internal/type_test/sub2"
-	testee "github.com/youta-t/its/structer/example/internal/type_test"
 	
 )
 

@@ -366,13 +366,13 @@ func New{{ .Name }}Call{{ .GenericExpr true }}(
 	}
 }
 
-type _{{ .Name }}Behaviour {{ .GenericExpr true }} struct {
+type {{ .Name }}Behaviour {{ .GenericExpr true }} struct {
 	name itskit.Label
 	spec _{{ .Name }}CallSpec{{ .GenericExpr false }}
 	effect {{ .Body.Expr }}
 }
 
-func (b _{{ .Name }}Behaviour{{ .GenericExpr false }}) Mock(t interface { Error(...any) }) {{ .Body.Expr }} {
+func (b {{ .Name }}Behaviour{{ .GenericExpr false }}) Mock(t interface { Error(...any) }) {{ .Body.Expr }} {
 	return func (
 		{{ range $idx, $p :=  .Body.Args }}
 		{{ printf "arg%d" $idx }} {{ $p.Expr }},
@@ -433,7 +433,7 @@ func (c _{{.Name}}Call{{ .GenericExpr false }}) ThenReturn(
 {{ range $idx, $p := .Body.Returns }}
 	{{printf "ret%d" $idx}} {{  $p.Expr }},
 {{end}}
-)_{{ .Name }}Behaviour{{ .GenericExpr false }} {
+) {{ .Name }}Behaviour{{ .GenericExpr false }} {
 	return c.ThenEffect(func(
 		{{range .Body.Args}}
 		{{ .Expr }},
@@ -449,8 +449,8 @@ func (c _{{.Name}}Call{{ .GenericExpr false }}) ThenReturn(
 	})
 }
 
-func (c _{{ .Name }}Call{{ .GenericExpr false }}) ThenEffect(effect {{ .Body.Expr }}) _{{ .Name }}Behaviour{{ .GenericExpr false }} {
-	return _{{ .Name }}Behaviour{{ .GenericExpr false }} {
+func (c _{{ .Name }}Call{{ .GenericExpr false }}) ThenEffect(effect {{ .Body.Expr }}) {{ .Name }}Behaviour{{ .GenericExpr false }} {
+	return {{ .Name }}Behaviour{{ .GenericExpr false }} {
 		name: c.name,
 		spec: c.spec,
 		effect: effect,
