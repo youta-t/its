@@ -449,3 +449,67 @@ func ExamplePointer() {
 	// ✘ /* got */ nil is not nil,		--- @ ./general_test.go:444
 	//     ✘ /* got */ ?? == /* want */ 42		--- @ ./general_test.go:444
 }
+
+func ExampleText_multibytes() {
+	// "風景" (純銀もざいく; 山村暮鳥): https://www.aozora.gr.jp/cards/000136/files/52348_42039.html
+	its.Text(`
+いちめんのなのはな
+いちめんのなのはな
+いちめんのなのはな
+いちめんのなのはな
+いちめんのなのはな
+いちめんのなのはな
+いちめんのなのはな
+かすかなるむぎぶえ
+いちめんのなのはな
+`).Match(`
+いちめんのなのはな
+いちめんのなのはな
+いちめんのなのはな
+いちめんのなのはな
+いちめんのなのはな
+いちめんのなのはな
+いちめんのなのはな
+ひばりのおしやべり
+いちめんのなのはな
+`).OrError(t)
+	// Output:
+	// ✘ (+ = got, - = want)		--- @ ./general_test.go:455
+	//       |
+	//       | いちめんのなのはな
+	//       | いちめんのなのはな
+	//       | いちめんのなのはな
+	//       | いちめんのなのはな
+	//       | いちめんのなのはな
+	//       | いちめんのなのはな
+	//       | いちめんのなのはな
+	//     - | かすかなるむぎぶえ
+	//     + | ひばりのおしやべり
+	//       | いちめんのなのはな
+}
+
+func ExampleText_ascii() {
+	// London Bridge Is Falling Down
+	its.Text(`
+Build it up with bricks and mortar,
+Bricks and mortar, bricks and mortar,
+Build it up with bricks and mortar,
+My fair lady.
+`).Match(`
+Build it up with iron and steel,
+Iron and steel, iron and steel,
+Build it up with iron and steel,
+My fair lady.
+`).OrError(t)
+	// Output:
+	//
+	// ✘ (+ = got, - = want)		--- @ ./general_test.go:493
+	//       |
+	//     - | Build it up with bricks and mortar,
+	//     + | Build it up with iron and steel,
+	//     - | Bricks and mortar, bricks and mortar,
+	//     + | Iron and steel, iron and steel,
+	//     - | Build it up with bricks and mortar,
+	//     + | Build it up with iron and steel,
+	//       | My fair lady.
+}
