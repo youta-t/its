@@ -8,8 +8,8 @@ import (
 	"github.com/youta-t/its"
 	"github.com/youta-t/its/config"
 	"github.com/youta-t/its/mocker/internal/example"
-	. "github.com/youta-t/its/mocker/internal/example/gen"
 	. "github.com/youta-t/its/mocker/internal/example/gen_mock"
+	. "github.com/youta-t/its/mocker/internal/example/gen_structer"
 	"github.com/youta-t/its/mocker/scenario"
 )
 
