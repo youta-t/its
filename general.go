@@ -8,6 +8,7 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/sergi/go-diff/diffmatchpatch"
 	"github.com/youta-t/its/itskit"
 	"github.com/youta-t/its/itskit/itsio"
 )
@@ -559,5 +560,92 @@ func Pointer[T any](m Matcher[T]) Matcher[*T] {
 			itskit.Got,
 		),
 		m: m,
+	}
+}
+
+type textMatcher struct {
+	label itskit.Label
+	want  string
+}
+
+func (tm textMatcher) Match(got string) itskit.Match {
+	dmp := diffmatchpatch.New()
+	var diff []diffmatchpatch.Diff
+	{
+		a, b, dmpStrings := dmp.DiffLinesToChars(tm.want, got)
+		diff = dmp.DiffMain(a, b, false)
+		diff = dmp.DiffCharsToLines(diff, dmpStrings)
+		diff = dmp.DiffCleanupSemantic(diff)
+	}
+
+	message := new(strings.Builder)
+	message.WriteString(tm.label.String())
+	message.WriteString("\n")
+
+	unmatch := 0
+	for _, d := range diff {
+		header := "      | "
+		switch d.Type {
+		case diffmatchpatch.DiffDelete:
+			unmatch += 1
+			header = "    - | "
+		case diffmatchpatch.DiffInsert:
+			unmatch += 1
+			header = "    + | "
+		default:
+		}
+
+		lines := strings.SplitAfter(d.Text, "\n")
+		if len(lines) == 1 {
+			if len(d.Text) == 0 {
+				continue
+			}
+			message.WriteString(header)
+			message.WriteString(d.Text)
+			message.WriteString("\n")
+			continue
+		}
+		for _, l := range lines[:len(lines)-1] {
+			if l == "\n" {
+				message.WriteString(header[:len(header)-1])
+				message.WriteString("\n")
+				continue
+			}
+			message.WriteString(header)
+			message.WriteString(l)
+		}
+	}
+
+	return itskit.NewMatch(
+		unmatch == 0,
+		message.String(),
+	)
+}
+
+func (tm textMatcher) Write(w itsio.Writer) error {
+	if err := tm.label.Write(w); err != nil {
+		return err
+	}
+	in := w.Indent()
+	if err := in.WriteStringln(tm.want); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (tm textMatcher) String() string {
+	return itskit.MatcherToString(tm)
+}
+
+// Text returns a matcher for a long text.
+//
+// When it get unmatch, it shows diff of text.
+func Text(want string) Matcher[string] {
+	cancel := itskit.SkipStack()
+	defer cancel()
+
+	return textMatcher{
+		label: itskit.NewLabelWithLocation("(+ = got, - = want)"),
+		want:  want,
 	}
 }
