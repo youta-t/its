@@ -8,7 +8,8 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/sergi/go-diff/diffmatchpatch"
+	"github.com/youta-t/its/internal/diff"
+	editorialgraph "github.com/youta-t/its/internal/editorial_graph"
 	"github.com/youta-t/its/itskit"
 	"github.com/youta-t/its/itskit/itsio"
 )
@@ -569,51 +570,47 @@ type textMatcher struct {
 }
 
 func (tm textMatcher) Match(got string) itskit.Match {
-	dmp := diffmatchpatch.New()
-	var diff []diffmatchpatch.Diff
-	{
-		a, b, dmpStrings := dmp.DiffLinesToChars(tm.want, got)
-		diff = dmp.DiffMain(a, b, false)
-		diff = dmp.DiffCharsToLines(diff, dmpStrings)
-		diff = dmp.DiffCleanupSemantic(diff)
-	}
+	ws := strings.SplitAfter(tm.want, "\n")
+	gs := strings.SplitAfter(got, "\n")
+
+	diffs := editorialgraph.New(
+		ws, gs,
+		func(s1, s2 string) (string, bool) {
+			return s1, s1 == s2
+		},
+		func(s string) string { return s },
+		func(s string) string { return s },
+	)
 
 	message := new(strings.Builder)
 	message.WriteString(tm.label.String())
 	message.WriteString("\n")
 
 	unmatch := 0
-	for _, d := range diff {
+	for _, d := range diffs {
 		header := "      | "
-		switch d.Type {
-		case diffmatchpatch.DiffDelete:
-			unmatch += 1
-			header = "    - | "
-		case diffmatchpatch.DiffInsert:
+		switch d.Mode {
+		case diff.Extra:
 			unmatch += 1
 			header = "    + | "
+		case diff.Missing:
+			unmatch += 1
+			header = "    - | "
 		default:
 		}
 
-		lines := strings.SplitAfter(d.Text, "\n")
-		if len(lines) == 1 {
-			if len(d.Text) == 0 {
-				continue
-			}
-			message.WriteString(header)
-			message.WriteString(d.Text)
+		val := d.Value
+		if len(val) == 0 {
+			message.WriteString(header[:len(header)-1])
 			message.WriteString("\n")
 			continue
-		}
-		for _, l := range lines[:len(lines)-1] {
-			if l == "\n" {
-				message.WriteString(header[:len(header)-1])
-				message.WriteString("\n")
-				continue
-			}
+		} else if val == "\n" {
+			message.WriteString(header[:len(header)-1])
+		} else {
 			message.WriteString(header)
-			message.WriteString(l)
 		}
+
+		message.WriteString(d.Value)
 	}
 
 	return itskit.NewMatch(
