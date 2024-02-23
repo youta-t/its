@@ -6,7 +6,24 @@ import (
 	"github.com/youta-t/its/itskit"
 )
 
-func Compare[T any](values []T, specs []itskit.Matcher[T]) []diff.Diff {
+func CompareWithMatcher[T any](values []T, specs []itskit.Matcher[T]) []diff.Diff[itskit.Match] {
+	return Compare[T, itskit.Matcher[T], itskit.Match](
+		values, specs,
+		func(t T, m itskit.Matcher[T]) (itskit.Match, bool) {
+			match := m.Match(t)
+			return match, match.Ok()
+		},
+		diff.ExtraMatch[T],
+		diff.MissingMatch[T],
+	)
+}
+
+func Compare[A, B, C any](
+	values []A, specs []B,
+	pred func(A, B) (C, bool),
+	toExtra func(A) C,
+	toMissing func(B) C,
+) []diff.Diff[C] {
 	// Spec may match 0 or more items in values, thus can match with many.
 	// Even if in such case, we would like to do better pairing,
 	// so, we need "maximum matching in a bipartite graph".
@@ -31,18 +48,18 @@ func Compare[T any](values []T, specs []itskit.Matcher[T]) []diff.Diff {
 	// This graph is bipartite,
 	// and there are no edges like value -> value or spec -> spec,
 	// our adjcency matrices are [len(value)][len(spec)]int.
-	matches := map[[2]int]itskit.Match{}
+	edges := map[[2]int]C{}
 	value_spec := make2D[int](len(values), len(specs))
 	for i_value := range values {
 		v := values[i_value]
 		for i_spec := range specs {
 			s := specs[i_spec]
-			m := s.Match(v)
-			if !m.Ok() {
+			c, ok := pred(v, s)
+			if !ok {
 				continue
 			}
 			value_spec[i_value][i_spec] = 1
-			matches[[2]int{i_value, i_spec}] = m
+			edges[[2]int{i_value, i_spec}] = c
 		}
 	}
 
@@ -162,12 +179,12 @@ VALUE:
 		s_node[i_spec] = struct{}{}
 	}
 
-	ret := []diff.Diff{}
+	ret := []diff.Diff[C]{}
 	// matched nodes
 	for i_spec := range spec_value {
 		for i_value, capacity := range spec_value[i_spec] {
 			if 0 < capacity {
-				ret = append(ret, diff.OkItem(matches[[2]int{i_value, i_spec}]))
+				ret = append(ret, diff.OkItem(edges[[2]int{i_value, i_spec}]))
 				delete(v_node, i_value)
 				delete(s_node, i_spec)
 				break
@@ -176,10 +193,10 @@ VALUE:
 	}
 	// unmatched values
 	for i_value := range v_node {
-		ret = append(ret, diff.ExtraItem(values[i_value]))
+		ret = append(ret, diff.ExtraItem(toExtra(values[i_value])))
 	}
 	for i_spec := range s_node {
-		ret = append(ret, diff.MissingItem[T](specs[i_spec]))
+		ret = append(ret, diff.MissingItem(toMissing(specs[i_spec])))
 	}
 	return ret
 }

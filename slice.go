@@ -70,13 +70,13 @@ func (eq sliceMatcher[T]) Match(actual []T) itskit.Match {
 		m[i] = s
 	}
 
-	diffs := editorialgraph.New[T](m, actual)
+	diffs := editorialgraph.NewWithMatcher(m, actual)
 	nMiss := 0
 	nExtra := 0
 	submatches := []itskit.Match{}
 
 	for _, d := range diffs {
-		submatches = append(submatches, d.Match)
+		submatches = append(submatches, d.Value)
 		switch d.Mode {
 		case diff.Missing:
 			nMiss += 1
@@ -121,12 +121,12 @@ func (ss sliceUnorderedMatcher[T]) Match(got []T) itskit.Match {
 	for i, m := range ss.matchers {
 		ms[i] = m
 	}
-	diffs := set.Compare(got, ms)
+	diffs := set.CompareWithMatcher(got, ms)
 	matches := []itskit.Match{}
 	extra := 0
 	miss := 0
 	for _, d := range diffs {
-		matches = append(matches, d.Match)
+		matches = append(matches, d.Value)
 		switch d.Mode {
 		case diff.Missing:
 			miss += 1
@@ -188,11 +188,11 @@ func (ss sliceUnorderedContainingMatcher[T]) Match(actual []T) itskit.Match {
 	for i, m := range ss.matchers {
 		ms[i] = m
 	}
-	diffs := set.Compare(actual, ms)
+	diffs := set.CompareWithMatcher(actual, ms)
 	matches := []itskit.Match{}
 	miss := 0
 	for _, d := range diffs {
-		matches = append(matches, d.Match)
+		matches = append(matches, d.Value)
 		switch d.Mode {
 		case diff.Missing:
 			miss += 1
