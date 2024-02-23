@@ -1,6 +1,7 @@
 package set_test
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/youta-t/its/internal/diff"
@@ -39,15 +40,64 @@ func IsPrime() itskit.Matcher[int] {
 	)
 }
 
+func cutLast(s string, sep string) string {
+	i := strings.LastIndex(s, sep)
+	if i < 0 {
+		return s
+	}
+	return s[:i]
+}
+
+// ItsDiff checks equality between Matches, roughly.
+func ItsDiff(want diff.Diff[itskit.Match]) itskit.Matcher[diff.Diff[itskit.Match]] {
+	cancel := itskit.SkipStack()
+	defer cancel()
+
+	return itskit.SimpleMatcher(
+		func(got diff.Diff[itskit.Match]) bool {
+			if want.Mode != got.Mode {
+				return false
+			}
+
+			w := cutLast(want.Value.String(), "@")
+			a := cutLast(got.Value.String(), "@")
+			return w == a
+		},
+		"%s likes %s",
+		itskit.Got, itskit.Want(want),
+	)
+}
+
+func ItsMissingDiff[T any](matcher itskit.Matcher[T]) itskit.Matcher[diff.Diff[itskit.Match]] {
+	cancel := itskit.SkipStack()
+	defer cancel()
+
+	return ItsDiff(diff.MissingItem(diff.MissingMatch(matcher)))
+}
+
+func ItsExtraDiff[T any](v T) itskit.Matcher[diff.Diff[itskit.Match]] {
+	cancel := itskit.SkipStack()
+	defer cancel()
+
+	return ItsDiff(diff.ExtraItem(diff.ExtraMatch(v)))
+}
+
+func ItsOkDiff(match itskit.Match) itskit.Matcher[diff.Diff[itskit.Match]] {
+	cancel := itskit.SkipStack()
+	defer cancel()
+
+	return ItsDiff(diff.OkItem(match))
+}
+
 func TestCompair(t *testing.T) {
 	type When struct {
 		values []int
 		specs  []itskit.Matcher[int]
 	}
-	type Then []itskit.Matcher[diff.Diff]
+	type Then []itskit.Matcher[diff.Diff[itskit.Match]]
 	theory := func(when When, then Then) func(*testing.T) {
 		return func(t *testing.T) {
-			diffs := set.Compare[int](when.values, when.specs)
+			diffs := set.CompareWithMatcher[int](when.values, when.specs)
 		SPEC:
 			for _, spec := range then {
 				for _, d := range diffs {
@@ -67,7 +117,7 @@ func TestCompair(t *testing.T) {
 						continue DIFF
 					}
 				}
-				t.Errorf("missing spec for diff: %s", d)
+				t.Errorf("missing spec for diff: %+v", d)
 			}
 		}
 	}
@@ -89,16 +139,16 @@ func TestCompair(t *testing.T) {
 			},
 		},
 		Then{
-			diff.IsOk(IsOdd().Match(1)),
-			diff.IsOk(IsPrime().Match(2)),
-			diff.IsOk(IsPrime().Match(3)),
-			diff.IsOk(IsEven().Match(4)),
-			diff.IsOk(IsPrime().Match(5)),
-			diff.IsOk(IsEven().Match(6)),
-			diff.IsOk(IsPrime().Match(7)),
-			diff.IsOk(IsEven().Match(8)),
-			diff.IsOk(IsOdd().Match(9)),
-			diff.IsOk(IsEven().Match(10)),
+			ItsOkDiff(IsOdd().Match(1)),
+			ItsOkDiff(IsPrime().Match(2)),
+			ItsOkDiff(IsPrime().Match(3)),
+			ItsOkDiff(IsEven().Match(4)),
+			ItsOkDiff(IsPrime().Match(5)),
+			ItsOkDiff(IsEven().Match(6)),
+			ItsOkDiff(IsPrime().Match(7)),
+			ItsOkDiff(IsEven().Match(8)),
+			ItsOkDiff(IsOdd().Match(9)),
+			ItsOkDiff(IsEven().Match(10)),
 		},
 	))
 
@@ -119,16 +169,16 @@ func TestCompair(t *testing.T) {
 			},
 		},
 		Then{
-			diff.IsOk(IsOdd().Match(1)),
-			diff.IsOk(IsPrime().Match(2)),
-			diff.IsOk(IsPrime().Match(3)),
-			diff.IsOk(IsEven().Match(4)),
-			diff.IsOk(IsPrime().Match(5)),
-			diff.IsOk(IsEven().Match(6)),
-			diff.IsOk(IsPrime().Match(7)),
-			diff.IsOk(IsEven().Match(8)),
-			diff.IsOk(IsOdd().Match(9)),
-			diff.IsOk(IsEven().Match(10)),
+			ItsOkDiff(IsOdd().Match(1)),
+			ItsOkDiff(IsPrime().Match(2)),
+			ItsOkDiff(IsPrime().Match(3)),
+			ItsOkDiff(IsEven().Match(4)),
+			ItsOkDiff(IsPrime().Match(5)),
+			ItsOkDiff(IsEven().Match(6)),
+			ItsOkDiff(IsPrime().Match(7)),
+			ItsOkDiff(IsEven().Match(8)),
+			ItsOkDiff(IsOdd().Match(9)),
+			ItsOkDiff(IsEven().Match(10)),
 		},
 	))
 
@@ -149,16 +199,16 @@ func TestCompair(t *testing.T) {
 			},
 		},
 		Then{
-			diff.IsExtra(1),
-			diff.IsOk(IsPrime().Match(2)),
-			diff.IsOk(IsPrime().Match(3)),
-			diff.IsOk(IsEven().Match(4)),
-			diff.IsOk(IsPrime().Match(5)),
-			diff.IsOk(IsEven().Match(6)),
-			diff.IsOk(IsPrime().Match(7)),
-			diff.IsOk(IsEven().Match(8)),
-			diff.IsExtra(9),
-			diff.IsOk(IsEven().Match(10)),
+			ItsExtraDiff(1),
+			ItsOkDiff(IsPrime().Match(2)),
+			ItsOkDiff(IsPrime().Match(3)),
+			ItsOkDiff(IsEven().Match(4)),
+			ItsOkDiff(IsPrime().Match(5)),
+			ItsOkDiff(IsEven().Match(6)),
+			ItsOkDiff(IsPrime().Match(7)),
+			ItsOkDiff(IsEven().Match(8)),
+			ItsExtraDiff(9),
+			ItsOkDiff(IsEven().Match(10)),
 		},
 	))
 
@@ -182,18 +232,18 @@ func TestCompair(t *testing.T) {
 			},
 		},
 		Then{
-			diff.IsOk(IsOdd().Match(1)),
-			diff.IsOk(IsPrime().Match(2)),
-			diff.IsOk(IsPrime().Match(3)),
-			diff.IsOk(IsEven().Match(4)),
-			diff.IsOk(IsPrime().Match(5)),
-			diff.IsOk(IsEven().Match(6)),
-			diff.IsOk(IsPrime().Match(7)),
-			diff.IsOk(IsEven().Match(8)),
-			diff.IsOk(IsOdd().Match(9)),
-			diff.IsOk(IsEven().Match(10)),
-			diff.IsMissing(IsPrime()),
-			diff.IsMissing(IsPrime()),
+			ItsOkDiff(IsOdd().Match(1)),
+			ItsOkDiff(IsPrime().Match(2)),
+			ItsOkDiff(IsPrime().Match(3)),
+			ItsOkDiff(IsEven().Match(4)),
+			ItsOkDiff(IsPrime().Match(5)),
+			ItsOkDiff(IsEven().Match(6)),
+			ItsOkDiff(IsPrime().Match(7)),
+			ItsOkDiff(IsEven().Match(8)),
+			ItsOkDiff(IsOdd().Match(9)),
+			ItsOkDiff(IsEven().Match(10)),
+			ItsMissingDiff(IsPrime()),
+			ItsMissingDiff(IsPrime()),
 		},
 	))
 
@@ -217,18 +267,18 @@ func TestCompair(t *testing.T) {
 			},
 		},
 		Then{
-			diff.IsExtra(1),
-			diff.IsOk(IsPrime().Match(2)),
-			diff.IsOk(IsPrime().Match(3)),
-			diff.IsOk(IsEven().Match(4)),
-			diff.IsOk(IsPrime().Match(5)),
-			diff.IsOk(IsEven().Match(6)),
-			diff.IsOk(IsPrime().Match(7)),
-			diff.IsOk(IsEven().Match(8)),
-			diff.IsExtra(9),
-			diff.IsOk(IsEven().Match(10)),
-			diff.IsMissing(IsPrime()),
-			diff.IsMissing(IsPrime()),
+			ItsExtraDiff(1),
+			ItsOkDiff(IsPrime().Match(2)),
+			ItsOkDiff(IsPrime().Match(3)),
+			ItsOkDiff(IsEven().Match(4)),
+			ItsOkDiff(IsPrime().Match(5)),
+			ItsOkDiff(IsEven().Match(6)),
+			ItsOkDiff(IsPrime().Match(7)),
+			ItsOkDiff(IsEven().Match(8)),
+			ItsExtraDiff(9),
+			ItsOkDiff(IsEven().Match(10)),
+			ItsMissingDiff(IsPrime()),
+			ItsMissingDiff(IsPrime()),
 		},
 	))
 }

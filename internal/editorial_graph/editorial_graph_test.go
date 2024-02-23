@@ -10,18 +10,67 @@ import (
 	"github.com/youta-t/its/itskit"
 )
 
+func cutLast(s string, sep string) string {
+	i := strings.LastIndex(s, sep)
+	if i < 0 {
+		return s
+	}
+	return s[:i]
+}
+
+// ItsDiff checks equality between Matches, roughly.
+func ItsDiff(want diff.Diff[itskit.Match]) itskit.Matcher[diff.Diff[itskit.Match]] {
+	cancel := itskit.SkipStack()
+	defer cancel()
+
+	return itskit.SimpleMatcher(
+		func(got diff.Diff[itskit.Match]) bool {
+			if want.Mode != got.Mode {
+				return false
+			}
+
+			w := cutLast(want.Value.String(), "@")
+			a := cutLast(got.Value.String(), "@")
+			return w == a
+		},
+		"%s likes %s",
+		itskit.Got, itskit.Want(want),
+	)
+}
+
+func ItsMissingDiff[T any](matcher itskit.Matcher[T]) itskit.Matcher[diff.Diff[itskit.Match]] {
+	cancel := itskit.SkipStack()
+	defer cancel()
+
+	return ItsDiff(diff.MissingItem(diff.MissingMatch(matcher)))
+}
+
+func ItsExtraDiff[T any](v T) itskit.Matcher[diff.Diff[itskit.Match]] {
+	cancel := itskit.SkipStack()
+	defer cancel()
+
+	return ItsDiff(diff.ExtraItem(diff.ExtraMatch(v)))
+}
+
+func ItsOkDiff(match itskit.Match) itskit.Matcher[diff.Diff[itskit.Match]] {
+	cancel := itskit.SkipStack()
+	defer cancel()
+
+	return ItsDiff(diff.OkItem(match))
+}
+
 func TestEditorialGraph(t *testing.T) {
 	type When struct {
 		values []string
 		specs  []itskit.Matcher[string]
 	}
 	type Then struct {
-		matches []itskit.Matcher[diff.Diff]
+		matches []itskit.Matcher[diff.Diff[itskit.Match]]
 	}
 
 	theory := func(when When, then Then) func(t *testing.T) {
 		return func(t *testing.T) {
-			actual := editorialgraph.New(when.specs, when.values)
+			actual := editorialgraph.NewWithMatcher(when.specs, when.values)
 
 			if a, x := len(actual), len(then.matches); a != x {
 				t.Fatalf("len: %d, (want: %d)", a, x)
@@ -42,7 +91,7 @@ func TestEditorialGraph(t *testing.T) {
 			specs:  []itskit.Matcher[string]{},
 		},
 		Then{
-			matches: []itskit.Matcher[diff.Diff]{},
+			matches: []itskit.Matcher[diff.Diff[itskit.Match]]{},
 		},
 	))
 
@@ -54,8 +103,8 @@ func TestEditorialGraph(t *testing.T) {
 			},
 		},
 		Then{
-			matches: []itskit.Matcher[diff.Diff]{
-				diff.IsMissing(its.EqEq("a")),
+			matches: []itskit.Matcher[diff.Diff[itskit.Match]]{
+				ItsMissingDiff(its.EqEq("a")),
 			},
 		},
 	))
@@ -66,8 +115,8 @@ func TestEditorialGraph(t *testing.T) {
 			specs:  []itskit.Matcher[string]{},
 		},
 		Then{
-			matches: []itskit.Matcher[diff.Diff]{
-				diff.IsExtra("a"),
+			matches: []itskit.Matcher[diff.Diff[itskit.Match]]{
+				ItsExtraDiff("a"),
 			},
 		},
 	))
@@ -86,14 +135,14 @@ func TestEditorialGraph(t *testing.T) {
 			},
 		},
 		Then{
-			matches: []itskit.Matcher[diff.Diff]{
-				diff.IsOk(its.EqEq("a").Match("a")),
-				diff.IsOk(its.EqEq("b").Match("b")),
-				diff.IsOk(its.EqEq("c").Match("c")),
-				diff.IsOk(its.EqEq("d").Match("d")),
-				diff.IsOk(its.EqEq("e").Match("e")),
-				diff.IsOk(its.EqEq("f").Match("f")),
-				diff.IsOk(its.EqEq("g").Match("g")),
+			matches: []itskit.Matcher[diff.Diff[itskit.Match]]{
+				ItsOkDiff(its.EqEq("a").Match("a")),
+				ItsOkDiff(its.EqEq("b").Match("b")),
+				ItsOkDiff(its.EqEq("c").Match("c")),
+				ItsOkDiff(its.EqEq("d").Match("d")),
+				ItsOkDiff(its.EqEq("e").Match("e")),
+				ItsOkDiff(its.EqEq("f").Match("f")),
+				ItsOkDiff(its.EqEq("g").Match("g")),
 			},
 		},
 	))
@@ -112,15 +161,15 @@ func TestEditorialGraph(t *testing.T) {
 			},
 		},
 		Then{
-			matches: []itskit.Matcher[diff.Diff]{
-				diff.IsOk(its.EqEq("a").Match("a")),
-				diff.IsOk(its.EqEq("b").Match("b")),
-				diff.IsOk(its.EqEq("c").Match("c")),
-				diff.IsExtra("!"),
-				diff.IsOk(its.EqEq("d").Match("d")),
-				diff.IsOk(its.EqEq("e").Match("e")),
-				diff.IsOk(its.EqEq("f").Match("f")),
-				diff.IsOk(its.EqEq("g").Match("g")),
+			matches: []itskit.Matcher[diff.Diff[itskit.Match]]{
+				ItsOkDiff(its.EqEq("a").Match("a")),
+				ItsOkDiff(its.EqEq("b").Match("b")),
+				ItsOkDiff(its.EqEq("c").Match("c")),
+				ItsExtraDiff("!"),
+				ItsOkDiff(its.EqEq("d").Match("d")),
+				ItsOkDiff(its.EqEq("e").Match("e")),
+				ItsOkDiff(its.EqEq("f").Match("f")),
+				ItsOkDiff(its.EqEq("g").Match("g")),
 			},
 		},
 	))
@@ -139,14 +188,14 @@ func TestEditorialGraph(t *testing.T) {
 			},
 		},
 		Then{
-			matches: []itskit.Matcher[diff.Diff]{
-				diff.IsOk(its.EqEq("a").Match("a")),
-				diff.IsOk(its.EqEq("b").Match("b")),
-				diff.IsOk(its.EqEq("c").Match("c")),
-				diff.IsMissing(its.EqEq("d")),
-				diff.IsOk(its.EqEq("e").Match("e")),
-				diff.IsOk(its.EqEq("f").Match("f")),
-				diff.IsOk(its.EqEq("g").Match("g")),
+			matches: []itskit.Matcher[diff.Diff[itskit.Match]]{
+				ItsOkDiff(its.EqEq("a").Match("a")),
+				ItsOkDiff(its.EqEq("b").Match("b")),
+				ItsOkDiff(its.EqEq("c").Match("c")),
+				ItsMissingDiff(its.EqEq("d")),
+				ItsOkDiff(its.EqEq("e").Match("e")),
+				ItsOkDiff(its.EqEq("f").Match("f")),
+				ItsOkDiff(its.EqEq("g").Match("g")),
 			},
 		},
 	))
@@ -165,16 +214,16 @@ func TestEditorialGraph(t *testing.T) {
 			},
 		},
 		Then{
-			matches: []itskit.Matcher[diff.Diff]{
-				diff.IsOk(its.EqEq("a").Match("a")),
-				diff.IsExtra("a"),
-				diff.IsOk(its.EqEq("b").Match("b")),
-				diff.IsOk(its.EqEq("c").Match("c")),
-				diff.IsMissing(its.EqEq("d")),
-				diff.IsExtra("x"),
-				diff.IsOk(its.EqEq("e").Match("e")),
-				diff.IsOk(its.EqEq("f").Match("f")),
-				diff.IsMissing(its.EqEq("g")),
+			matches: []itskit.Matcher[diff.Diff[itskit.Match]]{
+				ItsOkDiff(its.EqEq("a").Match("a")),
+				ItsExtraDiff("a"),
+				ItsOkDiff(its.EqEq("b").Match("b")),
+				ItsOkDiff(its.EqEq("c").Match("c")),
+				ItsMissingDiff(its.EqEq("d")),
+				ItsExtraDiff("x"),
+				ItsOkDiff(its.EqEq("e").Match("e")),
+				ItsOkDiff(its.EqEq("f").Match("f")),
+				ItsMissingDiff(its.EqEq("g")),
 			},
 		},
 	))
