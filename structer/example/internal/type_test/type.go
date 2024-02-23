@@ -1,5 +1,5 @@
 //go:generate go run github.com/youta-t/its/structer
-//go:generate gofmt -w ./gen/type.go
+//go:generate gofmt -w ./gen_structer/type.go
 package types
 
 import (

@@ -1,6 +1,7 @@
 // Code generated -- DO NOT EDIT
 
 package gen_structer
+
 import (
 	"strings"
 
@@ -9,13 +10,10 @@ import (
 	itskit "github.com/youta-t/its/itskit"
 	itsio "github.com/youta-t/its/itskit/itsio"
 	testee "github.com/youta-t/its/structer/example/internal/type_test/sub2"
-	
 )
-
 
 type Sub2Spec struct {
 	IntField its.Matcher[int]
-	
 }
 
 type _Sub2Matcher struct {
@@ -28,7 +26,7 @@ func ItsSub2(want Sub2Spec) its.Matcher[testee.Sub2] {
 	defer cancel()
 
 	sub := []its.Matcher[testee.Sub2]{}
-	
+
 	{
 		matcher := want.IntField
 		if matcher == nil {
@@ -47,10 +45,9 @@ func ItsSub2(want Sub2Spec) its.Matcher[testee.Sub2] {
 			),
 		)
 	}
-	
 
 	return _Sub2Matcher{
-		label: itskit.NewLabelWithLocation("type Sub2:"),
+		label:  itskit.NewLabelWithLocation("type Sub2:"),
 		fields: sub,
 	}
 }
@@ -83,4 +80,3 @@ func (m _Sub2Matcher) String() string {
 	m.Write(w)
 	return sb.String()
 }
-
