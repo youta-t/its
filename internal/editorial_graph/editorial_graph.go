@@ -6,8 +6,8 @@ import (
 )
 
 type position struct {
-	posFrom int
 	posTo   int
+	posFrom int
 }
 
 type diffTrace[T any] struct {
@@ -16,16 +16,16 @@ type diffTrace[T any] struct {
 }
 
 func NewWithMatcher[A any](
-	ss []itskit.Matcher[A], as []A,
+	as []A, ss []itskit.Matcher[A],
 ) []diff.Diff[itskit.Match] {
-	return New[itskit.Matcher[A], A, itskit.Match](
-		ss, as,
-		func(m itskit.Matcher[A], a A) (itskit.Match, bool) {
+	return New(
+		as, ss,
+		func(a A, m itskit.Matcher[A]) (itskit.Match, bool) {
 			match := m.Match(a)
 			return match, match.Ok()
 		},
-		diff.MissingMatch[A],
 		diff.ExtraMatch[A],
+		diff.MissingMatch[A],
 	)
 }
 
@@ -33,28 +33,28 @@ func New[A, B, C any](
 	from []A,
 	to []B,
 	pred func(A, B) (C, bool),
-	toInsert func(A) C,
-	toDelete func(B) C,
+	toDelete func(A) C,
+	toInsert func(B) C,
 ) []diff.Diff[C] {
 	// based Myers Algorithm.
-	if len(from) == 0 && len(to) == 0 {
+	if len(to) == 0 && len(from) == 0 {
 		return []diff.Diff[C]{}
 	}
 
 	head := []diffTrace[C]{
 		{
-			p:     position{posFrom: -1, posTo: -1},
+			p:     position{posTo: -1, posFrom: -1},
 			trace: []diff.Diff[C]{},
 		},
 	}
 	visit := map[position]struct{}{}
-	centinel := position{posFrom: len(from) - 1, posTo: len(to) - 1}
+	centinel := position{posTo: len(to) - 1, posFrom: len(from) - 1}
 
 	for {
 		{
 			newHead := []diffTrace[C]{}
 			for _, h := range head[:] {
-				for h.p.posFrom < centinel.posFrom && h.p.posTo < centinel.posTo {
+				for h.p.posTo < centinel.posTo && h.p.posFrom < centinel.posFrom {
 					p := position{posFrom: h.p.posFrom + 1, posTo: h.p.posTo + 1}
 					if _, ok := visit[p]; ok {
 						goto SKIP
@@ -80,8 +80,8 @@ func New[A, B, C any](
 
 		newHead := []diffTrace[C]{}
 		for _, h := range head {
-			if h.p.posFrom < centinel.posFrom {
-				p := position{posFrom: h.p.posFrom + 1, posTo: h.p.posTo}
+			if h.p.posTo < centinel.posTo {
+				p := position{posTo: h.p.posTo + 1, posFrom: h.p.posFrom}
 				if _, ok := visit[p]; !ok {
 					visit[p] = struct{}{}
 
@@ -89,7 +89,7 @@ func New[A, B, C any](
 						p: p,
 						trace: append(
 							sliceclone(h.trace),
-							diff.MissingItem[C](toInsert(from[p.posFrom])),
+							diff.MissingItem(toInsert(to[p.posTo])),
 						),
 					}
 					if hh.p == centinel {
@@ -99,8 +99,8 @@ func New[A, B, C any](
 				}
 			}
 
-			if h.p.posTo < centinel.posTo {
-				p := position{posFrom: h.p.posFrom, posTo: h.p.posTo + 1}
+			if h.p.posFrom < centinel.posFrom {
+				p := position{posTo: h.p.posTo, posFrom: h.p.posFrom + 1}
 				if _, ok := visit[p]; !ok {
 					visit[p] = struct{}{}
 
@@ -108,7 +108,7 @@ func New[A, B, C any](
 						p: p,
 						trace: append(
 							sliceclone(h.trace),
-							diff.ExtraItem(toDelete(to[p.posTo])),
+							diff.ExtraItem(toDelete(from[p.posFrom])),
 						),
 					}
 					if hh.p == centinel {
