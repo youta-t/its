@@ -70,7 +70,7 @@ func (eq sliceMatcher[T]) Match(actual []T) itskit.Match {
 		m[i] = s
 	}
 
-	diffs := editorialgraph.NewWithMatcher(m, actual)
+	diffs := editorialgraph.NewWithMatcher(actual, m)
 	nMiss := 0
 	nExtra := 0
 	submatches := []itskit.Match{}

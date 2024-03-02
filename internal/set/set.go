@@ -19,7 +19,7 @@ func CompareWithMatcher[T any](values []T, specs []itskit.Matcher[T]) []diff.Dif
 }
 
 func Compare[A, B, C any](
-	values []A, specs []B,
+	from []A, to []B,
 	pred func(A, B) (C, bool),
 	toExtra func(A) C,
 	toMissing func(B) C,
@@ -49,11 +49,11 @@ func Compare[A, B, C any](
 	// and there are no edges like value -> value or spec -> spec,
 	// our adjcency matrices are [len(value)][len(spec)]int.
 	edges := map[[2]int]C{}
-	value_spec := make2D[int](len(values), len(specs))
-	for i_value := range values {
-		v := values[i_value]
-		for i_spec := range specs {
-			s := specs[i_spec]
+	value_spec := make2D[int](len(from), len(to))
+	for i_value := range from {
+		v := from[i_value]
+		for i_spec := range to {
+			s := to[i_spec]
 			c, ok := pred(v, s)
 			if !ok {
 				continue
@@ -68,11 +68,11 @@ func Compare[A, B, C any](
 	// To make residual graph, prepare reversed edges for value -> spec.
 	//
 	// At the beggining, all edges are zero.
-	spec_value := make2D[int](len(specs), len(values))
+	spec_value := make2D[int](len(to), len(from))
 
 	// if there are key, the spec have capacity outgoing to the sink.
 	spec_sink := map[int]struct{}{}
-	for i := range specs {
+	for i := range to {
 		spec_sink[i] = struct{}{}
 	}
 
@@ -170,13 +170,13 @@ VALUE:
 
 	// step3. we know maximum matching,
 	// Matched pair are edge with 0 < capacity in spec->value.
-	v_node := map[int]struct{}{}
-	for i_value := range values {
-		v_node[i_value] = struct{}{}
+	from_node := map[int]struct{}{}
+	for i_value := range from {
+		from_node[i_value] = struct{}{}
 	}
-	s_node := map[int]struct{}{}
-	for i_spec := range specs {
-		s_node[i_spec] = struct{}{}
+	to_node := map[int]struct{}{}
+	for i_spec := range to {
+		to_node[i_spec] = struct{}{}
 	}
 
 	ret := []diff.Diff[C]{}
@@ -185,18 +185,18 @@ VALUE:
 		for i_value, capacity := range spec_value[i_spec] {
 			if 0 < capacity {
 				ret = append(ret, diff.OkItem(edges[[2]int{i_value, i_spec}]))
-				delete(v_node, i_value)
-				delete(s_node, i_spec)
+				delete(from_node, i_value)
+				delete(to_node, i_spec)
 				break
 			}
 		}
 	}
 	// unmatched values
-	for i_value := range v_node {
-		ret = append(ret, diff.ExtraItem(toExtra(values[i_value])))
+	for i_value := range from_node {
+		ret = append(ret, diff.ExtraItem(toExtra(from[i_value])))
 	}
-	for i_spec := range s_node {
-		ret = append(ret, diff.MissingItem(toMissing(specs[i_spec])))
+	for i_spec := range to_node {
+		ret = append(ret, diff.MissingItem(toMissing(to[i_spec])))
 	}
 	return ret
 }

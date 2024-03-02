@@ -570,11 +570,11 @@ type textMatcher struct {
 }
 
 func (tm textMatcher) Match(got string) itskit.Match {
-	ws := strings.SplitAfter(tm.want, "\n")
 	gs := strings.SplitAfter(got, "\n")
+	ws := strings.SplitAfter(tm.want, "\n")
 
 	diffs := editorialgraph.New(
-		ws, gs,
+		gs, ws,
 		func(s1, s2 string) (string, bool) {
 			return s1, s1 == s2
 		},
