@@ -10,10 +10,17 @@ import (
 	"github.com/youta-t/its"
 )
 
-func ExampleEqEq() {
+func ExampleEqEq_ok() {
 	its.EqEq(42).Match(42).OrError(t) // pass. so no messages are output
-	its.EqEq(42).Match(49).OrError(t) // fail!
+}
 
+func ExampleEqEq_ng() {
+	its.EqEq(42).Match(49).OrError(t) // fail!
+	// Output:
+	// ✘ /* got */ 49 == /* want */ 42		--- @ ./general_test.go:18
+}
+
+func ExampleEqEq_ng_non_primitive_type() {
 	type MyType struct {
 		Foo int
 	}
@@ -21,130 +28,126 @@ func ExampleEqEq() {
 	its.EqEq(MyType{Foo: 42}).Match(MyType{Foo: 24}).OrError(t) // also fail!
 
 	// Output:
-	// ✘ /* got */ 49 == /* want */ 42		--- @ ./general_test.go:15
-	//
-	// ✘ /* got */ {Foo:24} == /* want */ {Foo:42}		--- @ ./general_test.go:21
+	// ✘ /* got */ {Foo:24} == /* want */ {Foo:42}		--- @ ./general_test.go:28
 }
 
-func ExampleEqEqPtr() {
-	a := 42
-	b := 42
-	c := 24
+func ExampleGreaterThan_int() {
+	its.GreaterThan(10).Match(10).OrError(t)
+	its.GreaterThan(11).Match(10).OrError(t)
+	its.GreaterThan(10).Match(11).OrError(t)
+	// Output:
+	// ✘ /* want */ 10 < /* got */ 10		--- @ ./general_test.go:35
+	//
+	// ✘ /* want */ 11 < /* got */ 10		--- @ ./general_test.go:36
+}
 
-	its.EqEqPtr(&a).Match(&a).OrError(t) // pass.
-	its.EqEqPtr(&a).Match(&b).OrError(t) // pass. EqEqPtr compairs pointed value.
-	its.EqEqPtr(&a).Match(&c).OrError(t) // fail.
+func ExampleGreaterThan_float() {
+	its.GreaterThan(1.0).Match(1.0).OrError(t)
+	its.GreaterThan(1.1).Match(1.0).OrError(t)
+	its.GreaterThan(1.0).Match(1.1).OrError(t)
+	// Output:
+	// ✘ /* want */ 1 < /* got */ 1		--- @ ./general_test.go:45
+	//
+	// ✘ /* want */ 1.1 < /* got */ 1		--- @ ./general_test.go:46
+}
 
-	its.EqEqPtr[int](nil).Match(&c).OrError(t)  // fail.
-	its.EqEqPtr(&a).Match(nil).OrError(t)       // fail.
-	its.EqEqPtr[int](nil).Match(nil).OrError(t) // pass.
+func ExampleGreaterThan_string() {
+	its.GreaterThan("aaa").Match("aaa").OrError(t)
+	its.GreaterThan("aab").Match("aaa").OrError(t)
+	its.GreaterThan("aaa").Match("aab").OrError(t)
 
 	// Output:
-	// ✘ /* got */ &(24) == /* want */ &(42)		--- @ ./general_test.go:36
+	// ✘ /* want */ aaa < /* got */ aaa		--- @ ./general_test.go:55
 	//
-	// ✘ /* got */ &(24) == /* want */ nil		--- @ ./general_test.go:38
-	//
-	// ✘ /* got */ nil == /* want */ &(42)		--- @ ./general_test.go:39
+	// ✘ /* want */ aab < /* got */ aaa		--- @ ./general_test.go:56
 }
 
-func ExampleGreaterThan() {
-	//       <
-	its.GreaterThan(10).Match(11).OrError(t) // pass.
-	its.GreaterThan(11).Match(10).OrError(t) // fail.
-	its.GreaterThan(10).Match(10).OrError(t) // pass.
-
-	its.GreaterThan(1.0).Match(1.1).OrError(t) // pass.
-	its.GreaterThan(1.0).Match(1.0).OrError(t) // pass.
-	its.GreaterThan(1.1).Match(1.0).OrError(t) // fail.
-
-	its.GreaterThan("aaa").Match("aab").OrError(t) // pass.
-	its.GreaterThan("aaa").Match("aaa").OrError(t) // fail.
-	its.GreaterThan("aab").Match("aaa").OrError(t) // fail.
-
-	// Output:
-	// ✘ /* want */ 11 < /* got */ 10		--- @ ./general_test.go:53
-	//
-	// ✘ /* want */ 10 < /* got */ 10		--- @ ./general_test.go:54
-	//
-	// ✘ /* want */ 1 < /* got */ 1		--- @ ./general_test.go:57
-	//
-	// ✘ /* want */ 1.1 < /* got */ 1		--- @ ./general_test.go:58
-	//
-	// ✘ /* want */ aaa < /* got */ aaa		--- @ ./general_test.go:61
-	//
-	// ✘ /* want */ aab < /* got */ aaa		--- @ ./general_test.go:62
-}
-
-func ExampleGreaterEq() {
+func ExampleGreaterEq_int() {
 	//      <=
-	its.GreaterEq(10).Match(11).OrError(t) // pass.
-	its.GreaterEq(11).Match(10).OrError(t) // fail.
-	its.GreaterEq(10).Match(10).OrError(t) // fail.
-
-	its.GreaterEq(1.0).Match(1.1).OrError(t) // pass.
-	its.GreaterEq(1.0).Match(1.0).OrError(t) // fail.
-	its.GreaterEq(1.1).Match(1.0).OrError(t) // fail.
-
-	its.GreaterEq("aaa").Match("aab").OrError(t) // pass.
-	its.GreaterEq("aaa").Match("aaa").OrError(t) // pass.
-	its.GreaterEq("aab").Match("aaa").OrError(t) // fail.
-
+	its.GreaterEq(10).Match(11).OrError(t)
+	its.GreaterEq(11).Match(10).OrError(t)
+	its.GreaterEq(10).Match(10).OrError(t)
 	// Output:
-	// ✘ /* want */ 11 <= /* got */ 10		--- @ ./general_test.go:81
-	//
-	// ✘ /* want */ 1.1 <= /* got */ 1		--- @ ./general_test.go:86
-	//
-	// ✘ /* want */ aab <= /* got */ aaa		--- @ ./general_test.go:90
+	// ✘ /* want */ 11 <= /* got */ 10		--- @ ./general_test.go:68
 }
 
-func ExampleLesserThan() {
+func ExampleGreaterEq_float() {
+
+	its.GreaterEq(1.0).Match(1.1).OrError(t)
+	its.GreaterEq(1.0).Match(1.0).OrError(t)
+	its.GreaterEq(1.1).Match(1.0).OrError(t)
+	// Output:
+	// ✘ /* want */ 1.1 <= /* got */ 1		--- @ ./general_test.go:78
+}
+
+func ExampleGreaterEq_sring() {
+	its.GreaterEq("aaa").Match("aab").OrError(t)
+	its.GreaterEq("aaa").Match("aaa").OrError(t)
+	its.GreaterEq("aab").Match("aaa").OrError(t)
+
+	// Output:
+	// ✘ /* want */ aab <= /* got */ aaa		--- @ ./general_test.go:86
+}
+
+func ExampleLesserThan_int() {
 	//       >
-	its.LesserThan(10).Match(11).OrError(t) // fail.
-	its.LesserThan(11).Match(10).OrError(t) // pass.
-	its.LesserThan(10).Match(10).OrError(t) // fail.
-
-	its.LesserThan(1.0).Match(1.1).OrError(t) // fail.
-	its.LesserThan(1.0).Match(1.0).OrError(t) // pass.
-	its.LesserThan(1.1).Match(1.0).OrError(t) // fail.
-
-	its.LesserThan("aaa").Match("aab").OrError(t) // fail.
-	its.LesserThan("aaa").Match("aaa").OrError(t) // fail.
-	its.LesserThan("aab").Match("aaa").OrError(t) // pass.
-
+	its.LesserThan(10).Match(11).OrError(t)
+	its.LesserThan(11).Match(10).OrError(t)
+	its.LesserThan(10).Match(10).OrError(t)
 	// Output:
-	// ✘ /* want */ 10 > /* got */ 11		--- @ ./general_test.go:102
+	// ✘ /* want */ 10 > /* got */ 11		--- @ ./general_test.go:94
 	//
-	// ✘ /* want */ 10 > /* got */ 10		--- @ ./general_test.go:104
-	//
-	// ✘ /* want */ 1 > /* got */ 1.1		--- @ ./general_test.go:106
-	//
-	// ✘ /* want */ 1 > /* got */ 1		--- @ ./general_test.go:107
-	//
-	// ✘ /* want */ aaa > /* got */ aab		--- @ ./general_test.go:110
-	//
-	// ✘ /* want */ aaa > /* got */ aaa		--- @ ./general_test.go:111
+	// ✘ /* want */ 10 > /* got */ 10		--- @ ./general_test.go:96
 }
 
-func ExampleLesserEq() {
-	//      >=
-	its.LesserEq(10).Match(11).OrError(t) // pass.
-	its.LesserEq(11).Match(10).OrError(t) // fail.
-	its.LesserEq(10).Match(10).OrError(t) // fail.
+func ExampleLesserThan_float() {
+	its.LesserThan(1.0).Match(1.1).OrError(t)
+	its.LesserThan(1.0).Match(1.0).OrError(t)
+	its.LesserThan(1.1).Match(1.0).OrError(t)
+	// Output:
+	// ✘ /* want */ 1 > /* got */ 1.1		--- @ ./general_test.go:104
+	//
+	// ✘ /* want */ 1 > /* got */ 1		--- @ ./general_test.go:105
+}
 
-	its.LesserEq(1.0).Match(1.1).OrError(t) // pass.
-	its.LesserEq(1.0).Match(1.0).OrError(t) // fail.
-	its.LesserEq(1.1).Match(1.0).OrError(t) // fail.
+func ExampleLesserThan_string() {
 
-	its.LesserEq("aaa").Match("aab").OrError(t) // pass.
-	its.LesserEq("aaa").Match("aaa").OrError(t) // pass.
-	its.LesserEq("aab").Match("aaa").OrError(t) // fail.
+	its.LesserThan("aaa").Match("aab").OrError(t)
+	its.LesserThan("aaa").Match("aaa").OrError(t)
+	its.LesserThan("aab").Match("aaa").OrError(t)
 
 	// Output:
-	// ✘ /* want */ 10 >= /* got */ 11		--- @ ./general_test.go:130
+	// ✘ /* want */ aaa > /* got */ aab		--- @ ./general_test.go:115
 	//
-	// ✘ /* want */ 1 >= /* got */ 1.1		--- @ ./general_test.go:134
-	//
-	// ✘ /* want */ aaa >= /* got */ aab		--- @ ./general_test.go:138
+	// ✘ /* want */ aaa > /* got */ aaa		--- @ ./general_test.go:116
+}
+
+func ExampleLesserEq_int() {
+	//      >=
+	its.LesserEq(10).Match(11).OrError(t)
+	its.LesserEq(11).Match(10).OrError(t)
+	its.LesserEq(10).Match(10).OrError(t)
+
+	// Output:
+	// ✘ /* want */ 10 >= /* got */ 11		--- @ ./general_test.go:127
+}
+
+func ExampleLesserEq_float() {
+	its.LesserEq(1.0).Match(1.1).OrError(t)
+	its.LesserEq(1.0).Match(1.0).OrError(t)
+	its.LesserEq(1.1).Match(1.0).OrError(t)
+
+	// Output:
+	//　✘ /* want */ 1 >= /* got */ 1.1		--- @ ./general_test.go:136
+}
+
+func ExampleLesserEq_string() {
+	its.LesserEq("aaa").Match("aab").OrError(t)
+	its.LesserEq("aaa").Match("aaa").OrError(t)
+	its.LesserEq("aab").Match("aaa").OrError(t)
+
+	// Output:
+	// ✘ /* want */ aaa >= /* got */ aab		--- @ ./general_test.go:145
 }
 
 func ExampleBefore() {
@@ -162,9 +165,9 @@ func ExampleBefore() {
 	its.Before(t2).Match(t1).OrError(t)
 
 	// Output:
-	// ✘ (/* got */ 2023-10-11 12:18:14 +0000 +0000).Before(/* want */ 2023-10-11 12:13:14 +0000 +0000)		--- @ ./general_test.go:160
+	// ✘ (/* got */ 2023-10-11 12:18:14 +0000 +0000).Before(/* want */ 2023-10-11 12:13:14 +0000 +0000)		--- @ ./general_test.go:163
 	//
-	// ✘ (/* got */ 2023-10-11 12:13:14 +0000 +0000).Before(/* want */ 2023-10-11 12:13:14 +0000 +0000)		--- @ ./general_test.go:161
+	// ✘ (/* got */ 2023-10-11 12:13:14 +0000 +0000).Before(/* want */ 2023-10-11 12:13:14 +0000 +0000)		--- @ ./general_test.go:164
 }
 
 func ExampleAfter() {
@@ -182,9 +185,9 @@ func ExampleAfter() {
 	its.After(t2).Match(t1).OrError(t)
 
 	// Output:
-	// ✘ (/* got */ 2023-10-11 12:13:14 +0000 +0000).After(/* want */ 2023-10-11 12:13:14 +0000 +0000)		--- @ ./general_test.go:181
+	// ✘ (/* got */ 2023-10-11 12:13:14 +0000 +0000).After(/* want */ 2023-10-11 12:13:14 +0000 +0000)		--- @ ./general_test.go:184
 	//
-	// ✘ (/* got */ 2023-10-11 12:13:14 +0000 +0000).After(/* want */ 2023-10-11 12:18:14 +0000 +0000)		--- @ ./general_test.go:182
+	// ✘ (/* got */ 2023-10-11 12:13:14 +0000 +0000).After(/* want */ 2023-10-11 12:18:14 +0000 +0000)		--- @ ./general_test.go:185
 }
 
 func ExampleEqual() {
@@ -202,23 +205,31 @@ func ExampleEqual() {
 	its.Equal(t2).Match(t1).OrError(t)
 
 	// Output:
-	// ✘ (/* want */ 2023-10-11 12:13:14 +0000 +0000).Equal(/* got */ 2023-10-11 12:18:14 +0000 +0000)		--- @ ./general_test.go:200
+	// ✘ (/* want */ 2023-10-11 12:13:14 +0000 +0000).Equal(/* got */ 2023-10-11 12:18:14 +0000 +0000)		--- @ ./general_test.go:203
 	//
-	// ✘ (/* want */ 2023-10-11 12:18:14 +0000 +0000).Equal(/* got */ 2023-10-11 12:13:14 +0000 +0000)		--- @ ./general_test.go:202
+	// ✘ (/* want */ 2023-10-11 12:18:14 +0000 +0000).Equal(/* got */ 2023-10-11 12:13:14 +0000 +0000)		--- @ ./general_test.go:205
 }
 
-func ExampleEquivWith() {
-	// testing equiveness on stringified value
+func ExampleEquivWith_ok() {
 	its.EquivWith(
-		42, func(want int, got string) bool { return fmt.Sprintf("%d", want) == got },
-	).Match("42").OrError(t)
+		42,
+		func(want int, got string) bool { return fmt.Sprintf("%d", want) == got },
+	).
+		Match("42").
+		OrError(t)
+	// Output:
+}
 
+func ExampleEquivWith_ng() {
 	its.EquivWith(
-		42, func(want int, got string) bool { return fmt.Sprintf("%d", want) == got },
-	).Match("40").OrError(t)
+		42,
+		func(want int, got string) bool { return fmt.Sprintf("%d", want) == got },
+	).
+		Match("40").
+		OrError(t)
 
 	// Output:
-	// ✘ (/* want */ 42) equiv. (/* got */ 40)		--- @ ./general_test.go:216
+	// ✘ (/* want */ 42) equiv. (/* got */ 40)		--- @ ./general_test.go:224
 }
 
 func ExampleError() {
@@ -227,10 +238,17 @@ func ExampleError() {
 
 	its.Error(e1).Match(e2).OrError(t)
 	its.Error(e1).Match(e1).OrError(t)
+	// Output:
+}
+
+func ExampleError_ng() {
+	e1 := errors.New("error")
+	e2 := fmt.Errorf("wrapped: %w", e1)
+
 	its.Error(e2).Match(e1).OrError(t)
 
 	// Output:
-	// ✘ errors.Is(/* got */ error, /* want */ wrapped: error)		--- @ ./general_test.go:230
+	// ✘ errors.Is(/* got */ error, /* want */ wrapped: error)		--- @ ./general_test.go:248
 }
 
 type CustomError string
@@ -239,15 +257,19 @@ func (c CustomError) Error() string {
 	return string(c)
 }
 
-func ExampleErrorAs() {
+func ExampleErrorAs_ok() {
 	customErr := CustomError("custom error")
-	otherErr := errors.New("error by error.New")
 
 	its.ErrorAs[CustomError]().Match(customErr).OrError(t)
+	// Output:
+}
+
+func ExampleErrorAs_ng() {
+	otherErr := errors.New("error by error.New")
 	its.ErrorAs[CustomError]().Match(otherErr).OrError(t)
 
 	// Output:
-	// ✘ want := new(its_test.CustomError); errors.As(/* got */ error by error.New, want)		--- @ ./general_test.go:247
+	// ✘ want := new(its_test.CustomError); errors.As(/* got */ error by error.New, want)		--- @ ./general_test.go:269
 }
 
 func ExampleAlways() {
@@ -258,122 +280,182 @@ func ExampleAlways() {
 func ExampleNever() {
 	its.Never[any]().Match(struct{ Arbitary string }{}).OrError(t)
 	// Output:
-	// ✘ (never pass)		--- @ ./general_test.go:259
+	// ✘ (never pass)		--- @ ./general_test.go:281
 }
 
-func ExampleStringHavingPrefix() {
+func ExampleStringHavingPrefix_ok() {
 	its.StringHavingPrefix("abc").Match("abcde").OrError(t)
+	// Output:
+}
+
+func ExampleStringHavingPrefix_ng() {
 	its.StringHavingPrefix("abc").Match("adcbe").OrError(t)
 
 	// Output:
-	// ✘ strings.HasPrefix(/* got */ "adcbe", /* want */ "abc")		--- @ ./general_test.go:266
+	// ✘ strings.HasPrefix(/* got */ "adcbe", /* want */ "abc")		--- @ ./general_test.go:292
 }
 
-func ExampleStringHavingSuffix() {
+func ExampleStringHavingSuffix_ok() {
 	its.StringHavingSuffix("cde").Match("abcde").OrError(t)
+	// Output:
+}
+
+func ExampleStringHavingSuffix_ng() {
 	its.StringHavingSuffix("cde").Match("adcbe").OrError(t)
 	// Output:
-	// ✘ strings.HasSuffix(/* got */ "adcbe", /* want */ "cde")		--- @ ./general_test.go:274
+	// ✘ strings.HasSuffix(/* got */ "adcbe", /* want */ "cde")		--- @ ./general_test.go:304
 }
 
-func ExampleStringContaining() {
+func ExampleStringContaining_ok() {
 	its.StringContaining("bcd").Match("abcde").OrError(t)
+	// Output:
+}
+
+func ExampleStringContaining_ng() {
 	its.StringContaining("bcd").Match("adcbe").OrError(t)
 	// Output:
-	// ✘ strings.Contains(/* got */ "adcbe", /* want */ "bcd")		--- @ ./general_test.go:281
+	// ✘ strings.Contains(/* got */ "adcbe", /* want */ "bcd")		--- @ ./general_test.go:315
 }
 
-func ExampleStringEqualFold() {
+func ExampleStringEqualFold_ok() {
 	its.StringEqualFold("abc").Match("abc").OrError(t)
 	its.StringEqualFold("aBc").Match("AbC").OrError(t)
+	// Output:
+}
+
+func ExampleStringEqualFold_ng() {
 	its.StringEqualFold("abc").Match("αβγ").OrError(t)
 	// Output:
-	// ✘ strings.EqualFold(/* got */ "αβγ", /* want */ "abc")		--- @ ./general_test.go:289
+	// ✘ strings.EqualFold(/* got */ "αβγ", /* want */ "abc")		--- @ ./general_test.go:327
 }
 
-func ExampleBytesEqual() {
+func ExampleBytesEqual_ok() {
 	its.BytesEqual([]byte("abc")).Match([]byte("abc")).OrError(t)
+	// Output:
+}
+
+func ExampleBytesEqual_ng() {
 	its.BytesEqual([]byte("abc")).Match([]byte("acb")).OrError(t)
 	// Output:
-	// ✘ bytes.Equal(/* got */ []byte{0x61, 0x63, 0x62}, /* want */ []byte{0x61, 0x62, 0x63})		--- @ ./general_test.go:296
+	// ✘ bytes.Equal(/* got */ []byte{0x61, 0x63, 0x62}, /* want */ []byte{0x61, 0x62, 0x63})		--- @ ./general_test.go:338
 }
 
-func ExampleBytesHavingPrefix() {
+func ExampleBytesHavingPrefix_ok() {
 	its.BytesHavingPrefix([]byte("abc")).Match([]byte("abcde")).OrError(t)
+	// Output:
+}
+
+func ExampleBytesHavingPrefix_ng() {
 	its.BytesHavingPrefix([]byte("abc")).Match([]byte("adcbe")).OrError(t)
 	// Output:
-	// ✘ bytes.HasPrefix(/* got */ []byte{0x61, 0x64, 0x63, 0x62, 0x65}, /* want */ []byte{0x61, 0x62, 0x63})		--- @ ./general_test.go:303
+	// ✘ bytes.HasPrefix(/* got */ []byte{0x61, 0x64, 0x63, 0x62, 0x65}, /* want */ []byte{0x61, 0x62, 0x63})		--- @ ./general_test.go:349
 }
 
-func ExampleBytesHavingSuffix() {
+func ExampleBytesHavingSuffix_ok() {
 	its.BytesHavingSuffix([]byte("cde")).Match([]byte("abcde")).OrError(t)
+	// Output:
+}
+
+func ExampleBytesHavingSuffix_ng() {
 	its.BytesHavingSuffix([]byte("cde")).Match([]byte("adcbe")).OrError(t)
 	// Output:
-	// ✘ bytes.HasSuffix(/* got */ []byte{0x61, 0x64, 0x63, 0x62, 0x65}, /* want */ []byte{0x63, 0x64, 0x65})		--- @ ./general_test.go:310
+	// ✘ bytes.HasSuffix(/* got */ []byte{0x61, 0x64, 0x63, 0x62, 0x65}, /* want */ []byte{0x63, 0x64, 0x65})		--- @ ./general_test.go:360
 }
 
-func ExampleBytesContaining() {
+func ExampleBytesContaining_ok() {
 	its.BytesContaining([]byte("bcd")).Match([]byte("abcde")).OrError(t)
+	// Output:
+}
+
+func ExampleBytesContaining_ng() {
 	its.BytesContaining([]byte("bcd")).Match([]byte("adcbe")).OrError(t)
 	// Output:
-	// ✘ bytes.Contains(/* got */ []byte{0x61, 0x64, 0x63, 0x62, 0x65}, /* want */ []byte{0x62, 0x63, 0x64})		--- @ ./general_test.go:317
+	// ✘ bytes.Contains(/* got */ []byte{0x61, 0x64, 0x63, 0x62, 0x65}, /* want */ []byte{0x62, 0x63, 0x64})		--- @ ./general_test.go:371
 }
 
-func ExampleNaN() {
+func ExampleNaN_ok() {
 	its.NaN().Match(math.NaN()).OrError(t)
+	// Output:
+}
+
+func ExampleNaN_ng() {
 	its.NaN().Match(42).OrError(t)
 	// Output:
-	// ✘ math.IsNaN(/* got */ 42.000000)		--- @ ./general_test.go:324
+	// ✘ math.IsNaN(/* got */ 42.000000)		--- @ ./general_test.go:382
 }
 
 func ExampleInf() {
 	its.Inf().Match(math.Inf(1)).OrError(t)
 	its.Inf().Match(math.Inf(-1)).OrError(t)
-	its.Inf().Match(0).OrError(t)
 	// Output:
-	// ✘ math.IsInf(/* got */ 0.000000, 0)		--- @ ./general_test.go:332
 }
 
-func ExampleClosedChan() {
+func ExampleInf_ng() {
+	its.Inf().Match(0).OrError(t)
+	// Output:
+	// ✘ math.IsInf(/* got */ 0.000000, 0)		--- @ ./general_test.go:394
+}
+
+func ExampleClosedChan_ok() {
 	ch1 := make(chan int, 1)
 	close(ch1)
 	its.ClosedChan[int]().Match(ch1).OrError(t)
+	// Output:
+}
+func ExampleClosedChan_ng() {
 	ch2 := make(chan string, 1)
 	its.ClosedChan[string]().Match(ch2).OrError(t)
 	// Output:
-	// ✘ chan string is not closed.		--- @ ./general_test.go:342
+	// ✘ chan string is not closed.		--- @ ./general_test.go:407
 }
 
-func ExampleType() {
+func ExampleType_primitive() {
 	its.Type[string]().Match("text value").OrError(t)
-	its.Type[int]().Match("text value").OrError(t)
+	its.Type[string]().Match(42).OrError(t)
+	// Output:
+	// ✘ /* got */ 42 is a string		--- @ ./general_test.go:414
+}
+
+func ExampleType_non_primitive() {
 	type T struct {
 		Foo int
 	}
-	its.Type[int]().Match(T{Foo: 42}).OrError(t)
+	type U struct {
+		Bar int
+	}
+	its.Type[T]().Match(T{Foo: 42}).OrError(t)
+	its.Type[U]().Match(T{Foo: 42}).OrError(t)
 	// Output:
-	// ✘ /* got */ text value is a int		--- @ ./general_test.go:349
-	//
-	// ✘ /* got */ {Foo:42} is a int		--- @ ./general_test.go:353
+	// ✘ /* got */ {Foo:42} is a its_test.U		--- @ ./general_test.go:427
 }
 
-func ExampleMatch() {
+func ExampleMatch_ok() {
 	pattern := regexp.MustCompile(`^[a-z]([a-z0-9.-]+[a-z])?$`)
 	its.Match(pattern).Match([]byte("github.com")).OrError(t)
+	// Output:
+}
+
+func ExampleMatch_ng() {
+	pattern := regexp.MustCompile(`^[a-z]([a-z0-9.-]+[a-z])?$`)
 	its.Match(pattern).Match([]byte("github.com/youta-t/its")).OrError(t)
 	// Output:
-	// ✘ (/* want */ ^[a-z]([a-z0-9.-]+[a-z])?$).Match(/* got */ [103 105 116 104 117 98 46 99 111 109 47 121 111 117 116 97 45 116 47 105 116 115])		--- @ ./general_test.go:363
+	// ✘ (/* want */ ^[a-z]([a-z0-9.-]+[a-z])?$).Match(/* got */ [103 105 116 104 117 98 46 99 111 109 47 121 111 117 116 97 45 116 47 105 116 115])		--- @ ./general_test.go:440
 }
 
 func ExampleMatchString() {
 	pattern := regexp.MustCompile(`^[a-z]([a-z0-9.-]+[a-z])?$`)
 	its.MatchString(pattern).Match("github.com").OrError(t)
-	its.MatchString(pattern).Match("github.com/youta-t/its").OrError(t)
 	// Output:
-	// ✘ (/* want */ ^[a-z]([a-z0-9.-]+[a-z])?$).MatchString(/* got */ "github.com/youta-t/its")		--- @ ./general_test.go:371
 }
 
-func ExampleNil_pass() {
+func ExampleMatchString_ng() {
+	pattern := regexp.MustCompile(`^[a-z]([a-z0-9.-]+[a-z])?$`)
+	its.MatchString(pattern).Match("github.com/youta-t/its").OrError(t)
+	// Output:
+	// ✘ (/* want */ ^[a-z]([a-z0-9.-]+[a-z])?$).MatchString(/* got */ "github.com/youta-t/its")		--- @ ./general_test.go:453
+}
+
+func ExampleNil_ok() {
 	var none *int
 	its.Nil[*int]().Match(none).OrError(t)
 
@@ -395,59 +477,78 @@ func ExampleNil_pass() {
 	// Output:
 }
 
-func ExampleNil_fail() {
+func ExampleNil_ng_value_ptr() {
 	three := 3
 	its.Nil[*int]().Match(&three).OrError(t)
 
+	// Output:
+	// ✘ (/* got */ 3) is nil		--- @ ./general_test.go:482
+}
+
+func ExampleNil_ng_chan() {
 	chNonNil := make(chan int)
 	its.Nil[chan int]().Match(chNonNil).OrError(t)
+	// Output:
+	// ✘ (/* got */ chan int) is nil		--- @ ./general_test.go:490
+}
 
+func ExampleNil_ng_func() {
 	funNonNil := func() {}
 	its.Nil[func()]().Match(funNonNil).OrError(t)
+	// Output:
+	//
+	// ✘ (/* got */ func()) is nil		--- @ ./general_test.go:497
+}
 
+func ExampleNil_ng_nonpointer_value() {
 	its.Nil[any]().Match(struct{}{}).OrError(t)
-	its.Nil[error]().Match(errors.New("error")).OrError(t)
+	its.Nil[int]().Match(3).OrError(t)
+	// Output:
+	// ✘ (/* got */ {}) is nil		--- @ ./general_test.go:504
+	//
+	// ✘ (/* got */ 3) is nil		--- @ ./general_test.go:505
+}
 
+func ExampleNil_ng_interface() {
+	its.Nil[error]().Match(errors.New("error")).OrError(t)
+	// Output:
+	// ✘ (/* got */ error) is nil		--- @ ./general_test.go:513
+}
+
+func ExampleNil_ng_map() {
 	mapNonNil := map[string]int{}
 	its.Nil[map[string]int]().Match(mapNonNil).OrError(t)
+	// Output:
+	//✘ (/* got */ map[]) is nil		--- @ ./general_test.go:520
+}
 
+func ExampleNil_ng_slice() {
 	sliceNonNil := []int{}
 	its.Nil[[]int]().Match(sliceNonNil).OrError(t)
 
-	its.Nil[int]().Match(3).OrError(t)
 	// Output:
-	// ✘ (/* got */ 3) is nil		--- @ ./general_test.go:400
 	//
-	// ✘ (/* got */ chan int) is nil		--- @ ./general_test.go:403
-	//
-	// ✘ (/* got */ func()) is nil		--- @ ./general_test.go:406
-	//
-	// ✘ (/* got */ {}) is nil		--- @ ./general_test.go:408
-	//
-	// ✘ (/* got */ error) is nil		--- @ ./general_test.go:409
-	//
-	// ✘ (/* got */ map[]) is nil		--- @ ./general_test.go:412
-	//
-	// ✘ (/* got */ []) is nil		--- @ ./general_test.go:415
-	//
-	// ✘ (/* got */ 3) is nil		--- @ ./general_test.go:417
+	// ✘ (/* got */ []) is nil		--- @ ./general_test.go:527
 }
 
-func ExamplePointer() {
+func ExamplePointer_ok() {
 	got := 42
 	its.Pointer(its.EqEq(42)).Match(&got).OrError(t)
+	// Output:
+}
 
-	got = 40
+func ExamplePointer_ng() {
+	got := 40
 	its.Pointer(its.EqEq(42)).Match(&got).OrError(t)
 
 	var ptrgot *int
 	its.Pointer(its.EqEq(42)).Match(ptrgot).OrError(t)
 	// Output:
-	// ✘ /* got */ *int is not nil,		--- @ ./general_test.go:441
-	//     ✘ /* got */ 40 == /* want */ 42		--- @ ./general_test.go:441
+	// ✘ /* got */ *int is not nil,		--- @ ./general_test.go:542
+	//     ✘ /* got */ 40 == /* want */ 42		--- @ ./general_test.go:542
 	//
-	// ✘ /* got */ nil is not nil,		--- @ ./general_test.go:444
-	//     ✘ /* got */ ?? == /* want */ 42		--- @ ./general_test.go:444
+	// ✘ /* got */ nil is not nil,		--- @ ./general_test.go:545
+	//     ✘ /* got */ ?? == /* want */ 42		--- @ ./general_test.go:545
 }
 
 func ExampleText_multibytes() {
@@ -474,7 +575,7 @@ func ExampleText_multibytes() {
 いちめんのなのはな
 `).OrError(t)
 	// Output:
-	// ✘ (+ = got, - = want)		--- @ ./general_test.go:455
+	// ✘ (+ = got, - = want)		--- @ ./general_test.go:556
 	//       |
 	//       | いちめんのなのはな
 	//       | いちめんのなのはな
@@ -504,7 +605,7 @@ My fair lady.
 `).OrError(t)
 	// Output:
 	//
-	// ✘ (+ = got, - = want)		--- @ ./general_test.go:494
+	// ✘ (+ = got, - = want)		--- @ ./general_test.go:595
 	//       |
 	//     - | Build it up with bricks and mortar,
 	//     - | Bricks and mortar, bricks and mortar,
@@ -547,7 +648,7 @@ Lorem Ipsum:
     Excepteur sint occaecat cupidatat non proident,
 `).OrError(t)
 	// Output:
-	// ✘ (+ = got, - = want)		--- @ ./general_test.go:520
+	// ✘ (+ = got, - = want)		--- @ ./general_test.go:621
 	//       |
 	//       | Lorem Ipsum:
 	//       |
