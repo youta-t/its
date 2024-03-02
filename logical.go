@@ -8,7 +8,7 @@ import (
 // All tests actual passes all specs.
 //
 // If no matchers are given, it always pass.
-func All[T any](matchers ...Matcher[T]) itskit.Matcher[T] {
+func All[T any](matchers ...Matcher[T]) Matcher[T] {
 	cancel := itskit.SkipStack()
 	defer cancel()
 	return allMatcher[T]{
@@ -63,7 +63,7 @@ func (as allMatcher[T]) String() string {
 // All tests actual passes at least one spec.
 //
 // If no matchers are given, it always fail.
-func Some[T any](matchers ...Matcher[T]) itskit.Matcher[T] {
+func Some[T any](matchers ...Matcher[T]) Matcher[T] {
 	cancel := itskit.SkipStack()
 	defer cancel()
 	return someMatcher[T]{
@@ -120,7 +120,7 @@ type notMatcher[T any] struct {
 }
 
 // Inverts matcher.
-func Not[T any](matcher Matcher[T]) itskit.Matcher[T] {
+func Not[T any](matcher Matcher[T]) Matcher[T] {
 	cancel := itskit.SkipStack()
 	defer cancel()
 	return notMatcher[T]{
@@ -147,7 +147,7 @@ func (n notMatcher[T]) String() string {
 }
 
 // None tests got value does NOT match for all given matchers.
-func None[T any](matchers ...Matcher[T]) itskit.Matcher[T] {
+func None[T any](matchers ...Matcher[T]) Matcher[T] {
 	cancel := itskit.SkipStack()
 	defer cancel()
 	return noneMathcer[T]{
