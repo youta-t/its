@@ -70,7 +70,7 @@ func TestEditorialGraph(t *testing.T) {
 
 	theory := func(when When, then Then) func(t *testing.T) {
 		return func(t *testing.T) {
-			actual := editorialgraph.NewWithMatcher(when.specs, when.values)
+			actual := editorialgraph.NewWithMatcher(when.values, when.specs)
 
 			if a, x := len(actual), len(then.matches); a != x {
 				t.Fatalf("len: %d, (want: %d)", a, x)
