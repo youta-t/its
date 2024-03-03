@@ -21,3 +21,13 @@ type F17[T struct{ Foo int }] func(T) T
 type F18[T, U any] func(func(T, U)) func(T, U)
 type F19[T ~int] func(F16[T]) T
 type F20[T ~int | int8 | ~int16 | int32] func(T) T
+
+type F21 func(p private) bool
+type F22 func() private
+type F23[T private] func() T
+type f24 func()
+
+func init() {
+	var x f24 = nil
+	_ = x
+}

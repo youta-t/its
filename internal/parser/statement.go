@@ -59,8 +59,9 @@ func (s *TypeStructDecl) Expr() string {
 
 func (s *TypeStructDecl) AsType() Type {
 	return &NamedType{
-		Pkg:  s.Package,
-		Name: s.Name,
+		Pkg:        s.Package,
+		Name:       s.Name,
+		isExported: s.Name[:1] == strings.ToUpper(s.Name[:1]),
 	}
 }
 
@@ -71,6 +72,15 @@ func (s *TypeStructDecl) Require() []*Import {
 	}
 	req = append(req, s.Body.Require()...)
 	return req
+}
+
+func (s *TypeStructDecl) IsOpaque() bool {
+	for _, tp := range s.TypeParams {
+		if tp.IsOpaque() {
+			return true
+		}
+	}
+	return s.Body.IsOpaque() || s.Name[:1] != strings.ToUpper(s.Name[:1])
 }
 
 type TypeInterfaceDecl struct {
@@ -112,8 +122,9 @@ func (s *TypeInterfaceDecl) Expr() string {
 
 func (s *TypeInterfaceDecl) AsType() Type {
 	return &NamedType{
-		Pkg:  s.Package,
-		Name: s.Name,
+		Pkg:        s.Package,
+		Name:       s.Name,
+		isExported: s.Name[:1] == strings.ToUpper(s.Name[:1]),
 	}
 }
 
@@ -126,6 +137,15 @@ func (s *TypeInterfaceDecl) Require() []*Import {
 	return req
 }
 
+func (in *TypeInterfaceDecl) IsOpaque() bool {
+	for _, tp := range in.TypeParams {
+		if tp.IsOpaque() {
+			return true
+		}
+	}
+	return in.Body.IsOpaque() || in.Name[:1] != strings.ToUpper(in.Name[:1])
+}
+
 type TypeFuncDecl struct {
 	Name       string
 	Package    *Import
@@ -133,15 +153,15 @@ type TypeFuncDecl struct {
 	Body       *FuncType
 }
 
-func (f *TypeFuncDecl) PlainName() string {
-	return f.Name
+func (fn *TypeFuncDecl) PlainName() string {
+	return fn.Name
 }
 
-func (s *TypeFuncDecl) GenericExpr(backtype bool) string {
+func (fn *TypeFuncDecl) GenericExpr(backtype bool) string {
 	typeParams := ""
 	{
 		tps := []string{}
-		for _, tp := range s.TypeParams {
+		for _, tp := range fn.TypeParams {
 			if backtype {
 				tps = append(tps, tp.Name+" "+tp.Back.Expr())
 			} else {
@@ -155,36 +175,46 @@ func (s *TypeFuncDecl) GenericExpr(backtype bool) string {
 	return typeParams
 }
 
-func (s *TypeFuncDecl) ParamsGenericExpr(backtype bool) string {
-	return s.Body.ParamsGenericExpr(backtype)
+func (fn *TypeFuncDecl) ParamsGenericExpr(backtype bool) string {
+	return fn.Body.ParamsGenericExpr(backtype)
 }
 
-func (s *TypeFuncDecl) ReturnGenericExpr(backtype bool) string {
-	return s.Body.ReturnGenericExpr(backtype)
+func (fn *TypeFuncDecl) ReturnGenericExpr(backtype bool) string {
+	return fn.Body.ReturnGenericExpr(backtype)
 }
 
-func (s *TypeFuncDecl) Expr() string {
+func (fn *TypeFuncDecl) Expr() string {
 	pkg := ""
-	if s.Package != nil {
-		pkg = s.Package.Name + "."
+	if fn.Package != nil {
+		pkg = fn.Package.Name + "."
 	}
-	return pkg + s.Name + s.GenericExpr(false)
+	return pkg + fn.Name + fn.GenericExpr(false)
 }
 
-func (s *TypeFuncDecl) AsType() Type {
+func (fn *TypeFuncDecl) AsType() Type {
 	return &NamedType{
-		Pkg:  s.Package,
-		Name: s.Name,
+		Pkg:        fn.Package,
+		Name:       fn.Name,
+		isExported: fn.Name[:1] == strings.ToUpper(fn.Name[:1]),
 	}
 }
 
-func (s *TypeFuncDecl) Require() []*Import {
-	req := []*Import{s.Package}
-	for i := range s.TypeParams {
-		req = append(req, s.TypeParams[i].Back.Require()...)
+func (fn *TypeFuncDecl) Require() []*Import {
+	req := []*Import{fn.Package}
+	for i := range fn.TypeParams {
+		req = append(req, fn.TypeParams[i].Back.Require()...)
 	}
-	req = append(req, s.Body.Require()...)
+	req = append(req, fn.Body.Require()...)
 	return req
+}
+
+func (fn *TypeFuncDecl) IsOpaque() bool {
+	for _, tp := range fn.TypeParams {
+		if tp.IsOpaque() {
+			return true
+		}
+	}
+	return fn.Body.IsOpaque() || fn.Name[:1] != strings.ToUpper(fn.Name[:1])
 }
 
 type TypeParam struct {
@@ -223,11 +253,16 @@ func (t *TypeParam) injectTypeParam(local *Import, tps []*TypeParam) {
 	t.Back = resolveBareNameType(local, tps, p.Name)
 }
 
+func (t *TypeParam) IsOpaque() bool {
+	return t.Back.IsOpaque()
+}
+
 type Type interface {
 	PlainName() string
 	Expr() string
 	Require() []*Import
 	TypeParams() []*TypeParam
+	IsOpaque() bool
 
 	injectTypeParam(*Import, []*TypeParam)
 }
@@ -251,9 +286,14 @@ func (*pseudoType) Require() []*Import {
 func (*pseudoType) injectTypeParam(*Import, []*TypeParam) {}
 func (*pseudoType) TypeParams() []*TypeParam              { return []*TypeParam{} }
 
+func (*pseudoType) IsOpaque() bool {
+	return true
+}
+
 type NamedType struct {
-	Pkg  *Import
-	Name string
+	Pkg        *Import
+	Name       string
+	isExported bool
 }
 
 func (n NamedType) PlainName() string {
@@ -278,6 +318,7 @@ func (n *NamedType) Require() []*Import {
 
 func (*NamedType) injectTypeParam(*Import, []*TypeParam) {}
 func (*NamedType) TypeParams() []*TypeParam              { return []*TypeParam{} }
+func (nt *NamedType) IsOpaque() bool                     { return !nt.isExported }
 
 type BuiltinType struct {
 	Name string
@@ -297,6 +338,7 @@ func (bt *BuiltinType) Require() []*Import {
 
 func (*BuiltinType) injectTypeParam(*Import, []*TypeParam) {}
 func (*BuiltinType) TypeParams() []*TypeParam              { return []*TypeParam{} }
+func (*BuiltinType) IsOpaque() bool                        { return false }
 
 type StructType struct {
 	Fields []*Field
@@ -359,10 +401,23 @@ func (s *StructType) TypeParams() []*TypeParam {
 	return ret
 }
 
-type Field struct {
-	Name string
-	Type Type
+func (s *StructType) IsOpaque() bool {
+	for _, f := range s.Fields {
+		if !f.isExported || f.Type.IsOpaque() {
+			return true
+		}
+	}
+
+	return false
 }
+
+type Field struct {
+	Name       string
+	Type       Type
+	isExported bool
+}
+
+func (f Field) IsOpaque() bool { return !f.isExported || f.Type.IsOpaque() }
 
 type GenericType struct {
 	Host   Type
@@ -436,6 +491,19 @@ func (g *GenericType) injectTypeParam(local *Import, tps []*TypeParam) {
 	}
 }
 
+func (g *GenericType) IsOpaque() bool {
+	if g.Host.IsOpaque() {
+		return true
+	}
+
+	for _, tp := range g.Params {
+		if tp.IsOpaque() {
+			return true
+		}
+	}
+	return false
+}
+
 type MapType struct {
 	Key  Type
 	Elem Type
@@ -498,6 +566,10 @@ func (m *MapType) injectTypeParam(local *Import, tps []*TypeParam) {
 	}
 }
 
+func (m *MapType) IsOpaque() bool {
+	return m.Key.IsOpaque() || m.Elem.IsOpaque()
+}
+
 type SliceType struct {
 	Elem Type
 }
@@ -541,6 +613,10 @@ func (s *SliceType) injectTypeParam(local *Import, tps []*TypeParam) {
 	} else {
 		s.Elem = resolveBareNameType(local, tps, p.Name)
 	}
+}
+
+func (s *SliceType) IsOpaque() bool {
+	return s.Elem.IsOpaque()
 }
 
 type ArrayType struct {
@@ -589,6 +665,10 @@ func (a *ArrayType) injectTypeParam(local *Import, tps []*TypeParam) {
 	}
 }
 
+func (a *ArrayType) IsOpaque() bool {
+	return a.Elem.IsOpaque()
+}
+
 type PointerType struct {
 	Elem Type
 }
@@ -632,6 +712,10 @@ func (ptr *PointerType) injectTypeParam(local *Import, tps []*TypeParam) {
 	} else {
 		ptr.Elem = resolveBareNameType(local, tps, p.Name)
 	}
+}
+
+func (ptr *PointerType) IsOpaque() bool {
+	return ptr.Elem.IsOpaque()
 }
 
 type ChanType struct {
@@ -679,12 +763,16 @@ func (ch *ChanType) TypeParams() []*TypeParam {
 	return ret
 }
 
-func (ptr *ChanType) injectTypeParam(local *Import, tps []*TypeParam) {
-	if p, ok := ptr.Elem.(*pseudoType); !ok {
-		ptr.Elem.injectTypeParam(local, tps)
+func (ch *ChanType) injectTypeParam(local *Import, tps []*TypeParam) {
+	if p, ok := ch.Elem.(*pseudoType); !ok {
+		ch.Elem.injectTypeParam(local, tps)
 	} else {
-		ptr.Elem = resolveBareNameType(local, tps, p.Name)
+		ch.Elem = resolveBareNameType(local, tps, p.Name)
 	}
+}
+
+func (ch *ChanType) IsOpaque() bool {
+	return ch.Elem.IsOpaque()
 }
 
 type TypeConstraint struct {
@@ -714,7 +802,10 @@ func (tx *TypeConstraint) injectTypeParam(local *Import, tps []*TypeParam) {
 	} else {
 		tx.Type.injectTypeParam(local, tps)
 	}
+}
 
+func (tc *TypeConstraint) IsOpaque() bool {
+	return tc.Type.IsOpaque()
 }
 
 type TypeUnion struct {
@@ -775,6 +866,10 @@ func (uni *TypeUnion) injectTypeParam(local *Import, tps []*TypeParam) {
 	} else {
 		uni.Y.injectTypeParam(local, tps)
 	}
+}
+
+func (uni *TypeUnion) IsOpaque() bool {
+	return uni.X.IsOpaque() || uni.Y.IsOpaque()
 }
 
 type FuncIOParam struct {
@@ -840,6 +935,10 @@ func (fio *FuncIOParam) injectTypeParam(local *Import, tps []*TypeParam) {
 	} else {
 		fio.Type = resolveBareNameType(local, tps, p.Name)
 	}
+}
+
+func (fio *FuncIOParam) IsOpaque() bool {
+	return fio.Type.IsOpaque()
 }
 
 type FuncType struct {
@@ -1024,6 +1123,25 @@ func (f *FuncType) injectTypeParam(local *Import, tps []*TypeParam) {
 	}
 }
 
+func (f *FuncType) IsOpaque() bool {
+	if f.VarArg != nil && f.VarArg.IsOpaque() {
+		return true
+	}
+
+	for _, a := range f.Args {
+		if a.IsOpaque() {
+			return true
+		}
+	}
+
+	for _, r := range f.Returns {
+		if r.IsOpaque() {
+			return true
+		}
+	}
+	return false
+}
+
 type InterfaceType struct {
 	Methods []*Method
 }
@@ -1079,7 +1197,21 @@ func (in *InterfaceType) injectTypeParam(local *Import, tps []*TypeParam) {
 	}
 }
 
+func (in *InterfaceType) IsOpaque() bool {
+	for _, m := range in.Methods {
+		if m.IsOpaque() {
+			return true
+		}
+	}
+	return false
+}
+
 type Method struct {
-	Name string
-	Func *FuncType
+	Name       string
+	Func       *FuncType
+	isExported bool
+}
+
+func (m *Method) IsOpaque() bool {
+	return !m.isExported || m.Func.IsOpaque()
 }

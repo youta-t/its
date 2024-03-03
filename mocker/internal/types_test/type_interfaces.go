@@ -24,3 +24,23 @@ type X[T any] struct{}
 type I2[T ~string] interface {
 	M0(T) T
 }
+
+type I3 interface {
+	P() private
+}
+
+type I4 interface {
+	P(private)
+}
+
+type I5[T private] interface {
+	P() T
+}
+
+type i6 interface {
+}
+
+func init() {
+	var x i6
+	_ = x
+}

@@ -97,7 +97,6 @@ It generates a file with same name as a file having go:generate directive.
 	if !*sourceAsPackage {
 		sources = append(sources, source)
 	} else {
-		logger.Printf("parse as package: %s", source)
 		p := try.To(build.Default.Import(source, ".", 0)).OrFatal(logger)
 		for _, gof := range p.GoFiles {
 			sources = append(sources, filepath.Join(p.Dir, gof))
@@ -176,6 +175,9 @@ It generates a file with same name as a file having go:generate directive.
 		funcs := newFile.Funcs
 
 		for _, intf := range newFile.Interfaces {
+			if intf.IsOpaque() {
+				continue
+			}
 			for _, m := range intf.Body.Methods {
 				fd := &parser.TypeFuncDecl{
 					Name:       fmt.Sprintf("%s_%s", intf.Name, m.Name),
@@ -295,8 +297,6 @@ func writeFile(dest string, newFile generatingFile) error {
 //
 //
 //
-//
-//
 
 const tpl = `// Code generated -- DO NOT EDIT
 package {{ .PackageName }}
@@ -308,6 +308,7 @@ import (
 )
 
 {{- range .Funcs -}}
+{{ if .IsOpaque }}{{ continue }}{{ end }}
 {{- $func := . }}
 
 type _{{ .Name }}ReturnFixture{{ .GenericExpr true }} struct {
@@ -460,6 +461,7 @@ func (c _{{ .Name }}Call{{ .GenericExpr false }}) ThenEffect(effect {{ .Body.Exp
 {{ end }}
 
 {{ range .Interfaces }}
+{{ if .IsOpaque }}{{ continue }}{{ end }}
 type {{ .Name }}Impl{{ .GenericExpr true }} struct {
 	{{ range .Body.Methods }}
 	{{ .Name }} {{ .Func.Expr }}
