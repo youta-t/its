@@ -57,6 +57,11 @@ type T[P any] struct {
 	}
 	F19 G[G[int]]
 
+	F20 private
+	F21 G[private]
+	F22 G[G[private]]
+	f23 string
+
 	// embedded
 	U
 	*X
@@ -83,3 +88,11 @@ type H[T, U any] struct {
 }
 
 type X string
+
+type private struct{}
+
+func init() {
+	_ = T[string]{
+		f23: "",
+	}
+}

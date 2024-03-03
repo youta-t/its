@@ -7,7 +7,6 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
-	"log"
 	"os"
 	"path"
 	"path/filepath"
@@ -42,7 +41,6 @@ func Parse(filepath string) (*File, error) {
 	for _, imp := range getImports(afile) {
 		pkgs[imp.Name] = imp
 	}
-	log.Printf("packages: %+v", pkgs)
 
 	decls, err := getDecls(localPackage, pkgs, afile)
 	if err != nil {
@@ -304,7 +302,15 @@ func parseTypeParam(local *Import, pkgs map[string]*Import, params []*ast.Field)
 	}
 
 	for i := range tps {
-		tps[i].Back.injectTypeParam(local, tps)
+		b := tps[i].Back
+
+		if p, ok := b.(*pseudoType); ok {
+			b = resolveBareNameType(local, tps, p.Name)
+		}
+
+		b.injectTypeParam(local, tps)
+
+		tps[i].Back = b
 	}
 
 	return tps, nil
