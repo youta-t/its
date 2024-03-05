@@ -65,6 +65,8 @@ func (epm eqeqPtrMatcher[T]) String() string {
 // EqEqPtr tests of pointer for comparable with
 //
 //	(want == got) || (*want == *got)
+//
+// Deprecated: Use Pointer(EqEq(...)) .
 func EqEqPtr[T comparable](want *T) Matcher[*T] {
 	cancel := itskit.SkipStack()
 	defer cancel()
