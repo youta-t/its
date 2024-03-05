@@ -97,7 +97,6 @@ It generates a file with same name as a file having go:generate directive.
 	if !*sourceAsPackage {
 		sources = append(sources, source)
 	} else {
-		logger.Printf("parse as package: %s", source)
 		p := try.To(build.Default.Import(source, ".", 0)).OrFatal(logger)
 		for _, gof := range p.GoFiles {
 			sources = append(sources, filepath.Join(p.Dir, gof))
@@ -121,6 +120,9 @@ It generates a file with same name as a file having go:generate directive.
 			if _, ok := targetTypeName[s.Name]; len(targetTypeName) != 0 && !ok {
 				continue
 			}
+			if s.IsOpaque() || 0 < len(s.Body.Embedded) {
+				continue
+			}
 
 			newFile.Interfaces = append(newFile.Interfaces, s)
 
@@ -134,6 +136,9 @@ It generates a file with same name as a file having go:generate directive.
 			s := f.Types.Funcs[i]
 
 			if _, ok := targetTypeName[s.Name]; len(targetTypeName) != 0 && !ok {
+				continue
+			}
+			if s.IsOpaque() {
 				continue
 			}
 
@@ -176,6 +181,9 @@ It generates a file with same name as a file having go:generate directive.
 		funcs := newFile.Funcs
 
 		for _, intf := range newFile.Interfaces {
+			if intf.IsOpaque() {
+				continue
+			}
 			for _, m := range intf.Body.Methods {
 				fd := &parser.TypeFuncDecl{
 					Name:       fmt.Sprintf("%s_%s", intf.Name, m.Name),
@@ -243,14 +251,6 @@ func writeFile(dest string, newFile generatingFile) error {
 	return nil
 }
 
-//
-//
-//
-//
-//
-//
-//
-//
 //
 //
 //

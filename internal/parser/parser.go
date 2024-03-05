@@ -7,7 +7,6 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
-	"log"
 	"os"
 	"path"
 	"path/filepath"
@@ -42,7 +41,6 @@ func Parse(filepath string) (*File, error) {
 	for _, imp := range getImports(afile) {
 		pkgs[imp.Name] = imp
 	}
-	log.Printf("packages: %+v", pkgs)
 
 	decls, err := getDecls(localPackage, pkgs, afile)
 	if err != nil {
@@ -304,7 +302,15 @@ func parseTypeParam(local *Import, pkgs map[string]*Import, params []*ast.Field)
 	}
 
 	for i := range tps {
-		tps[i].Back.injectTypeParam(local, tps)
+		b := tps[i].Back
+
+		if p, ok := b.(*pseudoType); ok {
+			b = resolveBareNameType(local, tps, p.Name)
+		}
+
+		b.injectTypeParam(local, tps)
+
+		tps[i].Back = b
 	}
 
 	return tps, nil
@@ -324,7 +330,8 @@ func resolveBareNameType(local *Import, tps []*TypeParam, name string) Type {
 		"string", "error", "any":
 		return &BuiltinType{Name: name}
 	default:
-		return &NamedType{Pkg: local, Name: name}
+		isExported := name[:1] == strings.ToUpper(name[:1])
+		return &NamedType{Pkg: local, Name: name, isExported: isExported}
 	}
 }
 
@@ -341,7 +348,7 @@ func parseType(local *Import, imports map[string]*Import, tps []*TypeParam, node
 		if !ok {
 			return nil, errors.New("selector is not normal name")
 		}
-		return &NamedType{Pkg: imports[x.Name], Name: t.Sel.Name}, nil
+		return &NamedType{Pkg: imports[x.Name], Name: t.Sel.Name, isExported: t.Sel.IsExported()}, nil
 
 	case *ast.IndexExpr: // generics
 		hostType, err := parseType(local, imports, tps, t.X)
@@ -463,10 +470,11 @@ func parseStruct(local *Import, imports map[string]*Import, typeParams []*TypePa
 
 		if len(f.Names) == 0 {
 			// embedded!
-			fields = append(fields, &Field{Name: typ.PlainName(), Type: typ})
+			name := typ.PlainName()
+			fields = append(fields, &Field{Name: name, Type: typ, isExported: name[:1] == strings.ToUpper(name[:1])})
 		} else {
 			for _, n := range f.Names {
-				fields = append(fields, &Field{Name: n.Name, Type: typ})
+				fields = append(fields, &Field{Name: n.Name, Type: typ, isExported: n.IsExported()})
 			}
 		}
 	}
@@ -476,23 +484,34 @@ func parseStruct(local *Import, imports map[string]*Import, typeParams []*TypePa
 
 func parseInterface(local *Import, imports map[string]*Import, typeParams []*TypeParam, node *ast.InterfaceType) (*InterfaceType, error) {
 	methods := []*Method{}
+	embeddeds := []Type{}
 	for _, f := range node.Methods.List {
-		if m, ok := f.Type.(*ast.FuncType); ok {
+		switch m := f.Type.(type) {
+		case *ast.FuncType:
 			typ, err := parseFn(local, imports, typeParams, m)
 			if err != nil {
 				return nil, err
 			}
 			if len(f.Names) == 0 {
 				// embedded
-				methods = append(methods, &Method{Name: "", Func: typ})
+				methods = append(methods, &Method{Name: "", Func: typ, isExported: !typ.IsOpaque()})
 			} else {
 				for _, n := range f.Names {
-					methods = append(methods, &Method{Name: n.Name, Func: typ})
+					methods = append(methods, &Method{Name: n.Name, Func: typ, isExported: n.IsExported()})
 				}
 			}
+		default:
+			parsed, err := parseType(local, imports, typeParams, m)
+			if err != nil {
+				return nil, err
+			}
+			if p, ok := parsed.(*pseudoType); ok {
+				parsed = resolveBareNameType(local, typeParams, p.Name)
+			}
+			embeddeds = append(embeddeds, parsed)
 		}
 	}
-	return &InterfaceType{Methods: methods}, nil
+	return &InterfaceType{Methods: methods, Embedded: embeddeds}, nil
 }
 
 func parseFn(local *Import, imports map[string]*Import, tps []*TypeParam, fnode *ast.FuncType) (*FuncType, error) {

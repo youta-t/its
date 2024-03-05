@@ -9,7 +9,7 @@ import (
 	config "github.com/youta-t/its/config"
 	itskit "github.com/youta-t/its/itskit"
 	itsio "github.com/youta-t/its/itskit/itsio"
-	testee "github.com/youta-t/its/structer/example/internal/type_test/sub2"
+	testee "github.com/youta-t/its/structer/example/internal/types/sub2"
 )
 
 type Sub2Spec struct {

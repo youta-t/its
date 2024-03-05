@@ -5,12 +5,15 @@ package types
 import (
 	"io"
 
-	"github.com/youta-t/its/structer/example/internal/type_test/sub1"
-	"github.com/youta-t/its/structer/example/internal/type_test/sub2"
+	"github.com/youta-t/its/structer/example/internal/types/sub1"
+	"github.com/youta-t/its/structer/example/internal/types/sub2"
 )
 
 // perfect example
-type T[P any] struct {
+type T[P interface {
+	float32 | ~float64
+	M() string
+}] struct {
 	// builtin
 	F0 string
 	F1 *string
@@ -54,8 +57,14 @@ type T[P any] struct {
 	F18 interface {
 		M(string, X, ...int) (int, error)
 		io.Writer
+		I1
+		I2
 	}
-	F19 G[G[int]]
+
+	F20 private
+	F21 G[private]
+	F22 G[G[private]]
+	f23 string
 
 	// embedded
 	U
@@ -83,3 +92,24 @@ type H[T, U any] struct {
 }
 
 type X string
+
+type I1 interface {
+	String() string
+	Int() int
+}
+
+type I2 interface{}
+
+type private struct{}
+
+func init() {
+	_ = T[fs]{
+		f23: "",
+	}
+}
+
+type fs float64
+
+func (fs) M() string {
+	return ""
+}
