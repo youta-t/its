@@ -371,22 +371,22 @@ func Inf() Matcher[float64] {
 	)
 }
 
-type chanMatcher[T any] struct {
+type chanMatcher[T any, C chan T | <-chan T] struct {
 	label itskit.Label
 }
 
 // ClosedChan tests wheather channel is closed or not.
 //
 // This matcher tries to receive from channel, it may cause sideeffect.
-func ClosedChan[T any]() Matcher[<-chan T] {
+func ClosedChan[C chan T | <-chan T, T any]() Matcher[C] {
 	cancel := itskit.SkipStack()
 	defer cancel()
-	return chanMatcher[T]{
+	return chanMatcher[T, C]{
 		label: itskit.NewLabelWithLocation("chan %T is %s.", *new(T), itskit.Placeholder),
 	}
 }
 
-func (c chanMatcher[T]) Match(ch <-chan T) itskit.Match {
+func (c chanMatcher[T, C]) Match(ch C) itskit.Match {
 	var closed bool
 	select {
 	case _, ok := <-ch:
@@ -405,12 +405,12 @@ func (c chanMatcher[T]) Match(ch <-chan T) itskit.Match {
 	)
 }
 
-func (c chanMatcher[T]) Write(ww itsio.Writer) error {
+func (c chanMatcher[T, C]) Write(ww itsio.Writer) error {
 	return c.label.Write(ww)
 }
 
-func (c chanMatcher[T]) String() string {
-	return itskit.MatcherToString[<-chan T](c)
+func (c chanMatcher[T, C]) String() string {
+	return itskit.MatcherToString(c)
 }
 
 // Type tests got value is a type.
