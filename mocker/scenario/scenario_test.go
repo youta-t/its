@@ -237,9 +237,9 @@ func Example_scenario_failed_by_wrong_arg() {
 	// Output:
 	// ✘ func UserRegistry_Update		--- @ ./mocker/scenario/scenario_test.go:217
 	//     ✘ type User:		--- @ ./mocker/scenario/scenario_test.go:218
-	//         ✘ .Id :
+	//         ✘ .Id :		--- @ ./mocker/scenario/scenario_test.go:218
 	//             ✘ /* got */ wrong-user-id == /* want */ sample-user-id		--- @ ./mocker/scenario/scenario_test.go:220
-	//         ✔ .Name :
+	//         ✔ .Name :		--- @ ./mocker/scenario/scenario_test.go:218
 	//             ✔ /* got */ Richard Roe == /* want */ Richard Roe		--- @ ./mocker/scenario/scenario_test.go:221
 }
 
