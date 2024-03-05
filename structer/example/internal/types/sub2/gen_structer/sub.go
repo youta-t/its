@@ -38,7 +38,7 @@ func ItsSub2(want Sub2Spec) its.Matcher[testee.Sub2] {
 		}
 		sub = append(
 			sub,
-			itskit.Property[testee.Sub2, int](
+			its.Property[testee.Sub2, int](
 				".IntField",
 				func(got testee.Sub2) int { return got.IntField },
 				matcher,

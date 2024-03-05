@@ -80,7 +80,7 @@ func ItsT[P interface {
 		}
 		sub = append(
 			sub,
-			itskit.Property[testee.T[P], string](
+			its.Property[testee.T[P], string](
 				".F0",
 				func(got testee.T[P]) string { return got.F0 },
 				matcher,
@@ -99,7 +99,7 @@ func ItsT[P interface {
 		}
 		sub = append(
 			sub,
-			itskit.Property[testee.T[P], *string](
+			its.Property[testee.T[P], *string](
 				".F1",
 				func(got testee.T[P]) *string { return got.F1 },
 				matcher,
@@ -118,7 +118,7 @@ func ItsT[P interface {
 		}
 		sub = append(
 			sub,
-			itskit.Property[testee.T[P], u_sub1.Sub1](
+			its.Property[testee.T[P], u_sub1.Sub1](
 				".F2",
 				func(got testee.T[P]) u_sub1.Sub1 { return got.F2 },
 				matcher,
@@ -137,7 +137,7 @@ func ItsT[P interface {
 		}
 		sub = append(
 			sub,
-			itskit.Property[testee.T[P], *u_sub1.Sub1](
+			its.Property[testee.T[P], *u_sub1.Sub1](
 				".F3",
 				func(got testee.T[P]) *u_sub1.Sub1 { return got.F3 },
 				matcher,
@@ -156,7 +156,7 @@ func ItsT[P interface {
 		}
 		sub = append(
 			sub,
-			itskit.Property[testee.T[P], testee.G[int]](
+			its.Property[testee.T[P], testee.G[int]](
 				".F4",
 				func(got testee.T[P]) testee.G[int] { return got.F4 },
 				matcher,
@@ -175,7 +175,7 @@ func ItsT[P interface {
 		}
 		sub = append(
 			sub,
-			itskit.Property[testee.T[P], testee.H[int, bool]](
+			its.Property[testee.T[P], testee.H[int, bool]](
 				".F5",
 				func(got testee.T[P]) testee.H[int, bool] { return got.F5 },
 				matcher,
@@ -194,7 +194,7 @@ func ItsT[P interface {
 		}
 		sub = append(
 			sub,
-			itskit.Property[testee.T[P], testee.G[testee.G[int]]](
+			its.Property[testee.T[P], testee.G[testee.G[int]]](
 				".F5_5",
 				func(got testee.T[P]) testee.G[testee.G[int]] { return got.F5_5 },
 				matcher,
@@ -213,7 +213,7 @@ func ItsT[P interface {
 		}
 		sub = append(
 			sub,
-			itskit.Property[testee.T[P], []testee.U](
+			its.Property[testee.T[P], []testee.U](
 				".F6",
 				func(got testee.T[P]) []testee.U { return got.F6 },
 				matcher,
@@ -232,7 +232,7 @@ func ItsT[P interface {
 		}
 		sub = append(
 			sub,
-			itskit.Property[testee.T[P], []int](
+			its.Property[testee.T[P], []int](
 				".F7",
 				func(got testee.T[P]) []int { return got.F7 },
 				matcher,
@@ -251,7 +251,7 @@ func ItsT[P interface {
 		}
 		sub = append(
 			sub,
-			itskit.Property[testee.T[P], [2]testee.U](
+			its.Property[testee.T[P], [2]testee.U](
 				".F8",
 				func(got testee.T[P]) [2]testee.U { return got.F8 },
 				matcher,
@@ -270,7 +270,7 @@ func ItsT[P interface {
 		}
 		sub = append(
 			sub,
-			itskit.Property[testee.T[P], [2]int](
+			its.Property[testee.T[P], [2]int](
 				".F9",
 				func(got testee.T[P]) [2]int { return got.F9 },
 				matcher,
@@ -289,7 +289,7 @@ func ItsT[P interface {
 		}
 		sub = append(
 			sub,
-			itskit.Property[testee.T[P], func(arg0 int, arg1 bool) (string, error)](
+			its.Property[testee.T[P], func(arg0 int, arg1 bool) (string, error)](
 				".F10",
 				func(got testee.T[P]) func(arg0 int, arg1 bool) (string, error) { return got.F10 },
 				matcher,
@@ -308,7 +308,7 @@ func ItsT[P interface {
 		}
 		sub = append(
 			sub,
-			itskit.Property[testee.T[P], map[string]int](
+			its.Property[testee.T[P], map[string]int](
 				".F11",
 				func(got testee.T[P]) map[string]int { return got.F11 },
 				matcher,
@@ -327,7 +327,7 @@ func ItsT[P interface {
 		}
 		sub = append(
 			sub,
-			itskit.Property[testee.T[P], map[string]testee.U](
+			its.Property[testee.T[P], map[string]testee.U](
 				".F12",
 				func(got testee.T[P]) map[string]testee.U { return got.F12 },
 				matcher,
@@ -346,7 +346,7 @@ func ItsT[P interface {
 		}
 		sub = append(
 			sub,
-			itskit.Property[testee.T[P], map[testee.U]int](
+			its.Property[testee.T[P], map[testee.U]int](
 				".F13",
 				func(got testee.T[P]) map[testee.U]int { return got.F13 },
 				matcher,
@@ -365,7 +365,7 @@ func ItsT[P interface {
 		}
 		sub = append(
 			sub,
-			itskit.Property[testee.T[P], chan int](
+			its.Property[testee.T[P], chan int](
 				".F14",
 				func(got testee.T[P]) chan int { return got.F14 },
 				matcher,
@@ -384,7 +384,7 @@ func ItsT[P interface {
 		}
 		sub = append(
 			sub,
-			itskit.Property[testee.T[P], <-chan int](
+			its.Property[testee.T[P], <-chan int](
 				".F15",
 				func(got testee.T[P]) <-chan int { return got.F15 },
 				matcher,
@@ -403,7 +403,7 @@ func ItsT[P interface {
 		}
 		sub = append(
 			sub,
-			itskit.Property[testee.T[P], chan<- int](
+			its.Property[testee.T[P], chan<- int](
 				".F16",
 				func(got testee.T[P]) chan<- int { return got.F16 },
 				matcher,
@@ -426,7 +426,7 @@ func ItsT[P interface {
 		}
 		sub = append(
 			sub,
-			itskit.Property[testee.T[P], struct {
+			its.Property[testee.T[P], struct {
 				Inline string
 			}](
 				".F17",
@@ -461,7 +461,7 @@ func ItsT[P interface {
 		}
 		sub = append(
 			sub,
-			itskit.Property[testee.T[P], interface {
+			its.Property[testee.T[P], interface {
 				M(arg0 string, arg1 testee.X, vararg ...int) (int, error)
 				u_io.Writer
 				testee.I1
@@ -492,7 +492,7 @@ func ItsT[P interface {
 		}
 		sub = append(
 			sub,
-			itskit.Property[testee.T[P], testee.U](
+			its.Property[testee.T[P], testee.U](
 				".U",
 				func(got testee.T[P]) testee.U { return got.U },
 				matcher,
@@ -511,7 +511,7 @@ func ItsT[P interface {
 		}
 		sub = append(
 			sub,
-			itskit.Property[testee.T[P], *testee.X](
+			its.Property[testee.T[P], *testee.X](
 				".X",
 				func(got testee.T[P]) *testee.X { return got.X },
 				matcher,
@@ -530,7 +530,7 @@ func ItsT[P interface {
 		}
 		sub = append(
 			sub,
-			itskit.Property[testee.T[P], u_sub2.Sub2](
+			its.Property[testee.T[P], u_sub2.Sub2](
 				".Sub2",
 				func(got testee.T[P]) u_sub2.Sub2 { return got.Sub2 },
 				matcher,
@@ -549,7 +549,7 @@ func ItsT[P interface {
 		}
 		sub = append(
 			sub,
-			itskit.Property[testee.T[P], testee.G[int]](
+			its.Property[testee.T[P], testee.G[int]](
 				".G",
 				func(got testee.T[P]) testee.G[int] { return got.G },
 				matcher,
@@ -618,7 +618,7 @@ func ItsU(want USpec) its.Matcher[testee.U] {
 		}
 		sub = append(
 			sub,
-			itskit.Property[testee.U, bool](
+			its.Property[testee.U, bool](
 				".FieldU1",
 				func(got testee.U) bool { return got.FieldU1 },
 				matcher,
@@ -687,7 +687,7 @@ func ItsG[H any](want GSpec[H]) its.Matcher[testee.G[H]] {
 		}
 		sub = append(
 			sub,
-			itskit.Property[testee.G[H], H](
+			its.Property[testee.G[H], H](
 				".Fx",
 				func(got testee.G[H]) H { return got.Fx },
 				matcher,
@@ -757,7 +757,7 @@ func ItsH[T any, U any](want HSpec[T, U]) its.Matcher[testee.H[T, U]] {
 		}
 		sub = append(
 			sub,
-			itskit.Property[testee.H[T, U], T](
+			its.Property[testee.H[T, U], T](
 				".Fx",
 				func(got testee.H[T, U]) T { return got.Fx },
 				matcher,
@@ -776,7 +776,7 @@ func ItsH[T any, U any](want HSpec[T, U]) its.Matcher[testee.H[T, U]] {
 		}
 		sub = append(
 			sub,
-			itskit.Property[testee.H[T, U], U](
+			its.Property[testee.H[T, U], U](
 				".Fy",
 				func(got testee.H[T, U]) U { return got.Fy },
 				matcher,

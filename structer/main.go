@@ -238,7 +238,7 @@ func Its{{ .Name }}{{ .GenericExpr true }}(want {{ .Name }}Spec{{ .GenericExpr f
 		}
 		sub = append(
 			sub,
-			itskit.Property[{{ $s.Expr }}, {{ .Type.Expr }}](
+			its.Property[{{ $s.Expr }}, {{ .Type.Expr }}](
 				".{{ .Name }}",
 				func(got {{ $s.Expr }}) {{ .Type.Expr }} { return got.{{ .Name }} },
 				matcher,

@@ -41,7 +41,7 @@ func ItsMyStruct(want MyStructSpec) its.Matcher[testee.MyStruct] {
 		}
 		sub = append(
 			sub,
-			itskit.Property[testee.MyStruct, string](
+			its.Property[testee.MyStruct, string](
 				".Name",
 				func(got testee.MyStruct) string { return got.Name },
 				matcher,
@@ -60,7 +60,7 @@ func ItsMyStruct(want MyStructSpec) its.Matcher[testee.MyStruct] {
 		}
 		sub = append(
 			sub,
-			itskit.Property[testee.MyStruct, []int](
+			its.Property[testee.MyStruct, []int](
 				".Value",
 				func(got testee.MyStruct) []int { return got.Value },
 				matcher,
@@ -79,7 +79,7 @@ func ItsMyStruct(want MyStructSpec) its.Matcher[testee.MyStruct] {
 		}
 		sub = append(
 			sub,
-			itskit.Property[testee.MyStruct, u_time.Time](
+			its.Property[testee.MyStruct, u_time.Time](
 				".Timestamp",
 				func(got testee.MyStruct) u_time.Time { return got.Timestamp },
 				matcher,

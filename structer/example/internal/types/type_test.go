@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/youta-t/its"
-	"github.com/youta-t/its/itskit"
 	"github.com/youta-t/its/structer/example/internal/types"
 	"github.com/youta-t/its/structer/example/internal/types/gen_structer"
 	"github.com/youta-t/its/structer/example/internal/types/sub1"
@@ -39,14 +38,14 @@ func TestT(T *testing.T) {
 		}),
 		F7: its.ForItems(its.Slice, its.EqEq, []int{3, 2, 1}),
 
-		F8: itskit.Property(
+		F8: its.Property(
 			"as slice",
 			func(got [2]types.U) []types.U { return got[:] },
 			its.ForItems(its.Slice, its.EqEq, []types.U{
 				{FieldU1: false}, {FieldU1: true},
 			}),
 		),
-		F9: itskit.Property(
+		F9: its.Property(
 			"as slice",
 			func(got [2]int) []int { return got[:] },
 			its.ForItems(its.Slice, its.EqEq, []int{4, 5}),
