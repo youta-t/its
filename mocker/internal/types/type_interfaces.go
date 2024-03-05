@@ -2,6 +2,8 @@
 package types
 
 import (
+	"io"
+
 	"github.com/youta-t/its/mocker/internal/example/sub"
 )
 
@@ -38,6 +40,18 @@ type I5[T private] interface {
 }
 
 type i6 interface {
+}
+
+type C1 interface {
+	string | int
+}
+type C2 interface {
+	~string
+}
+
+type C3 interface {
+	io.Reader
+	io.Writer
 }
 
 func init() {

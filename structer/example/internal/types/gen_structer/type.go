@@ -9,12 +9,16 @@ import (
 	config "github.com/youta-t/its/config"
 	itskit "github.com/youta-t/its/itskit"
 	itsio "github.com/youta-t/its/itskit/itsio"
-	testee "github.com/youta-t/its/structer/example/internal/type_test"
-	u_sub1 "github.com/youta-t/its/structer/example/internal/type_test/sub1"
-	u_sub2 "github.com/youta-t/its/structer/example/internal/type_test/sub2"
+	testee "github.com/youta-t/its/structer/example/internal/types"
+	u_sub1 "github.com/youta-t/its/structer/example/internal/types/sub1"
+	u_sub2 "github.com/youta-t/its/structer/example/internal/types/sub2"
+	u_io "io"
 )
 
-type TSpec[P any] struct {
+type TSpec[P interface {
+	M() string
+	float32 | ~float64
+}] struct {
 	F0   its.Matcher[string]
 	F1   its.Matcher[*string]
 	F2   its.Matcher[u_sub1.Sub1]
@@ -38,20 +42,28 @@ type TSpec[P any] struct {
 	}]
 	F18 its.Matcher[interface {
 		M(arg0 string, arg1 testee.X, vararg ...int) (int, error)
+		u_io.Writer
+		testee.I1
+		testee.I2
 	}]
-	F19  its.Matcher[testee.G[testee.G[int]]]
 	U    its.Matcher[testee.U]
 	X    its.Matcher[*testee.X]
 	Sub2 its.Matcher[u_sub2.Sub2]
 	G    its.Matcher[testee.G[int]]
 }
 
-type _TMatcher[P any] struct {
+type _TMatcher[P interface {
+	M() string
+	float32 | ~float64
+}] struct {
 	label  itskit.Label
 	fields []its.Matcher[testee.T[P]]
 }
 
-func ItsT[P any](want TSpec[P]) its.Matcher[testee.T[P]] {
+func ItsT[P interface {
+	M() string
+	float32 | ~float64
+}](want TSpec[P]) its.Matcher[testee.T[P]] {
 	cancel := itskit.SkipStack()
 	defer cancel()
 
@@ -434,10 +446,16 @@ func ItsT[P any](want TSpec[P]) its.Matcher[testee.T[P]] {
 			if config.StrictModeForStruct {
 				matcher = its.Never[interface {
 					M(arg0 string, arg1 testee.X, vararg ...int) (int, error)
+					u_io.Writer
+					testee.I1
+					testee.I2
 				}]()
 			} else {
 				matcher = its.Always[interface {
 					M(arg0 string, arg1 testee.X, vararg ...int) (int, error)
+					u_io.Writer
+					testee.I1
+					testee.I2
 				}]()
 			}
 		}
@@ -445,32 +463,19 @@ func ItsT[P any](want TSpec[P]) its.Matcher[testee.T[P]] {
 			sub,
 			itskit.Property[testee.T[P], interface {
 				M(arg0 string, arg1 testee.X, vararg ...int) (int, error)
+				u_io.Writer
+				testee.I1
+				testee.I2
 			}](
 				".F18",
 				func(got testee.T[P]) interface {
 					M(arg0 string, arg1 testee.X, vararg ...int) (int, error)
+					u_io.Writer
+					testee.I1
+					testee.I2
 				} {
 					return got.F18
 				},
-				matcher,
-			),
-		)
-	}
-
-	{
-		matcher := want.F19
-		if matcher == nil {
-			if config.StrictModeForStruct {
-				matcher = its.Never[testee.G[testee.G[int]]]()
-			} else {
-				matcher = its.Always[testee.G[testee.G[int]]]()
-			}
-		}
-		sub = append(
-			sub,
-			itskit.Property[testee.T[P], testee.G[testee.G[int]]](
-				".F19",
-				func(got testee.T[P]) testee.G[testee.G[int]] { return got.F19 },
 				matcher,
 			),
 		)

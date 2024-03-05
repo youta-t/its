@@ -120,6 +120,9 @@ It generates a file with same name as a file having go:generate directive.
 			if _, ok := targetTypeName[s.Name]; len(targetTypeName) != 0 && !ok {
 				continue
 			}
+			if s.IsOpaque() || 0 < len(s.Body.Embedded) {
+				continue
+			}
 
 			newFile.Interfaces = append(newFile.Interfaces, s)
 
@@ -133,6 +136,9 @@ It generates a file with same name as a file having go:generate directive.
 			s := f.Types.Funcs[i]
 
 			if _, ok := targetTypeName[s.Name]; len(targetTypeName) != 0 && !ok {
+				continue
+			}
+			if s.IsOpaque() {
 				continue
 			}
 
@@ -291,12 +297,6 @@ func writeFile(dest string, newFile generatingFile) error {
 //
 //
 //
-//
-//
-//
-//
-//
-//
 
 const tpl = `// Code generated -- DO NOT EDIT
 package {{ .PackageName }}
@@ -308,7 +308,6 @@ import (
 )
 
 {{- range .Funcs -}}
-{{ if .IsOpaque }}{{ continue }}{{ end }}
 {{- $func := . }}
 
 type _{{ .Name }}ReturnFixture{{ .GenericExpr true }} struct {
@@ -461,7 +460,6 @@ func (c _{{ .Name }}Call{{ .GenericExpr false }}) ThenEffect(effect {{ .Body.Exp
 {{ end }}
 
 {{ range .Interfaces }}
-{{ if .IsOpaque }}{{ continue }}{{ end }}
 type {{ .Name }}Impl{{ .GenericExpr true }} struct {
 	{{ range .Body.Methods }}
 	{{ .Name }} {{ .Func.Expr }}

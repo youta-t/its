@@ -525,7 +525,6 @@ func (c _UserRegistry_DeleteCall) ThenEffect(effect func(arg0 testee.User) error
 
 
 
-
 type UserRegistryImpl struct {
 	
 	Get func(userId string) ( testee.User,  error)

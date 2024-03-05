@@ -17,7 +17,7 @@ type F13 func(_ ...string)
 type F14 func(int, string) (f float64)
 type F15 func(i int, ss ...string) float64
 type F16[T any] func(F16[T]) T
-type F17[T struct{ Foo int }] func(T) T
+type F17[T ~struct{ Foo int }] func(T) T
 type F18[T, U any] func(func(T, U)) func(T, U)
 type F19[T ~int] func(F16[T]) T
 type F20[T ~int | int8 | ~int16 | int32] func(T) T

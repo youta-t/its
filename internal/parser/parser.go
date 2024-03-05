@@ -484,27 +484,34 @@ func parseStruct(local *Import, imports map[string]*Import, typeParams []*TypePa
 
 func parseInterface(local *Import, imports map[string]*Import, typeParams []*TypeParam, node *ast.InterfaceType) (*InterfaceType, error) {
 	methods := []*Method{}
+	embeddeds := []Type{}
 	for _, f := range node.Methods.List {
-		m, ok := f.Type.(*ast.FuncType)
-		if !ok {
-			continue
-		}
-
-		typ, err := parseFn(local, imports, typeParams, m)
-		if err != nil {
-			return nil, err
-		}
-		if len(f.Names) == 0 {
-			// embedded
-			methods = append(methods, &Method{Name: "", Func: typ, isExported: !typ.IsOpaque()})
-		} else {
-			for _, n := range f.Names {
-				methods = append(methods, &Method{Name: n.Name, Func: typ, isExported: n.IsExported()})
+		switch m := f.Type.(type) {
+		case *ast.FuncType:
+			typ, err := parseFn(local, imports, typeParams, m)
+			if err != nil {
+				return nil, err
 			}
+			if len(f.Names) == 0 {
+				// embedded
+				methods = append(methods, &Method{Name: "", Func: typ, isExported: !typ.IsOpaque()})
+			} else {
+				for _, n := range f.Names {
+					methods = append(methods, &Method{Name: n.Name, Func: typ, isExported: n.IsExported()})
+				}
+			}
+		default:
+			parsed, err := parseType(local, imports, typeParams, m)
+			if err != nil {
+				return nil, err
+			}
+			if p, ok := parsed.(*pseudoType); ok {
+				parsed = resolveBareNameType(local, typeParams, p.Name)
+			}
+			embeddeds = append(embeddeds, parsed)
 		}
-
 	}
-	return &InterfaceType{Methods: methods}, nil
+	return &InterfaceType{Methods: methods, Embedded: embeddeds}, nil
 }
 
 func parseFn(local *Import, imports map[string]*Import, tps []*TypeParam, fnode *ast.FuncType) (*FuncType, error) {

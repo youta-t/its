@@ -4,7 +4,7 @@ package gen_mock
 import (
 	its "github.com/youta-t/its"
 	itskit "github.com/youta-t/its/itskit"
-	testee "github.com/youta-t/its/mocker/internal/types_test"
+	testee "github.com/youta-t/its/mocker/internal/types"
 	u_sub "github.com/youta-t/its/mocker/internal/example/sub"
 	
 )
@@ -1173,7 +1173,6 @@ func (c _I2_M0Call[T]) ThenEffect(effect func(arg0 T) T) *I2_M0Behaviour[T] {
 
 
 
-
 type I0Impl struct {
 	
 	M0 func()
@@ -1297,7 +1296,6 @@ func (m _I0Mock) M4 (
 }
 
 
-
 type I1Impl[S u_sub.T, T u_sub.T, U testee.X[T]] struct {
 	
 	M0 func(arg0 S, arg1 T) ( U,  error)
@@ -1373,7 +1371,6 @@ func (m _I1Mock[S, T, U]) M2 (
 }
 
 
-
 type I2Impl[T ~string] struct {
 	
 	M0 func(arg0 T) T
@@ -1406,8 +1403,5 @@ func (m _I2Mock[T]) M0 (
 		arg0,
 	)
 }
-
-
-
 
 

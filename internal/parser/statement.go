@@ -1143,7 +1143,8 @@ func (f *FuncType) IsOpaque() bool {
 }
 
 type InterfaceType struct {
-	Methods []*Method
+	Methods  []*Method
+	Embedded []Type
 }
 
 func (*InterfaceType) PlainName() string {
@@ -1158,6 +1159,10 @@ func (i *InterfaceType) Expr() string {
 		io.WriteString(sb, m.Name)
 		io.WriteString(sb, m.Func.Signature(false))
 	}
+	for _, em := range i.Embedded {
+		io.WriteString(sb, "\n\t")
+		io.WriteString(sb, em.Expr())
+	}
 	io.WriteString(sb, "\n}")
 	return sb.String()
 }
@@ -1166,6 +1171,9 @@ func (in *InterfaceType) Require() []*Import {
 	req := []*Import{}
 	for i := range in.Methods {
 		req = append(req, in.Methods[i].Func.Require()...)
+	}
+	for i := range in.Embedded {
+		req = append(req, in.Embedded[i].Require()...)
 	}
 	return req
 }
@@ -1200,6 +1208,11 @@ func (in *InterfaceType) injectTypeParam(local *Import, tps []*TypeParam) {
 func (in *InterfaceType) IsOpaque() bool {
 	for _, m := range in.Methods {
 		if m.IsOpaque() {
+			return true
+		}
+	}
+	for _, em := range in.Embedded {
+		if em.IsOpaque() {
 			return true
 		}
 	}
