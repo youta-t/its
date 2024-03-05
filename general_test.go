@@ -399,12 +399,12 @@ func ExampleInf_ng() {
 func ExampleClosedChan_ok() {
 	ch1 := make(chan int, 1)
 	close(ch1)
-	its.ClosedChan[int]().Match(ch1).OrError(t)
+	its.ClosedChan[chan int]().Match(ch1).OrError(t)
 	// Output:
 }
 func ExampleClosedChan_ng() {
 	ch2 := make(chan string, 1)
-	its.ClosedChan[string]().Match(ch2).OrError(t)
+	its.ClosedChan[chan string]().Match(ch2).OrError(t)
 	// Output:
 	// ✘ chan string is not closed.		--- @ ./general_test.go:407
 }
