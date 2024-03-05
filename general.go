@@ -659,21 +659,30 @@ type propMatcher[T, U any] struct {
 //
 // # Args
 //
-// - description: description of property
+// - description: description of property.
+// It can be string for a static message, or itskit.Label for a dinamic message.
 //
 // - prop: calcuration extracting U from T
 //
 // - m: matcher for U
-func Property[T, U any](
-	description string,
+func Property[T, U any, D string | itskit.Label](
+	description D,
 	prop func(T) U,
 	m Matcher[U],
 ) Matcher[T] {
 	cancel := itskit.SkipStack()
 	defer cancel()
 
+	var label itskit.Label
+	switch d := any(description).(type) {
+	case string:
+		label = itskit.NewLabelWithLocation(d + " :")
+	case itskit.Label:
+		label = d
+	}
+
 	return propMatcher[T, U]{
-		description: itskit.NewLabelWithLocation(description + " :"), prop: prop, m: m,
+		description: label, prop: prop, m: m,
 	}
 }
 
