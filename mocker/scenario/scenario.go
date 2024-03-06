@@ -123,7 +123,7 @@ type call struct {
 //
 // If the (returned) function is called, but the call-order is wrong,
 // it reports test error.
-func Next[T any](s Scenario, fn T) (Token, T) {
+func Next[T any](s Scenario, fn T) T {
 	cancel := itskit.SkipStack()
 	defer cancel()
 
@@ -173,5 +173,5 @@ func Next[T any](s Scenario, fn T) (Token, T) {
 	}
 
 	s.addWantCall(tok)
-	return tok, w
+	return w
 }

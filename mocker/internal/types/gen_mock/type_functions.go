@@ -4,7 +4,7 @@ package gen_mock
 import (
 	its "github.com/youta-t/its"
 	itskit "github.com/youta-t/its/itskit"
-	testee "github.com/youta-t/its/mocker/internal/types_test"
+	testee "github.com/youta-t/its/mocker/internal/types"
 	
 )
 
@@ -1922,14 +1922,14 @@ func (c _F16Call[T]) ThenEffect(effect func(arg0 testee.F16[T]) T) *F16Behaviour
 
 
 
-type _F17ReturnFixture[T struct{
+type _F17ReturnFixture[T ~struct{
 	Foo int
 }] struct {
 	ret0 T
 	
 }
 
-type _F17Return[T struct{
+type _F17Return[T ~struct{
 	Foo int
 }] struct {
 	fixture _F17ReturnFixture[T]
@@ -1942,7 +1942,7 @@ func (rfx _F17Return[T]) Get() (
 	return rfx.fixture.ret0
 }
 
-type _F17CallSpec[T struct{
+type _F17CallSpec[T ~struct{
 	Foo int
 }] struct {
 	arg0 its.Matcher[T]
@@ -1950,14 +1950,14 @@ type _F17CallSpec[T struct{
 	
 }
 
-type _F17Call[T struct{
+type _F17Call[T ~struct{
 	Foo int
 }] struct {
 	name itskit.Label
 	spec _F17CallSpec[T]
 }
 
-func NewF17Call[T struct{
+func NewF17Call[T ~struct{
 	Foo int
 }](
 	arg0 its.Matcher[T],
@@ -1979,7 +1979,7 @@ func NewF17Call[T struct{
 	}
 }
 
-type F17Behaviour [T struct{
+type F17Behaviour [T ~struct{
 	Foo int
 }] struct {
 	name itskit.Label

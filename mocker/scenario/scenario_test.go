@@ -147,14 +147,14 @@ func Example_scenario_passed() {
 	sc := scenario.Begin(t)
 	defer sc.End()
 
-	_, sess := scenario.Next( // add a function into scenario
+	sess := scenario.Next( // add a function into scenario
 		sc, NewSessionStoreCall(
 			its.EqEq("fake-cookie")).           // expectation for arguments
 			ThenReturn("sample-user-id", true). // fixture for retrun valeus
 			Mock(t),                            // build as mock function
 	)
 
-	_, getUser := scenario.Next(sc, NewUserRegistry_GetCall(
+	getUser := scenario.Next(sc, NewUserRegistry_GetCall(
 		its.EqEq("sample-user-id"),
 	).
 		ThenReturn(
@@ -167,7 +167,7 @@ func Example_scenario_passed() {
 		Mock(t),
 	)
 
-	_, updateUser := scenario.Next(sc, NewUserRegistry_UpdateCall(
+	updateUser := scenario.Next(sc, NewUserRegistry_UpdateCall(
 		ItsUser(
 			UserSpec{
 				Id:   its.EqEq("sample-user-id"),
@@ -194,14 +194,14 @@ func Example_scenario_failed_by_wrong_arg() {
 	sc := scenario.Begin(t)
 	defer sc.End()
 
-	_, sess := scenario.Next(
+	sess := scenario.Next(
 		sc,
 		NewSessionStoreCall(its.EqEq("fake-cookie")).
 			ThenReturn("sample-user-id", true).
 			Mock(t),
 	)
 
-	_, getUser := scenario.Next(sc, NewUserRegistry_GetCall(
+	getUser := scenario.Next(sc, NewUserRegistry_GetCall(
 		its.EqEq("sample-user-id"),
 	).
 		ThenReturn(
@@ -214,7 +214,7 @@ func Example_scenario_failed_by_wrong_arg() {
 		Mock(t),
 	)
 
-	_, updateUser := scenario.Next(sc, NewUserRegistry_UpdateCall(
+	updateUser := scenario.Next(sc, NewUserRegistry_UpdateCall(
 		ItsUser(
 			UserSpec{
 				Id:   its.EqEq("sample-user-id"),
@@ -237,9 +237,9 @@ func Example_scenario_failed_by_wrong_arg() {
 	// Output:
 	// ✘ func UserRegistry_Update		--- @ ./mocker/scenario/scenario_test.go:217
 	//     ✘ type User:		--- @ ./mocker/scenario/scenario_test.go:218
-	//         ✘ .Id :
+	//         ✘ .Id :		--- @ ./mocker/scenario/scenario_test.go:218
 	//             ✘ /* got */ wrong-user-id == /* want */ sample-user-id		--- @ ./mocker/scenario/scenario_test.go:220
-	//         ✔ .Name :
+	//         ✔ .Name :		--- @ ./mocker/scenario/scenario_test.go:218
 	//             ✔ /* got */ Richard Roe == /* want */ Richard Roe		--- @ ./mocker/scenario/scenario_test.go:221
 }
 
@@ -247,7 +247,7 @@ func Example_scenario_failed_by_wrong_call_order() {
 	sc := scenario.Begin(t)
 	defer sc.End()
 
-	_, getUser := scenario.Next(sc, NewUserRegistry_GetCall(
+	getUser := scenario.Next(sc, NewUserRegistry_GetCall(
 		its.EqEq("sample-user-id"),
 	).
 		ThenReturn(
@@ -260,14 +260,14 @@ func Example_scenario_failed_by_wrong_call_order() {
 		Mock(t),
 	)
 
-	_, sess := scenario.Next(
+	sess := scenario.Next(
 		sc,
 		NewSessionStoreCall(its.EqEq("fake-cookie")).
 			ThenReturn("sample-user-id", true).
 			Mock(t),
 	)
 
-	_, updateUser := scenario.Next(sc, NewUserRegistry_UpdateCall(
+	updateUser := scenario.Next(sc, NewUserRegistry_UpdateCall(
 		ItsUser(
 			UserSpec{
 				Id:   its.EqEq("sample-user-id"),
@@ -303,14 +303,14 @@ func Example_scenario_failed_by_plans_incompleted() {
 	sc := scenario.Begin(t)
 	defer sc.End()
 
-	_, sess := scenario.Next(
+	sess := scenario.Next(
 		sc,
 		NewSessionStoreCall(its.EqEq("fake-cookie")).
 			ThenReturn("sample-user-id", true).
 			Mock(t),
 	)
 
-	_, getUser := scenario.Next(sc, NewUserRegistry_GetCall(
+	getUser := scenario.Next(sc, NewUserRegistry_GetCall(
 		its.EqEq("sample-user-id"),
 	).
 		ThenReturn(
@@ -323,7 +323,7 @@ func Example_scenario_failed_by_plans_incompleted() {
 		Mock(t),
 	)
 
-	_, updateUser := scenario.Next(sc, NewUserRegistry_UpdateCall(
+	updateUser := scenario.Next(sc, NewUserRegistry_UpdateCall(
 		ItsUser(
 			UserSpec{
 				Id:   its.EqEq("sample-user-id"),
@@ -335,7 +335,7 @@ func Example_scenario_failed_by_plans_incompleted() {
 		Mock(t),
 	)
 
-	_, _ = scenario.Next(sc, NewUserRegistry_DeleteCall(
+	scenario.Next(sc, NewUserRegistry_DeleteCall(
 		its.Always[example.User](),
 	).
 		ThenReturn(nil).

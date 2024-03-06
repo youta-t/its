@@ -4,8 +4,8 @@ package gen_mock
 import (
 	its "github.com/youta-t/its"
 	itskit "github.com/youta-t/its/itskit"
+	testee "github.com/youta-t/its/mocker/internal/types"
 	u_sub "github.com/youta-t/its/mocker/internal/example/sub"
-	testee "github.com/youta-t/its/mocker/internal/types_test"
 	
 )
 

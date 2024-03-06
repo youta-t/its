@@ -65,6 +65,8 @@ func (epm eqeqPtrMatcher[T]) String() string {
 // EqEqPtr tests of pointer for comparable with
 //
 //	(want == got) || (*want == *got)
+//
+// Deprecated: Use Pointer(EqEq(...)) .
 func EqEqPtr[T comparable](want *T) Matcher[*T] {
 	cancel := itskit.SkipStack()
 	defer cancel()
@@ -371,22 +373,22 @@ func Inf() Matcher[float64] {
 	)
 }
 
-type chanMatcher[T any] struct {
+type chanMatcher[T any, C chan T | <-chan T] struct {
 	label itskit.Label
 }
 
 // ClosedChan tests wheather channel is closed or not.
 //
 // This matcher tries to receive from channel, it may cause sideeffect.
-func ClosedChan[T any]() Matcher[<-chan T] {
+func ClosedChan[C chan T | <-chan T, T any]() Matcher[C] {
 	cancel := itskit.SkipStack()
 	defer cancel()
-	return chanMatcher[T]{
+	return chanMatcher[T, C]{
 		label: itskit.NewLabelWithLocation("chan %T is %s.", *new(T), itskit.Placeholder),
 	}
 }
 
-func (c chanMatcher[T]) Match(ch <-chan T) itskit.Match {
+func (c chanMatcher[T, C]) Match(ch C) itskit.Match {
 	var closed bool
 	select {
 	case _, ok := <-ch:
@@ -405,12 +407,12 @@ func (c chanMatcher[T]) Match(ch <-chan T) itskit.Match {
 	)
 }
 
-func (c chanMatcher[T]) Write(ww itsio.Writer) error {
+func (c chanMatcher[T, C]) Write(ww itsio.Writer) error {
 	return c.label.Write(ww)
 }
 
-func (c chanMatcher[T]) String() string {
-	return itskit.MatcherToString[<-chan T](c)
+func (c chanMatcher[T, C]) String() string {
+	return itskit.MatcherToString(c)
 }
 
 // Type tests got value is a type.
@@ -645,4 +647,58 @@ func Text(want string) Matcher[string] {
 		label: itskit.NewLabelWithLocation("(+ = got, - = want)"),
 		want:  want,
 	}
+}
+
+type propMatcher[T, U any] struct {
+	description itskit.Label
+	prop        func(T) U
+	m           Matcher[U]
+}
+
+// Property creates a matcher for property U calcurated from type T.
+//
+// # Args
+//
+// - description: description of property.
+// It can be string for a static message, or itskit.Label for a dinamic message.
+//
+// - prop: calcuration extracting U from T
+//
+// - m: matcher for U
+func Property[T, U any, D string | itskit.Label](
+	description D,
+	prop func(T) U,
+	m Matcher[U],
+) Matcher[T] {
+	cancel := itskit.SkipStack()
+	defer cancel()
+
+	var label itskit.Label
+	switch d := any(description).(type) {
+	case string:
+		label = itskit.NewLabelWithLocation(d + " :")
+	case itskit.Label:
+		label = d
+	}
+
+	return propMatcher[T, U]{
+		description: label, prop: prop, m: m,
+	}
+}
+
+func (k propMatcher[T, U]) Match(actual T) itskit.Match {
+	p := k.prop(actual)
+	match := k.m.Match(p)
+	return itskit.NewMatch(match.Ok(), k.description.Fill(actual), match)
+}
+
+func (k propMatcher[T, U]) Write(w itsio.Writer) error {
+	if err := k.description.Write(w); err != nil {
+		return err
+	}
+	return k.m.Write(w.Indent())
+}
+
+func (k propMatcher[T, U]) String() string {
+	return itskit.MatcherToString(k)
 }

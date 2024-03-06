@@ -69,48 +69,6 @@ func (ss *simpleMatcher[T]) String() string {
 	return MatcherToString[T](ss)
 }
 
-type propMatcher[T, U any] struct {
-	description Label
-	prop        func(T) U
-	m           Matcher[U]
-}
-
-// Property creates a matcher for property U calcurated from type T.
-//
-// # Args
-//
-// - description: description of property
-//
-// - prop: calcuration extractin U from T
-//
-// - m: matcher for U
-func Property[T, U any](
-	description string,
-	prop func(T) U,
-	m Matcher[U],
-) Matcher[T] {
-	return propMatcher[T, U]{
-		description: NewLabel(description + " :"), prop: prop, m: m,
-	}
-}
-
-func (k propMatcher[T, U]) Match(actual T) Match {
-	p := k.prop(actual)
-	match := k.m.Match(p)
-	return NewMatch(match.Ok(), k.description.Fill(actual), match)
-}
-
-func (k propMatcher[T, U]) Write(w itsio.Writer) error {
-	if err := k.description.Write(w); err != nil {
-		return err
-	}
-	return k.m.Write(w.Indent())
-}
-
-func (k propMatcher[T, U]) String() string {
-	return MatcherToString[T](k)
-}
-
 type namedMatcher[T any] struct {
 	name Label
 	m    Matcher[T]

@@ -97,12 +97,10 @@ The new file, has "Matcher" and "Spec" types, is placed in "./gen_structer" dire
 	if !*sourceAsPackage {
 		sources = append(sources, source)
 	} else {
-		logger.Printf("parse as package: %s", source)
 		p := try.To(build.Default.Import(source, ".", 0)).OrFatal(logger)
 		for _, gof := range p.GoFiles {
 			sources = append(sources, filepath.Join(p.Dir, gof))
 		}
-		logger.Println("source files are found!:", sources, ", in dir:", p.Dir)
 	}
 
 	for _, s := range sources {
@@ -213,7 +211,7 @@ import (
 {{ range .Structs }}
 {{ $s := . }}
 type {{ .Name }}Spec{{ .GenericExpr true }} struct {
-	{{ range .Body.Fields -}}
+	{{ range .Body.Fields -}}{{ if .IsOpaque }}{{ continue }}{{ end }}
 	{{- .Name }} its.Matcher[{{ .Type.Expr }}]
 	{{ end }}
 }
@@ -228,7 +226,7 @@ func Its{{ .Name }}{{ .GenericExpr true }}(want {{ .Name }}Spec{{ .GenericExpr f
 	defer cancel()
 
 	sub := []its.Matcher[{{ .Expr }}]{}
-	{{ range .Body.Fields }}
+	{{ range .Body.Fields }}{{ if .IsOpaque }}{{ continue }}{{ end }}
 	{
 		matcher := want.{{ .Name }}
 		if matcher == nil {
@@ -240,7 +238,7 @@ func Its{{ .Name }}{{ .GenericExpr true }}(want {{ .Name }}Spec{{ .GenericExpr f
 		}
 		sub = append(
 			sub,
-			itskit.Property[{{ $s.Expr }}, {{ .Type.Expr }}](
+			its.Property[{{ $s.Expr }}, {{ .Type.Expr }}](
 				".{{ .Name }}",
 				func(got {{ $s.Expr }}) {{ .Type.Expr }} { return got.{{ .Name }} },
 				matcher,

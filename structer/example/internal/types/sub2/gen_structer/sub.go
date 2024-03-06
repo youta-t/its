@@ -9,7 +9,7 @@ import (
 	config "github.com/youta-t/its/config"
 	itskit "github.com/youta-t/its/itskit"
 	itsio "github.com/youta-t/its/itskit/itsio"
-	testee "github.com/youta-t/its/structer/example/internal/type_test/sub2"
+	testee "github.com/youta-t/its/structer/example/internal/types/sub2"
 )
 
 type Sub2Spec struct {
@@ -38,7 +38,7 @@ func ItsSub2(want Sub2Spec) its.Matcher[testee.Sub2] {
 		}
 		sub = append(
 			sub,
-			itskit.Property[testee.Sub2, int](
+			its.Property[testee.Sub2, int](
 				".IntField",
 				func(got testee.Sub2) int { return got.IntField },
 				matcher,

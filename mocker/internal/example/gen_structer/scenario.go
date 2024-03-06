@@ -41,7 +41,7 @@ func ItsUser(want UserSpec) its.Matcher[testee.User] {
 		}
 		sub = append(
 			sub,
-			itskit.Property[testee.User, string](
+			its.Property[testee.User, string](
 				".Id",
 				func(got testee.User) string { return got.Id },
 				matcher,
@@ -60,7 +60,7 @@ func ItsUser(want UserSpec) its.Matcher[testee.User] {
 		}
 		sub = append(
 			sub,
-			itskit.Property[testee.User, string](
+			its.Property[testee.User, string](
 				".Name",
 				func(got testee.User) string { return got.Name },
 				matcher,
