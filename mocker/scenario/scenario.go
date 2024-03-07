@@ -153,6 +153,21 @@ func Next[T any](s Scenario, fn T) T {
 		c := &call{
 			args: a, tok: tok, loc: itskit.InvokedFrom(),
 		}
+
+		if 0 < len(args) && rfn.Type().IsVariadic() {
+			_args := args[:len(args)-1]
+			varg := args[len(args)-1]
+			if varg.Kind() != reflect.Slice {
+				panic("non-slice variadic arg!")
+			}
+			l := varg.Len()
+			for i := 0; i < l; i += 1 {
+				_args = append(_args, varg.Index(i))
+			}
+
+			args = _args
+		}
+
 		outs := rfn.Call(args)
 
 		o := make([]any, len(outs))

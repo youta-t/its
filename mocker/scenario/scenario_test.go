@@ -354,3 +354,48 @@ func Example_scenario_failed_by_plans_incompleted() {
 	// ✘ // there are functions planned but not called		--- @ ./mocker/scenario/scenario_test.go:356
 	//     ✘ ./mocker/scenario/scenario_test.go:338
 }
+
+func TestScenarioNext_WithoutArgs(t *testing.T) {
+	sc := scenario.Begin(t)
+
+	f := scenario.Next(sc, func() bool { return false })
+
+	got := f()
+	its.EqEq(false).Match(got).OrError(t)
+}
+
+func TestScenarioNext_WithoutVariadic(t *testing.T) {
+	sc := scenario.Begin(t)
+
+	f := scenario.Next(sc, func(a int, b int, c int) bool {
+		its.ForItems(its.Slice, its.EqEq, []int{1, 2, 3}).Match([]int{a, b, c}).OrError(t)
+		return false
+	})
+
+	got := f(1, 2, 3)
+	its.EqEq(false).Match(got).OrError(t)
+}
+
+func TestScenarioNext_WithSlice(t *testing.T) {
+	sc := scenario.Begin(t)
+
+	f := scenario.Next(sc, func(args []int) bool {
+		its.ForItems(its.Slice, its.EqEq, []int{1, 2, 3}).Match(args).OrError(t)
+		return false
+	})
+
+	got := f([]int{1, 2, 3})
+	its.EqEq(false).Match(got).OrError(t)
+}
+
+func TestScenarioNext_WithVariadic(t *testing.T) {
+	sc := scenario.Begin(t)
+
+	f := scenario.Next(sc, func(args ...int) bool {
+		its.ForItems(its.Slice, its.EqEq, []int{1, 2, 3}).Match(args).OrError(t)
+		return false
+	})
+
+	got := f(1, 2, 3)
+	its.EqEq(false).Match(got).OrError(t)
+}
