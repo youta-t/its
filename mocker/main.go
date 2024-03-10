@@ -109,8 +109,9 @@ It generates a file with same name as a file having go:generate directive.
 			PackageName: path.Base(dest),
 		}
 		requiredImports := map[string]*parser.Import{
-			"its":    {Name: "its", Path: "github.com/youta-t/its"},
-			"itskit": {Name: "itskit", Path: "github.com/youta-t/its/itskit"},
+			"its":     {Name: "its", Path: "github.com/youta-t/its"},
+			"itskit":  {Name: "itskit", Path: "github.com/youta-t/its/itskit"},
+			"mockkit": {Name: "mockkit", Path: "github.com/youta-t/its/mocker/mockkit"},
 		}
 		usedImports := map[string]*parser.Import{}
 
@@ -296,7 +297,6 @@ func writeFile(dest string, newFile generatingFile) error {
 //
 //
 //
-//
 
 const tpl = `// Code generated -- DO NOT EDIT
 package {{ .PackageName }}
@@ -309,25 +309,6 @@ import (
 
 {{- range .Funcs -}}
 {{- $func := . }}
-
-type _{{ .Name }}ReturnFixture{{ .GenericExpr true }} struct {
-	{{- range $idx, $p := .Body.Returns}}
-	{{ $p.ParamNameOr (printf "ret%d" $idx) }} {{ $p.Expr }}
-	{{ end }}
-}
-
-type _{{ .Name }}Return{{ .GenericExpr true }} struct {
-	fixture _{{ .Name }}ReturnFixture{{ .GenericExpr false }}
-}
-
-func (rfx _{{ .Name }}Return{{ .GenericExpr false }}) Get() (
-	{{- range $idx, $p := .Body.Returns}}
-	{{ $p.Expr }},
-	{{ end }}
-) {
-	return {{ range $idx, $p := .Body.Returns }}{{ if ne $idx 0}}, {{ end }}rfx.fixture.{{ $p.ParamNameOr (printf "ret%d" $idx) }}{{ end }}
-}
-
 type _{{ .Name }}CallSpec{{ .GenericExpr true }} struct {
 	{{- range $idx, $p := .Body.Args}}
 	{{ $p.ParamNameOr (printf "arg%d" $idx) }} its.Matcher[{{ $p.Expr }}]
@@ -340,7 +321,7 @@ type _{{ .Name }}Call{{ .GenericExpr true }} struct {
 	spec _{{ .Name }}CallSpec{{ .GenericExpr false }}
 }
 
-func New{{ .Name }}Call{{ .GenericExpr true }}(
+func {{ .Name }}_Expects{{ .GenericExpr true }}(
 	{{- range $idx, $p := .Body.Args}}
 	{{ $p.ParamNameOr (printf "arg%d" $idx) }} its.Matcher[{{ $p.Expr }}],
 	{{ end -}}
@@ -366,13 +347,13 @@ func New{{ .Name }}Call{{ .GenericExpr true }}(
 	}
 }
 
-type {{ .Name }}Behaviour {{ .GenericExpr true }} struct {
+type _{{ .Name }}Behavior {{ .GenericExpr true }} struct {
 	name itskit.Label
 	spec _{{ .Name }}CallSpec{{ .GenericExpr false }}
 	effect {{ .Body.Expr }}
 }
 
-func (b *{{ .Name }}Behaviour{{ .GenericExpr false }}) Mock(t interface { Error(...any) }) {{ .Body.Expr }} {
+func (b *_{{ .Name }}Behavior{{ .GenericExpr false }}) Fn(t mockkit.TestLike) {{ .Body.Expr }} {
 	return func (
 		{{ range $idx, $p :=  .Body.Args }}
 		{{ printf "arg%d" $idx }} {{ $p.Expr }},
@@ -433,7 +414,7 @@ func (c _{{.Name}}Call{{ .GenericExpr false }}) ThenReturn(
 {{ range $idx, $p := .Body.Returns }}
 	{{printf "ret%d" $idx}} {{  $p.Expr }},
 {{end}}
-) *{{ .Name }}Behaviour{{ .GenericExpr false }} {
+) mockkit.FuncBehavior[ func {{ .Body.Signature false }}  ] {
 	return c.ThenEffect(func(
 		{{range .Body.Args}}
 		{{ .Expr }},
@@ -449,8 +430,8 @@ func (c _{{.Name}}Call{{ .GenericExpr false }}) ThenReturn(
 	})
 }
 
-func (c _{{ .Name }}Call{{ .GenericExpr false }}) ThenEffect(effect {{ .Body.Expr }}) *{{ .Name }}Behaviour{{ .GenericExpr false }} {
-	return &{{ .Name }}Behaviour{{ .GenericExpr false }} {
+func (c _{{ .Name }}Call{{ .GenericExpr false }}) ThenEffect(effect {{ .Body.Expr }}) mockkit.FuncBehavior[ func {{ .Body.Signature false }} ] {
+	return &_{{ .Name }}Behavior{{ .GenericExpr false }} {
 		name: c.name,
 		spec: c.spec,
 		effect: effect,
@@ -460,19 +441,27 @@ func (c _{{ .Name }}Call{{ .GenericExpr false }}) ThenEffect(effect {{ .Body.Exp
 {{ end }}
 
 {{ range .Interfaces }}
-type {{ .Name }}Impl{{ .GenericExpr true }} struct {
+type _{{ .Name }}Impl{{ .GenericExpr true }} struct {
 	{{ range .Body.Methods }}
 	{{ .Name }} {{ .Func.Expr }}
 	{{- end }}
 }
 
-func NewMocked{{ .Name }}{{ .GenericExpr true }}(t interface { Fatal(...any) } ,impl {{ .Name }}Impl{{ .GenericExpr false }}) testee.{{ .Name }}{{ .GenericExpr false }} {
+func {{ .Name }}_Build{{ .GenericExpr true }}(t mockkit.TestLike, spec {{ .Name }}_Spec{{ .GenericExpr false }}) testee.{{ .Name }}{{ .GenericExpr false }} {
+	impl := _{{ .Name }}Impl{{ .GenericExpr false }}{}
+
+	{{ range .Body.Methods }}
+	if spec.{{ .Name }} != nil {
+		impl.{{ .Name }} = spec.{{ .Name }}.Fn(t)
+	}
+	{{ end }}
+
 	return _{{ .Name }}Mock{{ .GenericExpr false }} { t: t, impl: impl }
 }
 
 type _{{ .Name }}Mock{{ .GenericExpr true }} struct {
-	t interface { Fatal(...any) }
-	impl {{ .Name }}Impl{{ .GenericExpr false }}
+	t mockkit.TestLike
+	impl _{{ .Name }}Impl{{ .GenericExpr false }}
 }
 
 {{- $i := . -}}
@@ -501,5 +490,11 @@ func (m _{{ $i.Name }}Mock{{ $i.GenericExpr false }}) {{ .Name }} ({{ range $idx
 	)
 }
 {{ end }}
+
+type {{ $i.Name }}_Spec{{ $i.GenericExpr true }} struct {
+	{{ range .Body.Methods }}
+	{{ .Name }} mockkit.FuncBehavior[func {{ .Func.Signature false }}]
+	{{ end }}
+}
 {{ end }}
 `

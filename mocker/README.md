@@ -32,8 +32,11 @@ its-mocker is designed to be used as
 //go:generate go run github.com/youta-t/its/mocker
 ```
 
+Generated files are stored in a subpackage named `gen_mock`.
+
 When you do `go generate ./...`, its-mocker creates mock function builders and
 mock implementation of interfaces.
+
 
 Function Mocks of its
 -------------
@@ -47,17 +50,30 @@ When mocks are needed, they mostly are used for
 
 So, its mock has such features.
 
-The its-mocker generates `New${func name}Call` function for each functions and methods of interfaces.
-This `New...Call` is the entrypoint of function mock builder, and receives "what arguments to be passed" as `its.Matcher`
+The its-mocker generates `${func name}_Expecs` function for each functions and methods of interfaces.
+This `..._Expects` is the entrypoint of function mock builder, and receives "what arguments to be passed" as `its.Matcher`
 
-For example,
+`..._Expects` function is generated for each functions and methods of interfaces,
+so arguments of `..._Expects` and the method chain are tailored for each functions/methods.
+
+For example about a type
 
 ```go
-mockFn := NewFooCall(its.EqEq(10), its.GreaterThan(0)).
-    // ...
+//go:generate github.com/youta-t/its/mocker
+
+// ...
+
+type Foo func(int, int) (int, bool)
 ```
 
-declares, the mock function is expected to be called as `mockFn(10, 1)` or `mockFn(10, 100)` (or something).
+After `go generate ./...`, we can create mock of a `Foo` function.
+
+```go
+mockFoo := Foo_Expects(its.EqEq(10), its.GreaterThan(0)).
+    // cont....
+```
+
+It declares, the mock function is expected to be called as `mockFoo(10, 1)` or `mockFoo(10, 100)` (or something).
 
 This mock automatically test arguments when called, no needs to retreive arguments later.
 If not the test is passed, it records test error.
@@ -65,30 +81,36 @@ If not the test is passed, it records test error.
 Then, let us declare return values and get a mock.
 
 ```go
-mockFn := NewFooCall(its.EqEq(10), its.GreaterThan(0)).
+mockFoo := Foo_Expects(its.EqEq(10), its.GreaterThan(0)).
     ThenReturn(42, false).
-    Mock(t)  // t is *testing.T
+    // cont....
 ```
 
-In this method chain, `ThenReturn` declares "what values should be returned".
-When do that, `mockFn` returns `(42, false)` always.
+In this method chain, `.ThenReturn` declares "what values should be returned".
+When do that, the mock function `mockFoo` returns `(42, false)` always.
 
-And, `Mock(t)` builds the method chain into a mock function.
-
-`New...Call` function is generated for each functions and methods of interfaces,
-so arguments of `New...Call` and the method chain are tailored for each functions/methods.
-
-### Mock with Behavior
-
-When you need to give behavior to mock, use `.ThenEffect` for an alternative of `.ThenReturn`.
+`.ThenReturn` at here returns `its/mocker/mockkit.FuncBehavior[Foo]`, not a function itself.
+To get a mocked function, do
 
 ```go
-mockFn := NewFooCall(its.EqEq(10), its.GreaterThan(0)).
+mockFoo := Foo_Expects(its.EqEq(10), its.GreaterThan(0)).
+    ThenReturn(42, false).
+    Fn(t)  // t is *testing.T.
+```
+
+Now we get a mock.
+
+### Mock with Side Effect
+
+When you need to give side effects to mock, use `.ThenEffect` for an alternative of `.ThenReturn`.
+
+```go
+mockFoo := Foo_Expects(its.EqEq(10), its.GreaterThan(0)).
     ThenEffect(func(int, int) (int, bool) {
         fmt.Printf("called!")
         return 42, false
     }).
-    Mock(t)  // t is *testing.T
+    Fn(t)  // t is *testing.T
 ```
 
 The return values of callback are the return values of the mock.
@@ -96,38 +118,55 @@ The return values of callback are the return values of the mock.
 Interface Mocks
 ----------------
 
-For each interface, its-mock generates mock implementations of them.
+For each interface, its/mocker generates mock implementations of them.
 
-Mock implementation can be gain with `New${interface-name}(t, ${interface-name}Impl{ ... })`.
+Mock implementation can be gain with `${interface name}_Build(t, ${interface name}_Spec{ ... })`.
 
-For example, given an interface `Fizz` as below:
+For example, given an interface `FizzBazz` as below:
 
 ```go
 type FizzBazz interface {
-    Say (int) (int, string, bool)
+    Say (int) (n int, s string, seeString bool)
 }
 ```
 
-Then, with its-mocker, you can mock of that with
+Then, with its/mocker, you can mock of that with
 
 ```go
-mock := NewFizzBazz(t, FizzImpl{  // t is *testing.T
-    Say: func(n int) (int, string, bool) { ... },
-})
-```
-
-Fields of `FizzImpl` defines mocked implementations for each methods.
-Of course, to create mocked methods we can use function mock. So, we can...
-
-```go
-mock := NewFizzBazz(t, FizzImpl{  // t is *testing.T
-    Say: NewFizzBazz_SayCall(its.EqEq(3)).ThenReturn(3, "fizz", true).Mock(t),
-})
+var mock FizzBazz = FizzBazz_Build(
+    t,  // t is *testing.T
+    FizzBazz_Spec{
+        Say: FizzBazz_Say_Expects(...).ThenReturn(...),
+    },
+)
 
 mock.Say(3)  // 3, "fizz", true
 ```
 
-If you call not-mocked method, the interface mock records test error.
+Fields of `FizzBazz_Spec` holds "behavior" for each methods.
+Behavior, in this context, is a value defines that "how does it test the parameters?" and "what values will be returned?".
+
+They, fields, are typed as `github.com/youta.t/its/mocker/mockkit.FuncBehavior[F]`, of course it represents a behavior.
+Each of `F`s is a `func` type having same signature as the method for the field name,
+and it expresses specification of the behavior the mocked funcion.
+
+When you call not-mocked method of interface mock, the interface mock records test error.
+
+### Behavior without parameter testing
+
+Test-free `FuncBehavior[F]` can be created by `github.com/youta-t/its/mocker/mockkit.Effect`.
+
+The package `github.com/yotua-t/mocker/mockkit` has utilities for mockking. `Effect` function is one of them.
+
+`Effect` works like below:
+
+```go
+var eff mockkit.FuncBehavior[func(int, string) (float, error)] = mockkit.Effect(
+    func(a int, b string) (f float, err error) { return 0, nil },
+)
+mockFn := eff.Fn(t)
+mockFn()  // 0, nil
+```
 
 Scenario Test
 -------------
@@ -137,55 +176,46 @@ When mocking, mock is not enough.
 Testing with mock are often intersted with call order of mocked functions.
 For such case, its mock supports "scenario test".
 
-Scenario test feature is exported from `github.com/youta-t/its/mocker/scenario`.
-
 In scenario test, the interested call order is described as a scenario.
 
 ```go
-sc := scenario.Begin(t)  // t is *testing.T
+sc := mockkit.BeginScenario(t)  // t is *testing.T
 defer sc.End()
 
-_, chap1 := scenario.Next(sc, func(...) { ... })
-_, chap2 := scenario.Next(sc, func(...) { ... })
+chap1 := mockkit.Next(sc, mockkit.Effect(func(...) { ... }))
+chap2 := mockkit.Next(sc, mockkit.Effect(func(...) { ... }))
 // ...
 ```
 
-At first, `scenario.Begin`. This creates an empty scenario.
-Then, register functions with `scenario.Next` in expected call order.
+At first, `mockkit.BeginScenario`. This creates an empty scenario.
+Then, register `FuncBehavior[F]` with `mockkit.Next` in expected call order.
 
-Returned `chapX`s are functions tracked by scenario.
-If `chap`s are called out of order, scenario reports test errors.
-If all `chap` are not called until `sc.End`, also scenario reports test errors.
+Returned `chapX`s are behaviors tracked by scenario.
+If `chap`s are called out of order or have not called until the end, scenario reports test errors.
 
-So, with scenario, "it has been called?" flags are not needed. Scenario tracks that.
-
-`scenario.Next` can receive function, so we can pass function-mock.
+`mockkit.Next` can receive `FuncBehavior`, so we can pass function-mock.
 And, returned `chap` can be set as implementations of interface.
 
 So, building them up all and we get...
 
 ```go
-sc := scenario.Begin(t)  // t is *testing.T
+sc := mockkit.BeginScenario(t)  // t is *testing.T
 defer sc.End()
 
-_, chap1 := scenario.Next(
+spec := FizzBazz_Sppec{}
+spec.Say = mockkit.Next(
     sc,
-    NewFizzBazz_SayCall(its.EqEq(3)).
-        ThenReturn(3, "fizz", true).
-        Mock(t),
+    NewFizzBazz_SayCall(its.EqEq(3)).ThenReturn(3, "fizz", true),
 )
 
-mock := NewFizzBazz(t, FizzBazzImpl{
-    Say: chap1,
-})
-
+mock := FizzBazz_Build(t, spec)
 mock.Say(3)
 ```
 
 This tests them all:
 
 - `mock.Say` is called? (by scenario)
-- `mock.Say` is planned to be called? (by interface mock)
+- `mock.Say` is planned to be called? (by interface mock & scenario)
 - `mock.Say` is called with `(3)`? (by function mock)
 
 More advanced example
@@ -239,51 +269,47 @@ To test that, we can do
 
 ```go
 func TestUpdateUser(t *testing.T) {
-	sc := scenario.Begin(t)
+	sc := mockkit.BeginScenario(t)
 	defer sc.End()
 
-	_, sess := scenario.Next( // add a function into scenario
-		sc, NewSessionStoreCall(
-			its.EqEq("fake-cookie")).           // expectation for arguments
-			ThenReturn("sample-user-id", true). // fixture for retrun valeus
-			Mock(t),                            // build as mock function
+	sess := mockkit.Next( // add a function into scenario
+		sc,
+		SessionStore_Expects(its.EqEq("fake-cookie")).  // expectation for arguments
+			ThenReturn("sample-user-id", true),         // fixture for retrun valeus
 	)
 
-	_, getUser := scenario.Next(sc, NewUserRegistry_GetCall(
-		its.EqEq("sample-user-id"),
-	).
-		ThenReturn(
-			example.User{
-				Id:   "sample-user-id",
-				Name: "John Doe",
-			},
-			nil,
-		).
-		Mock(t),
+	userRegistry := UserRegistry_Spec{}
+	userRegistry.Get = mockkit.Next(
+ 		sc,
+		UserRegistry_Get_Expects(its.EqEq("sample-user-id")).
+			ThenReturn(
+				example.User{
+					Id:   "sample-user-id",
+					Name: "John Doe",
+				},
+				nil,
+			),
 	)
 
-	_, updateUser := scenario.Next(sc, NewUserRegistry_UpdateCall(
-		ItsUser(
-			UserSpec{
+	userRegistry.Update = mockkit.Next(
+		sc,
+		UserRegistry_Update_Expects(
+			ItsUser(UserSpec{
 				Id:   its.EqEq("sample-user-id"),
 				Name: its.EqEq("Richard Roe"),
-			},
-		),
-	).
-		ThenReturn(nil).
-		Mock(t),
+			}),
+		).
+			ThenReturn(nil),
 	)
 
-	registry := NewMockedUserRegistry(t, UserRegistryImpl{
-		Get:    getUser,
-		Update: updateUser,
-	})
+	testee := example.UpdateUser(
+		sess.Fn(t),
+		UserRegistry_Build(t, userRegistry),
+	)
 
-	testee := example.UpdateUser(sess, registry)
-
-	its.Nil().Match( // no error has been returned?
-		testee("fake-cookie", "Richard Roe"),
-	).OrError(t)
+	its.Nil().
+		Match(testee("fake-cookie", "Richard Roe")).  // no error has been returned?
+		OrError(t)
 }
 ```
 
