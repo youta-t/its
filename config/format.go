@@ -1,8 +1,12 @@
 package config
 
 import (
+	"cmp"
 	"os"
+	"path"
 	"path/filepath"
+	"slices"
+	"strings"
 )
 
 // Indent of messages
@@ -39,6 +43,13 @@ var FailedSuppressed = func(s string) string {
 // default: "* "
 var FailedSuppressedSigil = "~ "
 
+type replacer struct {
+	From string
+	To   string
+}
+
+func (r replacer) Cmp(r2 replacer) int { return cmp.Compare(r.From, r2.From) }
+
 // When set, this filepath will be replaced with FilepathReplaceWith value.
 // If this value is empty string, replacing is not performed.
 //
@@ -48,14 +59,33 @@ var FailedSuppressedSigil = "~ "
 //
 // The project root is the most shallow filepath
 // having ".git", "go.work" or "go.mod" from working directory.
-var FilepathReplace = ""
+var FilepathReplace = []replacer{}
 
-// Replacement by FilepathReplace.
-//
-// Default is ".".
-//
-// When ennvat ITS_REPLCE_FILEPATH_WITH is set, use that value as default.
-var FilepathReplaceWith = "."
+func ReplaceFilepath(p string) string {
+	repl := []replacer{}
+	repl = append(repl, FilepathReplace...)
+	slices.SortFunc(repl, replacer.Cmp)
+
+	for _, r := range repl {
+		if strings.HasPrefix(p, r.From) {
+			p = p[len(r.From):]
+			if p[0] == os.PathSeparator {
+				p = p[1:]
+			}
+			prefix := r.To
+			if prefix[len(prefix)-1] == os.PathSeparator {
+				prefix = prefix[:len(prefix)-1]
+			}
+
+			if prefix == "." {
+				return strings.Join([]string{prefix, p}, string(os.PathSeparator))
+			}
+			return path.Join(prefix, p)
+		}
+	}
+
+	return p
+}
 
 func init() {
 	replace := os.Getenv("ITS_REPLACE_FILEPATH")
@@ -64,10 +94,23 @@ func init() {
 	case "!project":
 		ReplaceProjectRoot()
 	default:
-		FilepathReplace = replace
 		replaceWith, ok := os.LookupEnv("ITS_REPLACE_FILEPATH_WITH")
 		if ok {
-			FilepathReplaceWith = replaceWith
+			FilepathReplace = append(FilepathReplace, replacer{
+				From: replaceWith, To: replaceWith,
+			})
+		}
+	}
+
+	cloakGoRoot := os.Getenv("ITS_CLOAK_GOROOT")
+	switch cloakGoRoot {
+	case "":
+	default:
+		goroot := os.Getenv("GOROOT")
+		if goroot != "" {
+			FilepathReplace = append(FilepathReplace, replacer{
+				goroot, "(GOROOT)",
+			})
 		}
 	}
 }
@@ -79,51 +122,58 @@ func ReplaceProjectRoot() {
 		return
 	}
 	{
+		wd_ := wd
 		for {
-			gomod := filepath.Join(wd, "go.mod")
+			gomod := filepath.Join(wd_, "go.mod")
 			if _, err := os.Stat(gomod); err == nil {
-				FilepathReplace = wd
-				break
+				FilepathReplace = append(FilepathReplace, replacer{
+					From: wd_, To: ".",
+				})
+				return
 			}
 
-			parent := filepath.Dir(wd)
-			if wd == parent {
+			parent := filepath.Dir(wd_)
+			if wd_ == parent {
 				break
 			}
-			wd = parent
+			wd_ = parent
 		}
 	}
 
 	{
-		wd := FilepathReplace
+		wd_ := wd
 		for {
-			gomod := filepath.Join(wd, "go.work")
-			if _, err := os.Stat(gomod); err == nil {
-				FilepathReplace = wd
-				break
+			gowork := filepath.Join(wd_, "go.work")
+			if _, err := os.Stat(gowork); err == nil {
+				FilepathReplace = append(FilepathReplace, replacer{
+					From: wd_, To: ".",
+				})
+				return
 			}
 
-			parent := filepath.Dir(wd)
-			if wd == parent {
+			parent := filepath.Dir(wd_)
+			if wd_ == parent {
 				break
 			}
-			wd = parent
+			wd_ = parent
 		}
 	}
 	{
-		wd := FilepathReplace
+		wd_ := wd
 		for {
-			gomod := filepath.Join(wd, ".git")
-			if _, err := os.Stat(gomod); err == nil {
-				FilepathReplace = wd
-				break
+			gitroot := filepath.Join(wd_, ".git")
+			if _, err := os.Stat(gitroot); err == nil {
+				FilepathReplace = append(FilepathReplace, replacer{
+					From: wd_, To: ".",
+				})
+				return
 			}
 
-			parent := filepath.Dir(wd)
-			if wd == parent {
+			parent := filepath.Dir(wd_)
+			if wd_ == parent {
 				break
 			}
-			wd = parent
+			wd_ = parent
 		}
 	}
 }

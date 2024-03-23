@@ -2,17 +2,9 @@ package itskit
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
-	"runtime"
-	"strings"
-	"sync"
 
-	"github.com/youta-t/its/config"
+	"github.com/youta-t/its/internal/location"
 )
-
-var skipstack = map[uintptr]struct{}{}
-var mustack sync.Mutex
 
 // SkipStack marks callstack not to show in error messge.
 //
@@ -20,26 +12,7 @@ var mustack sync.Mutex
 //
 // cancel function. It deletes a mark created by SkipStack.
 func SkipStack() (cancel func()) {
-	mustack.Lock()
-	defer mustack.Unlock()
-	if skipstack == nil {
-		skipstack = map[uintptr]struct{}{}
-	}
-
-	pc, _, _, ok := runtime.Caller(1)
-	if !ok {
-		return func() {}
-	}
-
-	fnpc := runtime.FuncForPC(pc).Entry()
-
-	skipstack[fnpc] = struct{}{}
-
-	return func() {
-		mustack.Lock()
-		defer mustack.Unlock()
-		delete(skipstack, fnpc)
-	}
+	return location.SkipStackSkipping(1)
 }
 
 // Location in sourcecode.
@@ -63,24 +36,7 @@ func (l Location) String() string {
 //
 // InvokedFrom considers skipped call stack by SkipStack().
 func InvokedFrom() Location {
-	skip := 2
-	for {
-		pc, file, line, ok := runtime.Caller(skip)
-		if !ok {
-			return Location{File: "(unknwon)", Line: -1}
-		}
-		fn := runtime.FuncForPC(pc)
-		fnpc := fn.Entry()
-		if _, ok := skipstack[fnpc]; ok {
-			skip += 1
-			continue
-		}
+	loc := location.InvokedFrom()
 
-		if config.FilepathReplace != "" {
-			if f, err := filepath.Rel(config.FilepathReplace, file); err == nil && !strings.HasPrefix(f, "..") {
-				file = strings.Join([]string{config.FilepathReplaceWith, f}, string(os.PathSeparator))
-			}
-		}
-		return Location{File: file, Line: line}
-	}
+	return Location(loc)
 }

@@ -12,29 +12,22 @@ import (
 
 func TestI0(t *testing.T) {
 	wantErr := errors.New("err")
-	var testee types.I0 = gen_mock.NewMockedI0(
-		t,
-		gen_mock.I0Impl{
-			M0: gen_mock.NewI0_M0Call().ThenReturn().Mock(t),
-			M1: gen_mock.NewI0_M1Call(its.EqEq(42), its.EqEq("abc")).
-				ThenReturn(true, wantErr).
-				Mock(t),
-			M2: gen_mock.NewI0_M2Call(its.EqEq(42), its.EqEq("abc")).
-				ThenReturn(true, wantErr).
-				Mock(t),
-			M3: gen_mock.NewI0_M3Call(
-				its.EqEq(42),
-				its.ForItems(its.Slice, its.EqEq, []string{"a", "b", "c"}),
-			).
-				ThenReturn(true, wantErr).
-				Mock(t),
-			M4: gen_mock.NewI0_M4Call(
-				its.ForItems(its.Slice, its.EqEq, []string{"a", "b", "c"}),
-			).
-				ThenReturn(true).
-				Mock(t),
-		},
-	)
+	var testee types.I0 = gen_mock.I0_Build(t, gen_mock.I0_Spec{
+		M0: gen_mock.I0_M0_Expects().ThenReturn(),
+		M1: gen_mock.I0_M1_Expects(its.EqEq(42), its.EqEq("abc")).
+			ThenReturn(true, wantErr),
+		M2: gen_mock.I0_M2_Expects(its.EqEq(42), its.EqEq("abc")).
+			ThenReturn(true, wantErr),
+		M3: gen_mock.I0_M3_Expects(
+			its.EqEq(42),
+			its.ForItems(its.Slice, its.EqEq, []string{"a", "b", "c"}),
+		).
+			ThenReturn(true, wantErr),
+		M4: gen_mock.I0_M4_Expects(
+			its.ForItems(its.Slice, its.EqEq, []string{"a", "b", "c"}),
+		).
+			ThenReturn(true),
+	})
 
 	{
 		testee.M0()
@@ -66,16 +59,12 @@ func TestI0(t *testing.T) {
 
 func TestI1(t *testing.T) {
 	wanterr := errors.New("err")
-	testee := gen_mock.NewMockedI1(
-		t,
-		gen_mock.I1Impl[sub.T, sub.T, types.X[sub.T]]{
-			M0: gen_mock.NewI1_M0Call(its.EqEq(sub.T{}), its.EqEq(sub.T{})).
-				ThenReturn(types.X[sub.T]{}, wanterr).
-				Mock(t),
-			M1: gen_mock.NewI1_M1Call(its.EqEq(sub.T{})).ThenReturn().Mock(t),
-			M2: gen_mock.NewI1_M2Call().ThenReturn(types.X[sub.T]{}).Mock(t),
-		},
-	)
+	testee := gen_mock.I1_Build(t, gen_mock.I1_Spec[sub.T, sub.T, types.X[sub.T]]{
+		M0: gen_mock.I1_M0_Expects(its.EqEq(sub.T{}), its.EqEq(sub.T{})).
+			ThenReturn(types.X[sub.T]{}, wanterr),
+		M1: gen_mock.I1_M1_Expects(its.EqEq(sub.T{})).ThenReturn(),
+		M2: gen_mock.I1_M2_Expects().ThenReturn(types.X[sub.T]{}),
+	})
 	{
 		r1, r2 := testee.M0(sub.T{}, sub.T{})
 
@@ -96,10 +85,9 @@ func TestI1(t *testing.T) {
 func TestI3(t *testing.T) {
 	type mystr string
 
-	var testee types.I2[mystr] = gen_mock.NewMockedI2(t, gen_mock.I2Impl[mystr]{
-		M0: gen_mock.NewI2_M0Call(its.EqEq(mystr("foo"))).
-			ThenReturn(mystr("bar")).
-			Mock(t),
+	var testee types.I2[mystr] = gen_mock.I2_Build(t, gen_mock.I2_Spec[mystr]{
+		M0: gen_mock.I2_M0_Expects(its.EqEq(mystr("foo"))).
+			ThenReturn(mystr("bar")),
 	})
 
 	r1 := testee.M0("foo")

@@ -13,33 +13,33 @@ import (
 func TestF1(t *testing.T) {
 	// compilability test
 	{
-		testee := gen_mock.NewF1Call().ThenReturn().Mock(t)
+		testee := gen_mock.F1_Expects().ThenReturn().Fn(t)
 		testee()
 	}
 
 	{
-		testee := gen_mock.NewF1Call().ThenEffect(func() {}).Mock(t)
+		testee := gen_mock.F1_Expects().ThenEffect(func() {}).Fn(t)
 		testee()
 	}
 }
 
 func TestF2(t *testing.T) {
 	{
-		testee := gen_mock.NewF2Call().ThenReturn(42).Mock(t)
+		testee := gen_mock.F2_Expects().ThenReturn(42).Fn(t)
 		its.EqEq(42).Match(testee()).OrError(t)
 	}
 
 	{
-		testee := gen_mock.NewF2Call().
+		testee := gen_mock.F2_Expects().
 			ThenEffect(func() int { return 42 }).
-			Mock(t)
+			Fn(t)
 		its.EqEq(42).Match(testee()).OrError(t)
 	}
 }
 
 func TestF3(t *testing.T) {
 	{
-		testee := gen_mock.NewF3Call().ThenReturn(1, "a").Mock(t)
+		testee := gen_mock.F3_Expects().ThenReturn(1, "a").Fn(t)
 
 		r1, r2 := testee()
 
@@ -48,9 +48,9 @@ func TestF3(t *testing.T) {
 	}
 
 	{
-		testee := gen_mock.NewF3Call().ThenEffect(func() (int, string) {
+		testee := gen_mock.F3_Expects().ThenEffect(func() (int, string) {
 			return 1, "a"
-		}).Mock(t)
+		}).Fn(t)
 
 		r1, r2 := testee()
 		its.EqEq(r1).Match(1).OrError(t)
@@ -60,7 +60,7 @@ func TestF3(t *testing.T) {
 
 func TestF4(t *testing.T) {
 	{
-		testee := gen_mock.NewF4Call().ThenReturn(1, "a").Mock(t)
+		testee := gen_mock.F4_Expects().ThenReturn(1, "a").Fn(t)
 
 		r1, r2 := testee()
 
@@ -69,9 +69,9 @@ func TestF4(t *testing.T) {
 	}
 
 	{
-		testee := gen_mock.NewF4Call().ThenEffect(func() (int, string) {
+		testee := gen_mock.F4_Expects().ThenEffect(func() (int, string) {
 			return 1, "a"
-		}).Mock(t)
+		}).Fn(t)
 
 		r1, r2 := testee()
 		its.EqEq(r1).Match(1).OrError(t)
@@ -81,20 +81,20 @@ func TestF4(t *testing.T) {
 
 func TestF5(t *testing.T) {
 	{
-		testee := gen_mock.NewF5Call(
+		testee := gen_mock.F5_Expects(
 			its.EqEq(15), its.EqEq("abc"),
 		).
 			ThenReturn().
-			Mock(t)
+			Fn(t)
 
 		testee(15, "abc")
 	}
 	{
-		testee := gen_mock.NewF5Call(
+		testee := gen_mock.F5_Expects(
 			its.EqEq(15), its.EqEq("abc"),
 		).
 			ThenEffect(func(arg0 int, arg1 string) {}).
-			Mock(t)
+			Fn(t)
 
 		testee(15, "abc")
 	}
@@ -102,60 +102,60 @@ func TestF5(t *testing.T) {
 
 func TestF6(t *testing.T) {
 	{
-		testee := gen_mock.NewF6Call(
+		testee := gen_mock.F6_Expects(
 			its.EqEq(42),
 			its.ForItems(its.Slice, its.EqEq, []string{"a", "b", "c"}),
 		).
 			ThenReturn().
-			Mock(t)
+			Fn(t)
 		testee(42, "a", "b", "c")
 	}
 	{
-		testee := gen_mock.NewF6Call(
+		testee := gen_mock.F6_Expects(
 			its.EqEq(42),
 			its.ForItems(its.Slice, its.EqEq, []string{"a", "b", "c"}),
 		).
 			ThenEffect(func(arg0 int, vararg ...string) {}).
-			Mock(t)
+			Fn(t)
 		testee(42, "a", "b", "c")
 	}
 }
 
 func TestF7(t *testing.T) {
 	{
-		testee := gen_mock.NewF7Call(
+		testee := gen_mock.F7_Expects(
 			its.ForItems(its.Slice, its.EqEq, []string{"a", "b", "c"}),
 		).
 			ThenReturn().
-			Mock(t)
+			Fn(t)
 		testee("a", "b", "c")
 	}
 	{
-		testee := gen_mock.NewF7Call(
+		testee := gen_mock.F7_Expects(
 			its.ForItems(its.Slice, its.EqEq, []string{"a", "b", "c"}),
 		).
 			ThenEffect(func(vararg ...string) {}).
-			Mock(t)
+			Fn(t)
 		testee("a", "b", "c")
 	}
 }
 
 func TestF8(t *testing.T) {
 	{
-		testee := gen_mock.NewF8Call(
+		testee := gen_mock.F8_Expects(
 			its.EqEq(15), its.EqEq("abc"),
 		).
 			ThenReturn().
-			Mock(t)
+			Fn(t)
 
 		testee(15, "abc")
 	}
 	{
-		testee := gen_mock.NewF8Call(
+		testee := gen_mock.F8_Expects(
 			its.EqEq(15), its.EqEq("abc"),
 		).
 			ThenEffect(func(arg0 int, arg1 string) {}).
-			Mock(t)
+			Fn(t)
 
 		testee(15, "abc")
 	}
@@ -163,60 +163,60 @@ func TestF8(t *testing.T) {
 
 func TestF9(t *testing.T) {
 	{
-		testee := gen_mock.NewF9Call(
+		testee := gen_mock.F9_Expects(
 			its.EqEq(42),
 			its.ForItems(its.Slice, its.EqEq, []string{"a", "b", "c"}),
 		).
 			ThenReturn().
-			Mock(t)
+			Fn(t)
 		testee(42, "a", "b", "c")
 	}
 	{
-		testee := gen_mock.NewF9Call(
+		testee := gen_mock.F9_Expects(
 			its.EqEq(42),
 			its.ForItems(its.Slice, its.EqEq, []string{"a", "b", "c"}),
 		).
 			ThenEffect(func(arg0 int, vararg ...string) {}).
-			Mock(t)
+			Fn(t)
 		testee(42, "a", "b", "c")
 	}
 }
 
 func TestF10(t *testing.T) {
 	{
-		testee := gen_mock.NewF10Call(
+		testee := gen_mock.F10_Expects(
 			its.ForItems(its.Slice, its.EqEq, []string{"a", "b", "c"}),
 		).
 			ThenReturn().
-			Mock(t)
+			Fn(t)
 		testee("a", "b", "c")
 	}
 	{
-		testee := gen_mock.NewF10Call(
+		testee := gen_mock.F10_Expects(
 			its.ForItems(its.Slice, its.EqEq, []string{"a", "b", "c"}),
 		).
 			ThenEffect(func(vararg ...string) {}).
-			Mock(t)
+			Fn(t)
 		testee("a", "b", "c")
 	}
 }
 
 func TestF11(t *testing.T) {
 	{
-		testee := gen_mock.NewF11Call(
+		testee := gen_mock.F11_Expects(
 			its.EqEq(15), its.EqEq("abc"),
 		).
 			ThenReturn().
-			Mock(t)
+			Fn(t)
 
 		testee(15, "abc")
 	}
 	{
-		testee := gen_mock.NewF11Call(
+		testee := gen_mock.F11_Expects(
 			its.EqEq(15), its.EqEq("abc"),
 		).
 			ThenEffect(func(arg0 int, arg1 string) {}).
-			Mock(t)
+			Fn(t)
 
 		testee(15, "abc")
 	}
@@ -224,64 +224,64 @@ func TestF11(t *testing.T) {
 
 func TestF12(t *testing.T) {
 	{
-		testee := gen_mock.NewF12Call(
+		testee := gen_mock.F12_Expects(
 			its.EqEq(42),
 			its.ForItems(its.Slice, its.EqEq, []string{"a", "b", "c"}),
 		).
 			ThenReturn().
-			Mock(t)
+			Fn(t)
 		testee(42, "a", "b", "c")
 	}
 	{
-		testee := gen_mock.NewF12Call(
+		testee := gen_mock.F12_Expects(
 			its.EqEq(42),
 			its.ForItems(its.Slice, its.EqEq, []string{"a", "b", "c"}),
 		).
 			ThenEffect(func(arg0 int, vararg ...string) {}).
-			Mock(t)
+			Fn(t)
 		testee(42, "a", "b", "c")
 	}
 }
 
 func TestF13(t *testing.T) {
 	{
-		testee := gen_mock.NewF13Call(
+		testee := gen_mock.F13_Expects(
 			its.ForItems(its.Slice, its.EqEq, []string{"a", "b", "c"}),
 		).
 			ThenReturn().
-			Mock(t)
+			Fn(t)
 		testee("a", "b", "c")
 	}
 	{
-		testee := gen_mock.NewF13Call(
+		testee := gen_mock.F13_Expects(
 			its.ForItems(its.Slice, its.EqEq, []string{"a", "b", "c"}),
 		).
 			ThenEffect(func(vararg ...string) {}).
-			Mock(t)
+			Fn(t)
 		testee("a", "b", "c")
 	}
 }
 
 func TestF14(t *testing.T) {
 	{
-		testee := gen_mock.NewF14Call(
+		testee := gen_mock.F14_Expects(
 			its.EqEq(42), its.EqEq("foo"),
 		).
 			ThenReturn(12.125).
-			Mock(t)
+			Fn(t)
 
 		r1 := testee(42, "foo")
 
 		its.EqEq(12.125).Match(r1).OrError(t)
 	}
 	{
-		testee := gen_mock.NewF14Call(
+		testee := gen_mock.F14_Expects(
 			its.EqEq(42), its.EqEq("foo"),
 		).
 			ThenEffect(func(arg0 int, arg1 string) (f float64) {
 				return 12.125
 			}).
-			Mock(t)
+			Fn(t)
 
 		r1 := testee(42, "foo")
 
@@ -291,26 +291,26 @@ func TestF14(t *testing.T) {
 
 func TestF15(t *testing.T) {
 	{
-		testee := gen_mock.NewF15Call(
+		testee := gen_mock.F15_Expects(
 			its.EqEq(42),
 			its.ForItems(its.Slice, its.EqEq, []string{"a", "b", "c"}),
 		).
 			ThenReturn(12.125).
-			Mock(t)
+			Fn(t)
 
 		r1 := testee(42, "a", "b", "c")
 
 		its.EqEq(12.125).Match(r1).OrError(t)
 	}
 	{
-		testee := gen_mock.NewF15Call(
+		testee := gen_mock.F15_Expects(
 			its.EqEq(42),
 			its.ForItems(its.Slice, its.EqEq, []string{"a", "b", "c"}),
 		).
 			ThenEffect(func(i int, ss ...string) float64 {
 				return 12.125
 			}).
-			Mock(t)
+			Fn(t)
 
 		r1 := testee(42, "a", "b", "c")
 
@@ -320,11 +320,11 @@ func TestF15(t *testing.T) {
 
 func TestF16(t *testing.T) {
 	{
-		testee := gen_mock.NewF16Call[string](
+		testee := gen_mock.F16_Expects[string](
 			its.Always[types.F16[string]](),
 		).
 			ThenReturn("foo").
-			Mock(t)
+			Fn(t)
 
 		r1 := testee(func(f types.F16[string]) string {
 			return "abc"
@@ -333,13 +333,13 @@ func TestF16(t *testing.T) {
 		its.EqEq("foo").Match(r1).OrError(t)
 	}
 	{
-		testee := gen_mock.NewF16Call[string](
+		testee := gen_mock.F16_Expects[string](
 			its.Always[types.F16[string]](),
 		).
 			ThenEffect(func(arg0 types.F16[string]) string {
 				return "foo"
 			}).
-			Mock(t)
+			Fn(t)
 
 		r1 := testee(func(f types.F16[string]) string {
 			return "abc"
@@ -354,23 +354,23 @@ func TestF17(t *testing.T) {
 		Foo int
 	}
 	{
-		testee := gen_mock.NewF17Call[Fooer](
+		testee := gen_mock.F17_Expects[Fooer](
 			its.EqEq(Fooer{Foo: 42}),
 		).
 			ThenReturn(Fooer{Foo: 99}).
-			Mock(t)
+			Fn(t)
 
 		r1 := testee(Fooer{Foo: 42})
 		its.EqEq(Fooer{Foo: 99}).Match(r1).OrError(t)
 	}
 	{
-		testee := gen_mock.NewF17Call[Fooer](
+		testee := gen_mock.F17_Expects[Fooer](
 			its.EqEq(Fooer{Foo: 42}),
 		).
 			ThenEffect(func(arg0 Fooer) Fooer {
 				return Fooer{Foo: 99}
 			}).
-			Mock(t)
+			Fn(t)
 
 		r1 := testee(Fooer{Foo: 42})
 		its.EqEq(Fooer{Foo: 99}).Match(r1).OrError(t)
@@ -380,23 +380,23 @@ func TestF17(t *testing.T) {
 func TestF18(t *testing.T) {
 	// compilability test
 	{
-		testee := gen_mock.NewF18Call[int, string](
+		testee := gen_mock.F18_Expects[int, string](
 			its.Always[func(int, string)](),
 		).
 			ThenReturn(func(int, string) {}).
-			Mock(t)
+			Fn(t)
 
 		r1 := testee(func(int, string) {})
 		r1(1, "a")
 	}
 	{
-		testee := gen_mock.NewF18Call[int, string](
+		testee := gen_mock.F18_Expects[int, string](
 			its.Always[func(int, string)](),
 		).
 			ThenEffect(func(arg0 func(arg0 int, arg1 string)) func(arg0 int, arg1 string) {
 				return func(arg0 int, arg1 string) {}
 			}).
-			Mock(t)
+			Fn(t)
 
 		r1 := testee(func(int, string) {})
 		r1(1, "a")
@@ -406,23 +406,23 @@ func TestF18(t *testing.T) {
 func TestF19(t *testing.T) {
 	type myint int
 	{
-		testee := gen_mock.NewF19Call[myint](
+		testee := gen_mock.F19_Expects[myint](
 			its.Always[types.F16[myint]](),
 		).
 			ThenReturn(myint(16)).
-			Mock(t)
+			Fn(t)
 
 		r1 := testee(func(f types.F16[myint]) myint { return 42 })
 		its.EqEq(myint(16)).Match(r1).OrError(t)
 	}
 	{
-		testee := gen_mock.NewF19Call[myint](
+		testee := gen_mock.F19_Expects[myint](
 			its.Always[types.F16[myint]](),
 		).
 			ThenEffect(func(arg0 types.F16[myint]) myint {
 				return 16
 			}).
-			Mock(t)
+			Fn(t)
 
 		r1 := testee(func(f types.F16[myint]) myint { return 42 })
 		its.EqEq(myint(16)).Match(r1).OrError(t)
@@ -431,14 +431,14 @@ func TestF19(t *testing.T) {
 
 func TestF20(t *testing.T) {
 	{
-		testee := gen_mock.NewF20Call(its.EqEq(42)).ThenReturn(99).Mock(t)
+		testee := gen_mock.F20_Expects(its.EqEq(42)).ThenReturn(99).Fn(t)
 		r1 := testee(42)
 		its.EqEq(99).Match(r1).OrError(t)
 	}
 	{
-		testee := gen_mock.NewF20Call(its.EqEq(42)).
+		testee := gen_mock.F20_Expects(its.EqEq(42)).
 			ThenEffect(func(arg0 int) int { return 99 }).
-			Mock(t)
+			Fn(t)
 		r1 := testee(42)
 		its.EqEq(99).Match(r1).OrError(t)
 	}

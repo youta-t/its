@@ -4,30 +4,10 @@ package gen_mock
 import (
 	its "github.com/youta-t/its"
 	itskit "github.com/youta-t/its/itskit"
+	mockkit "github.com/youta-t/its/mocker/mockkit"
 	testee "github.com/youta-t/its/mocker/internal/example"
 	
 )
-
-type _SessionStoreReturnFixture struct {
-	userId string
-	
-	ok bool
-	
-}
-
-type _SessionStoreReturn struct {
-	fixture _SessionStoreReturnFixture
-}
-
-func (rfx _SessionStoreReturn) Get() (
-	string,
-	
-	bool,
-	
-) {
-	return rfx.fixture.userId, rfx.fixture.ok
-}
-
 type _SessionStoreCallSpec struct {
 	cookie its.Matcher[string]
 	
@@ -39,7 +19,7 @@ type _SessionStoreCall struct {
 	spec _SessionStoreCallSpec
 }
 
-func NewSessionStoreCall(
+func SessionStore_Expects(
 	cookie its.Matcher[string],
 	
 ) _SessionStoreCall {
@@ -59,13 +39,13 @@ func NewSessionStoreCall(
 	}
 }
 
-type SessionStoreBehaviour  struct {
+type _SessionStoreBehavior  struct {
 	name itskit.Label
 	spec _SessionStoreCallSpec
 	effect func(cookie string) (userId string, ok bool)
 }
 
-func (b *SessionStoreBehaviour) Mock(t interface { Error(...any) }) func(cookie string) (userId string, ok bool) {
+func (b *_SessionStoreBehavior) Fn(t mockkit.TestLike) func(cookie string) (userId string, ok bool) {
 	return func (
 		
 		arg0 string,
@@ -114,7 +94,7 @@ func (c _SessionStoreCall) ThenReturn(
 
 	ret1 bool,
 
-) *SessionStoreBehaviour {
+) mockkit.FuncBehavior[ func (cookie string) (userId string, ok bool)  ] {
 	return c.ThenEffect(func(
 		
 		string,
@@ -131,35 +111,14 @@ func (c _SessionStoreCall) ThenReturn(
 	})
 }
 
-func (c _SessionStoreCall) ThenEffect(effect func(cookie string) (userId string, ok bool)) *SessionStoreBehaviour {
-	return &SessionStoreBehaviour {
+func (c _SessionStoreCall) ThenEffect(effect func(cookie string) (userId string, ok bool)) mockkit.FuncBehavior[ func (cookie string) (userId string, ok bool) ] {
+	return &_SessionStoreBehavior {
 		name: c.name,
 		spec: c.spec,
 		effect: effect,
 	}
 }
 
-
-
-type _UserRegistry_GetReturnFixture struct {
-	ret0 testee.User
-	
-	ret1 error
-	
-}
-
-type _UserRegistry_GetReturn struct {
-	fixture _UserRegistry_GetReturnFixture
-}
-
-func (rfx _UserRegistry_GetReturn) Get() (
-	testee.User,
-	
-	error,
-	
-) {
-	return rfx.fixture.ret0, rfx.fixture.ret1
-}
 
 type _UserRegistry_GetCallSpec struct {
 	userId its.Matcher[string]
@@ -172,7 +131,7 @@ type _UserRegistry_GetCall struct {
 	spec _UserRegistry_GetCallSpec
 }
 
-func NewUserRegistry_GetCall(
+func UserRegistry_Get_Expects(
 	userId its.Matcher[string],
 	
 ) _UserRegistry_GetCall {
@@ -192,13 +151,13 @@ func NewUserRegistry_GetCall(
 	}
 }
 
-type UserRegistry_GetBehaviour  struct {
+type _UserRegistry_GetBehavior  struct {
 	name itskit.Label
 	spec _UserRegistry_GetCallSpec
 	effect func(userId string) ( testee.User,  error)
 }
 
-func (b *UserRegistry_GetBehaviour) Mock(t interface { Error(...any) }) func(userId string) ( testee.User,  error) {
+func (b *_UserRegistry_GetBehavior) Fn(t mockkit.TestLike) func(userId string) ( testee.User,  error) {
 	return func (
 		
 		arg0 string,
@@ -247,7 +206,7 @@ func (c _UserRegistry_GetCall) ThenReturn(
 
 	ret1 error,
 
-) *UserRegistry_GetBehaviour {
+) mockkit.FuncBehavior[ func (userId string) ( testee.User,  error)  ] {
 	return c.ThenEffect(func(
 		
 		string,
@@ -264,31 +223,14 @@ func (c _UserRegistry_GetCall) ThenReturn(
 	})
 }
 
-func (c _UserRegistry_GetCall) ThenEffect(effect func(userId string) ( testee.User,  error)) *UserRegistry_GetBehaviour {
-	return &UserRegistry_GetBehaviour {
+func (c _UserRegistry_GetCall) ThenEffect(effect func(userId string) ( testee.User,  error)) mockkit.FuncBehavior[ func (userId string) ( testee.User,  error) ] {
+	return &_UserRegistry_GetBehavior {
 		name: c.name,
 		spec: c.spec,
 		effect: effect,
 	}
 }
 
-
-
-type _UserRegistry_UpdateReturnFixture struct {
-	ret0 error
-	
-}
-
-type _UserRegistry_UpdateReturn struct {
-	fixture _UserRegistry_UpdateReturnFixture
-}
-
-func (rfx _UserRegistry_UpdateReturn) Get() (
-	error,
-	
-) {
-	return rfx.fixture.ret0
-}
 
 type _UserRegistry_UpdateCallSpec struct {
 	arg0 its.Matcher[testee.User]
@@ -301,7 +243,7 @@ type _UserRegistry_UpdateCall struct {
 	spec _UserRegistry_UpdateCallSpec
 }
 
-func NewUserRegistry_UpdateCall(
+func UserRegistry_Update_Expects(
 	arg0 its.Matcher[testee.User],
 	
 ) _UserRegistry_UpdateCall {
@@ -321,13 +263,13 @@ func NewUserRegistry_UpdateCall(
 	}
 }
 
-type UserRegistry_UpdateBehaviour  struct {
+type _UserRegistry_UpdateBehavior  struct {
 	name itskit.Label
 	spec _UserRegistry_UpdateCallSpec
 	effect func(arg0 testee.User) error
 }
 
-func (b *UserRegistry_UpdateBehaviour) Mock(t interface { Error(...any) }) func(arg0 testee.User) error {
+func (b *_UserRegistry_UpdateBehavior) Fn(t mockkit.TestLike) func(arg0 testee.User) error {
 	return func (
 		
 		arg0 testee.User,
@@ -373,7 +315,7 @@ func (c _UserRegistry_UpdateCall) ThenReturn(
 
 	ret0 error,
 
-) *UserRegistry_UpdateBehaviour {
+) mockkit.FuncBehavior[ func (arg0 testee.User) error  ] {
 	return c.ThenEffect(func(
 		
 		testee.User,
@@ -389,31 +331,14 @@ func (c _UserRegistry_UpdateCall) ThenReturn(
 	})
 }
 
-func (c _UserRegistry_UpdateCall) ThenEffect(effect func(arg0 testee.User) error) *UserRegistry_UpdateBehaviour {
-	return &UserRegistry_UpdateBehaviour {
+func (c _UserRegistry_UpdateCall) ThenEffect(effect func(arg0 testee.User) error) mockkit.FuncBehavior[ func (arg0 testee.User) error ] {
+	return &_UserRegistry_UpdateBehavior {
 		name: c.name,
 		spec: c.spec,
 		effect: effect,
 	}
 }
 
-
-
-type _UserRegistry_DeleteReturnFixture struct {
-	ret0 error
-	
-}
-
-type _UserRegistry_DeleteReturn struct {
-	fixture _UserRegistry_DeleteReturnFixture
-}
-
-func (rfx _UserRegistry_DeleteReturn) Get() (
-	error,
-	
-) {
-	return rfx.fixture.ret0
-}
 
 type _UserRegistry_DeleteCallSpec struct {
 	arg0 its.Matcher[testee.User]
@@ -426,7 +351,7 @@ type _UserRegistry_DeleteCall struct {
 	spec _UserRegistry_DeleteCallSpec
 }
 
-func NewUserRegistry_DeleteCall(
+func UserRegistry_Delete_Expects(
 	arg0 its.Matcher[testee.User],
 	
 ) _UserRegistry_DeleteCall {
@@ -446,13 +371,13 @@ func NewUserRegistry_DeleteCall(
 	}
 }
 
-type UserRegistry_DeleteBehaviour  struct {
+type _UserRegistry_DeleteBehavior  struct {
 	name itskit.Label
 	spec _UserRegistry_DeleteCallSpec
 	effect func(arg0 testee.User) error
 }
 
-func (b *UserRegistry_DeleteBehaviour) Mock(t interface { Error(...any) }) func(arg0 testee.User) error {
+func (b *_UserRegistry_DeleteBehavior) Fn(t mockkit.TestLike) func(arg0 testee.User) error {
 	return func (
 		
 		arg0 testee.User,
@@ -498,7 +423,7 @@ func (c _UserRegistry_DeleteCall) ThenReturn(
 
 	ret0 error,
 
-) *UserRegistry_DeleteBehaviour {
+) mockkit.FuncBehavior[ func (arg0 testee.User) error  ] {
 	return c.ThenEffect(func(
 		
 		testee.User,
@@ -514,8 +439,8 @@ func (c _UserRegistry_DeleteCall) ThenReturn(
 	})
 }
 
-func (c _UserRegistry_DeleteCall) ThenEffect(effect func(arg0 testee.User) error) *UserRegistry_DeleteBehaviour {
-	return &UserRegistry_DeleteBehaviour {
+func (c _UserRegistry_DeleteCall) ThenEffect(effect func(arg0 testee.User) error) mockkit.FuncBehavior[ func (arg0 testee.User) error ] {
+	return &_UserRegistry_DeleteBehavior {
 		name: c.name,
 		spec: c.spec,
 		effect: effect,
@@ -525,20 +450,36 @@ func (c _UserRegistry_DeleteCall) ThenEffect(effect func(arg0 testee.User) error
 
 
 
-type UserRegistryImpl struct {
+type _UserRegistryImpl struct {
 	
 	Get func(userId string) ( testee.User,  error)
 	Update func(arg0 testee.User) error
 	Delete func(arg0 testee.User) error
 }
 
-func NewMockedUserRegistry(t interface { Fatal(...any) } ,impl UserRegistryImpl) testee.UserRegistry {
+func UserRegistry_Build(t mockkit.TestLike, spec UserRegistry_Spec) testee.UserRegistry {
+	impl := _UserRegistryImpl{}
+
+	
+	if spec.Get != nil {
+		impl.Get = spec.Get.Fn(t)
+	}
+	
+	if spec.Update != nil {
+		impl.Update = spec.Update.Fn(t)
+	}
+	
+	if spec.Delete != nil {
+		impl.Delete = spec.Delete.Fn(t)
+	}
+	
+
 	return _UserRegistryMock { t: t, impl: impl }
 }
 
 type _UserRegistryMock struct {
-	t interface { Fatal(...any) }
-	impl UserRegistryImpl
+	t mockkit.TestLike
+	impl _UserRegistryImpl
 }
 
 func (m _UserRegistryMock) Get (
@@ -601,4 +542,14 @@ func (m _UserRegistryMock) Delete (
 	)
 }
 
+
+type UserRegistry_Spec struct {
+	
+	Get mockkit.FuncBehavior[func (userId string) ( testee.User,  error)]
+	
+	Update mockkit.FuncBehavior[func (arg0 testee.User) error]
+	
+	Delete mockkit.FuncBehavior[func (arg0 testee.User) error]
+	
+}
 

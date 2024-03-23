@@ -175,14 +175,6 @@ func (fn *TypeFuncDecl) GenericExpr(backtype bool) string {
 	return typeParams
 }
 
-func (fn *TypeFuncDecl) ParamsGenericExpr(backtype bool) string {
-	return fn.Body.ParamsGenericExpr(backtype)
-}
-
-func (fn *TypeFuncDecl) ReturnGenericExpr(backtype bool) string {
-	return fn.Body.ReturnGenericExpr(backtype)
-}
-
 func (fn *TypeFuncDecl) Expr() string {
 	pkg := ""
 	if fn.Package != nil {
@@ -1000,80 +992,6 @@ func (f *FuncType) Require() []*Import {
 	return req
 }
 
-func (fn *FuncType) ParamsGenericExpr(back bool) string {
-	_tps := map[string]*TypeParam{}
-
-	for _, para := range fn.Args {
-		__tps := para.TypeParams()
-		for i := range __tps {
-			tp := __tps[i]
-			_tps[tp.Name] = tp
-		}
-	}
-
-	if fn.VarArg != nil {
-		__tps := fn.VarArg.TypeParams()
-		for i := range __tps {
-			tp := __tps[i]
-			_tps[tp.Name] = tp
-		}
-	}
-
-	params := []*TypeParam{}
-	for name := range _tps {
-		params = append(params, _tps[name])
-	}
-	slices.SortFunc(params, func(a, b *TypeParam) int {
-		return cmp.Compare(a.Name, b.Name)
-	})
-
-	tps := []string{}
-	for _, p := range params {
-		t := p.Expr()
-		if back {
-			t += " " + p.Back.Expr()
-		}
-		tps = append(tps, t)
-	}
-	if len(tps) == 0 {
-		return ""
-	}
-	return "[" + strings.Join(tps, ", ") + "]"
-}
-
-func (fn *FuncType) ReturnGenericExpr(back bool) string {
-	_tps := map[string]*TypeParam{}
-
-	for _, para := range fn.Returns {
-		__tps := para.TypeParams()
-		for i := range __tps {
-			tp := __tps[i]
-			_tps[tp.Name] = tp
-		}
-	}
-
-	params := []*TypeParam{}
-	for name := range _tps {
-		params = append(params, _tps[name])
-	}
-	slices.SortFunc(params, func(a, b *TypeParam) int {
-		return cmp.Compare(a.Name, b.Name)
-	})
-
-	tps := []string{}
-	for _, p := range params {
-		t := p.Expr()
-		if back {
-			t += " " + p.Back.Expr()
-		}
-		tps = append(tps, t)
-	}
-	if len(tps) == 0 {
-		return ""
-	}
-	return "[" + strings.Join(tps, ", ") + "]"
-}
-
 func (fn *FuncType) TypeParams() []*TypeParam {
 	tps := map[string]*TypeParam{}
 
@@ -1109,6 +1027,24 @@ func (fn *FuncType) TypeParams() []*TypeParam {
 		return cmp.Compare(a.Name, b.Name)
 	})
 	return params
+}
+
+func (fn *FuncType) GenericExpr(backtype bool) string {
+	typeParams := ""
+	{
+		tps := []string{}
+		for _, tp := range fn.TypeParams() {
+			if backtype {
+				tps = append(tps, tp.Name+" "+tp.Back.Expr())
+			} else {
+				tps = append(tps, tp.Name)
+			}
+		}
+		if 0 < len(tps) {
+			typeParams = "[" + strings.Join(tps, ", ") + "]"
+		}
+	}
+	return typeParams
 }
 
 func (f *FuncType) injectTypeParam(local *Import, tps []*TypeParam) {
