@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"go/build"
 	"html/template"
 	"log"
 	"os"
@@ -40,7 +39,7 @@ func (n names) String() string {
 
 type generatingFile struct {
 	PackageName string
-	Imports     []*parser.Import
+	Imports     []*parser.ImportPath
 	Interfaces  []*parser.TypeInterfaceDecl
 	Funcs       []*parser.TypeFuncDecl
 }
@@ -92,49 +91,43 @@ It generates a file with same name as a file having go:generate directive.
 		return
 	}
 
-	sources := []string{}
+	gomod := parser.New(".")
 
-	if !*sourceAsPackage {
-		sources = append(sources, source)
+	var pkg *parser.Package
+	targetFile := ""
+
+	if *sourceAsPackage {
+		pkg = try.To(gomod.Import(source, ".")).OrFatal(logger)
 	} else {
-		p := try.To(build.Default.Import(source, ".", 0)).OrFatal(logger)
-		for _, gof := range p.GoFiles {
-			sources = append(sources, filepath.Join(p.Dir, gof))
-		}
+		dir, t := filepath.Split(source)
+		targetFile = t
+		pkg = try.To(gomod.ImportDir(dir)).OrFatal(logger)
 	}
 
-	for _, s := range sources {
-		f := try.To(parser.Parse(s)).OrFatal(logger)
+	target := pkg.Types
+	if targetFile != "" {
+		f, ok := pkg.Types[targetFile]
+		if !ok {
+			os.Exit(0) // nothing to do.
+		}
+
+		target = map[string]*parser.File{targetFile: f}
+	}
+
+	for fname, content := range target {
 		newFile := generatingFile{
 			PackageName: path.Base(dest),
 		}
-		requiredImports := map[string]*parser.Import{
+		requiredImports := map[string]*parser.ImportPath{
 			"its":     {Name: "its", Path: "github.com/youta-t/its"},
 			"itskit":  {Name: "itskit", Path: "github.com/youta-t/its/itskit"},
 			"mockkit": {Name: "mockkit", Path: "github.com/youta-t/its/mocker/mockkit"},
 		}
-		usedImports := map[string]*parser.Import{}
+		usedImports := map[string]*parser.ImportPath{}
 
-		for i := range f.Types.Interfaces {
-			s := f.Types.Interfaces[i]
-
-			if _, ok := targetTypeName[s.Name]; len(targetTypeName) != 0 && !ok {
-				continue
-			}
-			if s.IsOpaque() || 0 < len(s.Body.Embedded) {
-				continue
-			}
-
-			newFile.Interfaces = append(newFile.Interfaces, s)
-
-			types := s.Require()
-			for i := range types {
-				t := types[i]
-				usedImports[t.Name] = t
-			}
-		}
-		for i := range f.Types.Funcs {
-			s := f.Types.Funcs[i]
+		funcs := content.Types.Funcs.Slice()
+		for i := range funcs {
+			s := funcs[i]
 
 			if _, ok := targetTypeName[s.Name]; len(targetTypeName) != 0 && !ok {
 				continue
@@ -152,6 +145,36 @@ It generates a file with same name as a file having go:generate directive.
 			}
 		}
 
+		interfaces := content.Types.Interfaces.Slice()
+		for i := range interfaces {
+			s := interfaces[i]
+
+			if _, ok := targetTypeName[s.Name]; len(targetTypeName) != 0 && !ok {
+				continue
+			}
+			if s.IsOpaque() || 0 < len(s.Body.Embedded) {
+				continue
+			}
+
+			newFile.Interfaces = append(newFile.Interfaces, s)
+
+			types := s.Require()
+			for i := range types {
+				t := types[i]
+				usedImports[t.Name] = t
+			}
+
+			for _, m := range s.Body.Methods {
+				fd := &parser.TypeFuncDecl{
+					Name:       fmt.Sprintf("%s_%s", s.Name, m.Name),
+					Package:    s.Package,
+					TypeParams: m.Func.TypeParams(),
+					Body:       m.Func,
+				}
+				funcs = append(funcs, fd)
+			}
+		}
+
 		if len(newFile.Interfaces)+len(newFile.Funcs) == 0 {
 			continue
 		}
@@ -159,7 +182,7 @@ It generates a file with same name as a file having go:generate directive.
 		for i := range requiredImports {
 			newFile.Imports = append(newFile.Imports, requiredImports[i])
 		}
-		slices.SortFunc(newFile.Imports, func(a, b *parser.Import) int {
+		slices.SortFunc(newFile.Imports, func(a, b *parser.ImportPath) int {
 			if a.Path < b.Path {
 				return -1
 			}
@@ -179,26 +202,7 @@ It generates a file with same name as a file having go:generate directive.
 			newFile.Imports = append(newFile.Imports, imp)
 		}
 
-		funcs := newFile.Funcs
-
-		for _, intf := range newFile.Interfaces {
-			if intf.IsOpaque() {
-				continue
-			}
-			for _, m := range intf.Body.Methods {
-				fd := &parser.TypeFuncDecl{
-					Name:       fmt.Sprintf("%s_%s", intf.Name, m.Name),
-					Package:    intf.Package,
-					TypeParams: m.Func.TypeParams(),
-					Body:       m.Func,
-				}
-				funcs = append(funcs, fd)
-			}
-		}
-		newFile.Funcs = funcs
-
-		err := writeFile(filepath.Join(dest, source), newFile)
-		if err != nil {
+		if err := writeFile(filepath.Join(dest, fname), newFile); err != nil {
 			logger.Fatal(err)
 		}
 	}
@@ -223,7 +227,7 @@ func writeFile(dest string, newFile generatingFile) error {
 			for _, p := range t.TypeParams() {
 				expr := p.Name
 				if back {
-					expr += " " + p.Back.Expr()
+					expr += " " + p.Constraint.Expr()
 				}
 				params = append(params, expr)
 			}
@@ -252,10 +256,77 @@ func writeFile(dest string, newFile generatingFile) error {
 	return nil
 }
 
-//
-//
-//
-//
+func inlineInterface(bc parser.BuildContext, intf *parser.InterfaceType) (*parser.InterfaceType, error) {
+	embededds := []parser.Type{}
+	methods := append([]*parser.Method{}, intf.Methods...)
+
+	type namedTypeInstance struct {
+		Type           *parser.NamedType
+		GivenTypeParam []parser.Type
+	}
+
+	embeddedNames := []*parser.NamedType{}
+	embeddedInterfaces := []*parser.InterfaceType{}
+	for i := range intf.Embedded {
+		switch t := intf.Embedded[i].(type) {
+		case *parser.NamedType:
+			embeddedNames = append(embeddedNames, t)
+		case *parser.InterfaceType:
+			ii, err := inlineInterface(bc, t)
+			if err != nil {
+				return nil, err
+			}
+			embeddedInterfaces = append(embeddedInterfaces, ii)
+		default:
+			embededds = append(embededds, t)
+		}
+	}
+
+	for 0 < len(embeddedNames) {
+		n := embeddedNames[0]
+		embeddedNames = embeddedNames[1:]
+
+		pkg, err := bc.Import(n.Pkg.Path, ".")
+		if err != nil {
+			return nil, err
+		}
+
+		for _, f := range pkg.Types {
+			if found, ok := f.Types.Interfaces.Get(n.PlainName()); ok {
+				b := found.Body
+
+				b, err := inlineInterface(bc, found.Body)
+				if err != nil {
+					return nil, err
+				}
+				embeddedInterfaces = append(embeddedInterfaces, b)
+				break
+			}
+
+			nn, ok := f.Types.Names.Get(n.PlainName())
+			if !ok {
+				continue
+			}
+			nt := &parser.NamedType{
+				Pkg:    nn.Body.Pkg,
+				Name:   nn.Body.Name,
+				Params: n.Params,
+			}
+			embeddedNames = append(embeddedNames, nt)
+		}
+	}
+
+	for i := range embeddedInterfaces {
+		methods = append(methods, embeddedInterfaces[i].Methods...)
+		embededds = append(embededds, embeddedInterfaces[i].Embedded...)
+	}
+
+	return &parser.InterfaceType{
+		Embedded: embededds,
+		Methods:  methods,
+	}, nil
+}
+
 //
 //
 //

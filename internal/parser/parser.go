@@ -1,178 +1,169 @@
 package parser
 
 import (
-	"errors"
-	"flag"
-	"fmt"
 	"go/ast"
+	"go/build"
 	"go/parser"
 	"go/token"
-	"os"
 	"path"
 	"path/filepath"
 	"strconv"
 	"strings"
 
-	"golang.org/x/mod/modfile"
+	maps "github.com/youta-t/its/internal/maps"
 )
 
-func Parse(filepath string) (*File, error) {
+func parsePackage(bc ParseContext, pkg importTarget) (*Package, error) {
+	p := &Package{
+		Path: pkg.ImportPath,
+		Src:  pkg.Dir,
+		Types: &TypeDeclarations{
+			Structs:    maps.NewOrdered[string, *TypeStructDecl](),
+			Interfaces: maps.NewOrdered[string, *TypeInterfaceDecl](),
+			Funcs:      maps.NewOrdered[string, *TypeFuncDecl](),
+			Names:      maps.NewOrdered[string, *TypeNameDecl](),
+			Unresolved: maps.NewOrdered[string, *TypeUnresolvedDecl](),
+		},
+	}
+
+	bpkg, err := build.ImportDir(pkg.Dir, 0)
+	if err != nil {
+		return nil, err
+	}
+	p.DefaultName = bpkg.Name
+	for _, gof := range bpkg.GoFiles {
+		basename := filepath.Base(gof)
+		f, err := parseFile(bc, pkg, basename)
+		if err != nil {
+			return nil, err
+		}
+		p.Types.Merge(f)
+	}
+
+	types := map[string]Type{}
+	p.Types.Structs.Iter(func(s string, decl *TypeStructDecl) bool {
+		types[s] = &NamedType{ImportPath: p.Path, Name: s}
+		return true
+	})
+	p.Types.Interfaces.Iter(func(s string, decl *TypeInterfaceDecl) bool {
+		types[s] = &NamedType{ImportPath: p.Path, Name: s}
+		return true
+	})
+	p.Types.Funcs.Iter(func(s string, decl *TypeFuncDecl) bool {
+		types[s] = &NamedType{ImportPath: p.Path, Name: s}
+		return true
+	})
+	p.Types.Names.Iter(func(s string, decl *TypeNameDecl) bool {
+		types[s] = &NamedType{ImportPath: p.Path, Name: s}
+		return true
+	})
+	p.Types.Unresolved.Iter(func(s string, decl *TypeUnresolvedDecl) bool {
+		types[s] = &NamedType{ImportPath: p.Path, Name: s}
+		return true
+	})
+
+	{
+		urs := p.Types.Unresolved.Slice()
+		for i := range urs {
+			ur := urs[i]
+			det := ur.Body.detect(types)
+			if unk, ok := det.(*unknwonType); ok {
+				det = unk.detect(builtin)
+			}
+			if nt, ok := det.(*NamedType); ok {
+				p.Types.Unresolved.Delete(ur.Name)
+				p.Types.Names.Put(ur.Name, &TypeNameDecl{
+					DefinedIn: ur.DefinedIn, ImportPath: ur.ImportPath,
+					Name: ur.Name, TypeParams: ur.TypeParams, Body: nt,
+				})
+			}
+		}
+	}
+
+	p.Types.Structs.Iter(func(s string, decl *TypeStructDecl) bool {
+		decl.resolve(types)
+		decl.resolve(builtin)
+		return true
+	})
+	p.Types.Interfaces.Iter(func(s string, decl *TypeInterfaceDecl) bool {
+		decl.resolve(types)
+		decl.resolve(builtin)
+		return true
+	})
+	p.Types.Funcs.Iter(func(s string, decl *TypeFuncDecl) bool {
+		decl.resolve(types)
+		decl.resolve(builtin)
+		return true
+	})
+	p.Types.Names.Iter(func(s string, decl *TypeNameDecl) bool {
+		decl.resolve(types)
+		decl.resolve(builtin)
+		return true
+	})
+
+	return p, nil
+}
+
+func parseFile(bc ParseContext, pkg importTarget, filename string) (*TypeDeclarations, error) {
 	fset := token.NewFileSet()
-	afile, err := parser.ParseFile(fset, filepath, nil, parser.Mode(0))
+	fullpath := filepath.Join(pkg.Dir, filename)
+	afile, err := parser.ParseFile(fset, fullpath, nil, parser.Mode(0))
 	if err != nil {
 		return nil, err
 	}
 
-	typenames := map[string]struct{}{}
-	for _, tn := range flag.Args() {
-		typenames[tn] = struct{}{}
-	}
-
-	dir := path.Dir(filepath)
-	if dir == "" {
-		dir = "."
-	}
-	localPackage, err := detectPackage(dir, afile)
-	if err != nil {
-		return nil, err
-	}
-
-	pkgs := map[string]*Import{}
-	for _, imp := range getImports(afile) {
-		pkgs[imp.Name] = imp
-	}
-
-	decls, err := getDecls(localPackage, pkgs, afile)
-	if err != nil {
-		return nil, err
-	}
-
-	imports := []*Import{
-		localPackage,
-	}
-	for k := range pkgs {
-		imports = append(imports, pkgs[k])
-	}
-
-	return &File{
-		PackageName: afile.Name.Name,
-		Imports:     imports,
-		Types:       decls,
-	}, nil
-}
-
-func detectGomod(from string) (string, *modfile.File, error) {
-	gomod := path.Join(from, "go.mod")
-	buf, err := os.ReadFile(gomod)
-
-	if err == nil {
-		m, err := modfile.Parse(gomod, buf, nil)
-		return from, m, err
-	} else if !os.IsNotExist(err) {
-		return from, nil, err
-	}
-
-	p := path.Dir(from)
-	if p == from {
-		return from, nil, err
-	}
-	return detectGomod(p)
-}
-
-func detectPackage(directory string, aFile *ast.File) (*Import, error) {
-	directory, err := filepath.Abs(directory)
-	if err != nil {
-		return nil, err
-	}
-	directory = strings.TrimSuffix(directory, "/")
-	root, gomod, err := detectGomod(directory)
-	if err != nil {
-		return nil, err
-	}
-	pkgpath, err := filepath.Rel(root, directory)
-	if err != nil {
-		return nil, err
-	}
-	pkgroot := gomod.Module.Mod.Path
-	var packageName string
-	ast.Inspect(aFile, func(n ast.Node) bool {
-		pkg, ok := n.(*ast.Package)
-		if !ok {
-			return true
+	imports := []ImportStatment{}
+	types := map[string]Type{}
+	for _, is := range afile.Imports {
+		n := safeDeref(is.Name).Name
+		p := strings.Trim(is.Path.Value, `"`)
+		if strings.HasPrefix(p, ".") {
+			p = path.Join(pkg.ImportPath, p)
 		}
-		packageName = pkg.Name
-		return false
-	})
 
-	return &Import{
-		Name: packageName,
-		Path: path.Join(pkgroot, pkgpath),
-	}, nil
-}
-
-func getImports(n ast.Node) []*Import {
-	ret := []*Import{}
-	ast.Inspect(n, func(n ast.Node) bool {
-		decl, ok := n.(*ast.GenDecl)
-		if !ok {
-			return true
-		}
-		if decl.Tok != token.IMPORT {
-			return false
-		}
-		for _, s := range decl.Specs {
-			imp, ok := s.(*ast.ImportSpec)
-			if !ok {
-				continue
+		switch n {
+		case "_":
+			// ignore
+			continue
+		case ".":
+			dot, err := bc.Import(p)
+			if err != nil {
+				return nil, err
 			}
-			name := ""
-			if n := imp.Name; n != nil {
-				name = n.Name
+			for _, decl := range dot.Types.Structs.Slice() {
+				types[decl.Name] = &NamedType{ImportPath: p, Name: decl.Name}
 			}
-			importPath := imp.Path.Value
-			importPath = strings.Trim(importPath, "`\"")
-			if name == "" {
-				name = path.Base(importPath)
+			for _, decl := range dot.Types.Interfaces.Slice() {
+				types[decl.Name] = &NamedType{ImportPath: p, Name: decl.Name}
 			}
-			ret = append(ret, &Import{
-				Name: name, Path: importPath,
-			})
+			for _, decl := range dot.Types.Funcs.Slice() {
+				types[decl.Name] = &NamedType{ImportPath: p, Name: decl.Name}
+			}
+			for _, decl := range dot.Types.Names.Slice() {
+				types[decl.Name] = &NamedType{ImportPath: p, Name: decl.Name}
+			}
+			continue
+		case "":
+			imported, err := bc.Import(p)
+			if err != nil {
+				return nil, err
+			}
+			n = imported.DefaultName
 		}
-		return false
-	})
-	return ret
-}
 
-type TypeDeclarations struct {
-	Structs    []*TypeStructDecl
-	Interfaces []*TypeInterfaceDecl
-	Funcs      []*TypeFuncDecl
-}
-
-func getDecls(local *Import, imports map[string]*Import, n ast.Node) (*TypeDeclarations, error) {
-
-	type structDef struct {
-		name      string
-		typeParam []*ast.Field
-		body      *ast.StructType
+		imports = append(imports, ImportStatment{Name: n, Path: p})
 	}
-	structDefs := []structDef{}
 
-	type interfaceDef struct {
-		name      string
-		typeParam []*ast.Field
-		body      *ast.InterfaceType
+	decls := &TypeDeclarations{
+		Structs:    maps.NewOrdered[string, *TypeStructDecl](),
+		Interfaces: maps.NewOrdered[string, *TypeInterfaceDecl](),
+		Funcs:      maps.NewOrdered[string, *TypeFuncDecl](),
+		Names:      maps.NewOrdered[string, *TypeNameDecl](),
+		Unresolved: maps.NewOrdered[string, *TypeUnresolvedDecl](),
 	}
-	interfaceDefs := []interfaceDef{}
 
-	type funcDef struct {
-		name      string
-		typeParam []*ast.Field
-		body      *ast.FuncType
-	}
-	fnDefs := []funcDef{}
-
-	ast.Inspect(n, func(n ast.Node) bool {
+	imp := pkg.ImportPath
+	ast.Inspect(afile, func(n ast.Node) bool {
 		switch n.(type) {
 		case *ast.FuncDecl, *ast.BadDecl:
 			return false
@@ -185,336 +176,366 @@ func getDecls(local *Import, imports map[string]*Import, n ast.Node) (*TypeDecla
 		if decl.Tok != token.TYPE {
 			return false
 		}
+
 		for i := range decl.Specs {
 			spec := decl.Specs[i]
 			typeSpec, ok := spec.(*ast.TypeSpec)
 			if !ok || !typeSpec.Name.IsExported() {
 				continue
 			}
+			name := safeDeref(typeSpec.Name).Name
+			tps := parseTypeParam(imports, safeDeref(typeSpec.TypeParams).List)
+			body := parseType(imports, typeSpec.Type)
 
-			switch spec := typeSpec.Type.(type) {
-			case *ast.StructType:
-				if spec.Incomplete {
-					continue
-				}
-				structDefs = append(structDefs, structDef{
-					name:      safeDeref(typeSpec.Name).Name,
-					typeParam: safeDeref(typeSpec.TypeParams).List,
-					body:      spec,
-				})
-			case *ast.InterfaceType:
-				if spec.Incomplete {
-					continue
-				}
-				interfaceDefs = append(interfaceDefs, interfaceDef{
-					name:      safeDeref(typeSpec.Name).Name,
-					typeParam: safeDeref(typeSpec.TypeParams).List,
-					body:      spec,
-				})
-			case *ast.FuncType:
-				fnDefs = append(fnDefs, funcDef{
-					name:      safeDeref(typeSpec.Name).Name,
-					typeParam: safeDeref(typeSpec.TypeParams).List,
-					body:      spec,
-				})
+			tpsmap := map[string]Type{}
+			for i := range tps {
+				tpsmap[tps[i].Name] = tps[i]
 			}
+			body.resolve(tpsmap)
 
+			switch b := body.(type) {
+			case *StructType:
+				decls.Structs.Put(name, &TypeStructDecl{
+					DefinedIn: fullpath, ImportPath: imp,
+					Name: name, TypeParams: tps, Body: b,
+				})
+				types[name] = &NamedType{ImportPath: imp, Name: name}
+			case *InterfaceType:
+				decls.Interfaces.Put(name, &TypeInterfaceDecl{
+					DefinedIn: fullpath, ImportPath: imp,
+					Name: name, TypeParams: tps, Body: b,
+				})
+				types[name] = &NamedType{ImportPath: imp, Name: name}
+			case *FuncType:
+				decls.Funcs.Put(name, &TypeFuncDecl{
+					DefinedIn: fullpath, ImportPath: imp,
+					Name: name, TypeParams: tps, Body: b,
+				})
+				types[name] = &NamedType{ImportPath: imp, Name: name}
+			case *NamedType:
+				decls.Names.Put(name, &TypeNameDecl{
+					DefinedIn: fullpath, ImportPath: imp,
+					Name: name, TypeParams: tps, Body: b,
+				})
+				types[name] = &NamedType{ImportPath: imp, Name: name}
+			case *unknwonType:
+				decls.Unresolved.Put(name, &TypeUnresolvedDecl{
+					DefinedIn: fullpath, ImportPath: imp,
+					Name: name, TypeParams: tps, Body: b,
+				})
+				types[name] = &NamedType{ImportPath: imp, Name: name}
+			}
 		}
 		return false
 	})
 
-	structs := []*TypeStructDecl{}
-	for _, d := range structDefs {
-		tps, err := parseTypeParam(local, imports, d.typeParam)
-		if err != nil {
-			return nil, err
-		}
-
-		body, err := parseStruct(local, imports, tps, d.body)
-		if err != nil {
-			return nil, err
-		}
-
-		structs = append(structs, &TypeStructDecl{
-			Name:       d.name,
-			Package:    local,
-			TypeParams: tps,
-			Body:       body,
-		})
+	for _, decl := range decls.Structs.Slice() {
+		decl.resolve(types)
 	}
-
-	interfaces := []*TypeInterfaceDecl{}
-	for _, d := range interfaceDefs {
-		tps, err := parseTypeParam(local, imports, d.typeParam)
-		if err != nil {
-			return nil, err
-		}
-		body, err := parseInterface(local, imports, tps, d.body)
-		if err != nil {
-			return nil, err
-		}
-		interfaces = append(interfaces, &TypeInterfaceDecl{
-			Name:       d.name,
-			Package:    local,
-			TypeParams: tps,
-			Body:       body,
-		})
+	for _, decl := range decls.Interfaces.Slice() {
+		decl.resolve(types)
 	}
-
-	funcs := []*TypeFuncDecl{}
-	for _, d := range fnDefs {
-		tps, err := parseTypeParam(local, imports, d.typeParam)
-		if err != nil {
-			return nil, err
-		}
-		body, err := parseFn(local, imports, tps, d.body)
-		if err != nil {
-			return nil, err
-		}
-		funcs = append(funcs, &TypeFuncDecl{
-			Name:       d.name,
-			Package:    local,
-			TypeParams: tps,
-			Body:       body,
-		})
+	for _, decl := range decls.Funcs.Slice() {
+		decl.resolve(types)
 	}
-
-	return &TypeDeclarations{
-		Structs:    structs,
-		Interfaces: interfaces,
-		Funcs:      funcs,
-	}, nil
-}
-
-func parseTypeParam(local *Import, pkgs map[string]*Import, params []*ast.Field) ([]*TypeParam, error) {
-	tps := []*TypeParam{}
-	for _, tp := range params {
-		constraint, err := parseType(local, pkgs, nil, tp.Type)
-		if err != nil {
-			return nil, err
-		}
-		for i := range tp.Names {
-			tps = append(tps, &TypeParam{
-				Name: tp.Names[i].Name,
-				Back: constraint,
+	for _, decl := range decls.Names.Slice() {
+		decl.resolve(types)
+	}
+	for _, decl := range decls.Unresolved.Slice() {
+		det := decl.Body.detect(types)
+		det.resolve(types)
+		switch dt := det.(type) {
+		case *NamedType:
+			decls.Unresolved.Delete(decl.Name)
+			decls.Names.Put(decl.Name, &TypeNameDecl{
+				DefinedIn: decl.DefinedIn, ImportPath: decl.ImportPath,
+				Name: decl.Name, TypeParams: decl.TypeParams, Body: dt,
 			})
+		default: // *unknownType
 		}
 	}
-
-	for i := range tps {
-		b := tps[i].Back
-
-		if p, ok := b.(*pseudoType); ok {
-			b = resolveBareNameType(local, tps, p.Name)
-		}
-
-		b.injectTypeParam(local, tps)
-
-		tps[i].Back = b
-	}
-
-	return tps, nil
+	return decls, nil
 }
 
-func resolveBareNameType(local *Import, tps []*TypeParam, name string) Type {
-	for _, tp := range tps {
-		if tp.Name == name {
-			return tp
-		}
-	}
-	switch name {
-	case "int", "int8", "int16", "int32", "int64",
+type TypeDeclarations struct {
+	Structs    maps.OrderedMap[string, *TypeStructDecl]
+	Interfaces maps.OrderedMap[string, *TypeInterfaceDecl]
+	Funcs      maps.OrderedMap[string, *TypeFuncDecl]
+	Names      maps.OrderedMap[string, *TypeNameDecl]
+	Unresolved maps.OrderedMap[string, *TypeUnresolvedDecl]
+}
+
+func (td *TypeDeclarations) Merge(other *TypeDeclarations) {
+	other.Structs.Iter(func(s string, decl *TypeStructDecl) bool {
+		td.Structs.Put(s, decl)
+		return true
+	})
+	other.Interfaces.Iter(func(s string, decl *TypeInterfaceDecl) bool {
+		td.Interfaces.Put(s, decl)
+		return true
+	})
+	other.Funcs.Iter(func(s string, decl *TypeFuncDecl) bool {
+		td.Funcs.Put(s, decl)
+		return true
+	})
+	other.Names.Iter(func(s string, decl *TypeNameDecl) bool {
+		td.Names.Put(s, decl)
+		return true
+	})
+	other.Unresolved.Iter(func(s string, decl *TypeUnresolvedDecl) bool {
+		td.Unresolved.Put(s, decl)
+		return true
+	})
+}
+
+var builtin = map[string]Type{}
+
+/*
+ */
+func init() {
+	for _, typename := range []string{
+		"int", "int8", "int16", "int32", "int64",
 		"uint", "uint8", "uint16", "uint32", "uint64",
 		"float32", "float64", "complex64", "complex128",
 		"bool", "rune", "byte", "uintptr",
-		"string", "error", "any":
-		return &BuiltinType{Name: name}
-	default:
-		isExported := name[:1] == strings.ToUpper(name[:1])
-		return &NamedType{Pkg: local, Name: name, isExported: isExported}
+		"string", "error", "any",
+	} {
+		builtin[typename] = &NamedType{Name: typename}
 	}
 }
 
-func parseType(local *Import, imports map[string]*Import, tps []*TypeParam, node ast.Expr) (Type, error) {
+func parseTypeParam(pkgs []ImportStatment, params []*ast.Field) []*TypeParam {
+	tps := []*TypeParam{}
+	tpmap := map[string]Type{}
+
+	for _, tp := range params {
+		constraint := parseType(pkgs, tp.Type)
+		for i := range tp.Names {
+			name := tp.Names[i].Name
+			param := &TypeParam{Name: name, Constraint: constraint}
+			tps = append(tps, param)
+			tpmap[name] = param
+		}
+	}
+
+	for _, tp := range tps {
+		tp.resolve(tpmap)
+	}
+
+	return tps
+}
+
+func parseType(imports []ImportStatment, node ast.Expr) Type {
 	switch t := node.(type) {
 	case *ast.Ident: // local or built-in type
-		if tps == nil { // type params are unresolved
-			return &pseudoType{Name: t.Name}, nil
-		}
-		return resolveBareNameType(local, tps, t.Name), nil
+		return &unknwonType{Name: t.Name}
 
 	case *ast.SelectorExpr: // imported type
 		x, ok := t.X.(*ast.Ident)
 		if !ok {
-			return nil, errors.New("selector is not normal name")
+			return &ParseError{
+				expected: "NAME.selector",
+				node:     node,
+			}
 		}
-		return &NamedType{Pkg: imports[x.Name], Name: t.Sel.Name, isExported: t.Sel.IsExported()}, nil
+		var imp string
+		for _, is := range imports {
+			if is.Name == x.Name {
+				imp = is.Path
+				break
+			}
+		}
+		if imp == "" {
+			return &ParseError{
+				expected: "NAME.selector (not imported?)",
+				node:     node,
+			}
+		}
+		return &NamedType{ImportPath: imp, Name: t.Sel.Name}
 
 	case *ast.IndexExpr: // generics
-		hostType, err := parseType(local, imports, tps, t.X)
-		if err != nil {
-			return nil, err
+		hostType := parseType(imports, t.X)
+		tp := parseType(imports, t.Index)
+		switch ht := hostType.(type) {
+		case *NamedType:
+			ht.Params = []Type{tp}
+			return ht
+		case *unknwonType:
+			ht.Params = []Type{tp}
+			return ht
+		default:
+			return &ParseError{
+				expected: "NAME[...]",
+				node:     node,
+			}
 		}
-		tp, err := parseType(local, imports, tps, t.Index)
-		if err != nil {
-			return nil, err
-		}
-		return &GenericType{Host: hostType, Params: []Type{tp}}, nil
 	case *ast.IndexListExpr: // generics
-		hostType, err := parseType(local, imports, tps, t.X)
-		if err != nil {
-			return nil, err
-		}
+		hostType := parseType(imports, t.X)
 		params := []Type{}
 		for i := range t.Indices {
-			tp, err := parseType(local, imports, tps, t.Indices[i])
-			if err != nil {
-				return nil, err
-			}
+			tp := parseType(imports, t.Indices[i])
 			params = append(params, tp)
 		}
-		return &GenericType{Host: hostType, Params: params}, nil
-	case *ast.StarExpr: // pointer
-		elem, err := parseType(local, imports, tps, t.X)
-		if err != nil {
-			return nil, err
+		switch ht := hostType.(type) {
+		case *NamedType:
+			ht.Params = params
+			return ht
+		case *unknwonType:
+			ht.Params = params
+			return ht
+		default:
+			return &ParseError{
+				expected: "NAME[..., ...]",
+				node:     node,
+			}
 		}
-		return &PointerType{Elem: elem}, nil
+	case *ast.StarExpr: // pointer
+		elem := parseType(imports, t.X)
+		return &PointerType{Elem: elem}
 
 	case *ast.ArrayType: // array or slice
-		elem, err := parseType(local, imports, tps, t.Elt)
-		if err != nil {
-			return nil, err
-		}
+		elem := parseType(imports, t.Elt)
 		if l := t.Len; l == nil {
-			return &SliceType{Elem: elem}, nil
+			return &SliceType{Elem: elem}
 		} else {
 			id, ok := l.(*ast.BasicLit)
 			if !ok {
-				return nil, errors.New("array length is not literal")
+				return &ParseError{
+					expected: "array[INDEX] (should be literal)",
+					node:     node,
+				}
 			}
-			l, err := strconv.Atoi(id.Value)
+
+			length, err := strconv.Atoi(id.Value)
 			if err != nil {
-				return nil, err
+				return &ParseError{
+					expected: "array[INDEX] (should be numeric)",
+					node:     node,
+				}
 			}
-			return &ArrayType{Elem: elem, Len: l}, nil
+			return &ArrayType{Elem: elem, Len: length}
 		}
 
 	case *ast.MapType:
-		key, err := parseType(local, imports, tps, t.Key)
-		if err != nil {
-			return nil, err
-		}
-		val, err := parseType(local, imports, tps, t.Value)
-		if err != nil {
-			return nil, err
-		}
-		return &MapType{Key: key, Elem: val}, nil
+		key := parseType(imports, t.Key)
+		val := parseType(imports, t.Value)
+		return &MapType{Key: key, Elem: val}
 
 	case *ast.ChanType: // channel
-		elem, err := parseType(local, imports, tps, t.Value)
-		if err != nil {
-			return nil, err
-		}
-		return &ChanType{Elem: elem, Dir: t.Dir}, nil
+		elem := parseType(imports, t.Value)
+		return &ChanType{Elem: elem, Dir: t.Dir}
 
 	case *ast.FuncType: // func
-		return parseFn(local, imports, tps, t)
+		return parseFn(imports, t)
 
 	case *ast.StructType: // struct literal
-		return parseStruct(local, imports, tps, t)
+		return parseStruct(imports, t)
 
 	case *ast.InterfaceType: // interface literal
-		return parseInterface(local, imports, tps, t)
+		return parseInterface(imports, t)
+
 	case *ast.UnaryExpr:
-		tt, err := parseType(local, imports, tps, t.X)
-		if err != nil {
-			return nil, err
-		}
+		tt := parseType(imports, t.X)
 		if t.Op.String() != "~" {
-			return nil, fmt.Errorf("unknown type unaryop: %s", t.Op.String())
+			return &ParseError{
+				expected: "~type (operator is not ~)",
+				node:     node,
+			}
 		}
 		return &TypeConstraint{
 			Op:   t.Op.String(),
 			Type: tt,
-		}, nil
+		}
+
 	case *ast.BinaryExpr:
-		tx, err := parseType(local, imports, tps, t.X)
-		if err != nil {
-			return nil, err
-		}
-		ty, err := parseType(local, imports, tps, t.Y)
-		if err != nil {
-			return nil, err
-		}
+		tx := parseType(imports, t.X)
+		ty := parseType(imports, t.Y)
 		if t.Op.String() != "|" {
-			return nil, fmt.Errorf("unknown type binaryop: %s", t.Op.String())
+			return &ParseError{
+				expected: "type | type (operator is not |)",
+				node:     node,
+			}
 		}
 		return &TypeUnion{
 			Op: t.Op.String(),
 			X:  tx,
 			Y:  ty,
-		}, nil
+		}
 
+	default:
+		return &ParseError{
+			expected: "unknown syntax",
+			node:     node,
+		}
 	}
-	return nil, fmt.Errorf("unknown type reference: %T", node)
 }
 
-func parseStruct(local *Import, imports map[string]*Import, typeParams []*TypeParam, snode *ast.StructType) (*StructType, error) {
+func parseStruct(imports []ImportStatment, snode *ast.StructType) *StructType {
 	fields := []*Field{}
 	for _, f := range snode.Fields.List {
-		typ, err := parseType(local, imports, typeParams, f.Type)
-		if err != nil {
-			return nil, err
-		}
+		typ := parseType(imports, f.Type)
 
-		if len(f.Names) == 0 {
-			// embedded!
-			name := typ.PlainName()
-			fields = append(fields, &Field{Name: name, Type: typ, isExported: name[:1] == strings.ToUpper(name[:1])})
-		} else {
+		if 0 < len(f.Names) {
 			for _, n := range f.Names {
-				fields = append(fields, &Field{Name: n.Name, Type: typ, isExported: n.IsExported()})
+				fields = append(fields, &Field{Name: n.Name, Type: typ})
 			}
+		} else {
+			// embedded!
+			t := typ
+			if ptr, ok := t.(*PointerType); ok {
+				t = ptr.Elem
+			}
+			var name string
+
+			switch tt := t.(type) {
+			case *NamedType:
+				name = tt.Name
+			case *unknwonType:
+				name = tt.Name
+			default:
+				fields = append(
+					fields,
+					&Field{
+						Name: "?",
+						Type: &ParseError{
+							expected: "NAME or NAME.SELECTOR",
+							node:     f.Type,
+						},
+					},
+				)
+				continue
+			}
+			fields = append(fields, &Field{Name: name, Type: typ})
 		}
 	}
-	return &StructType{Fields: fields}, nil
+	return &StructType{Fields: fields}
 
 }
 
-func parseInterface(local *Import, imports map[string]*Import, typeParams []*TypeParam, node *ast.InterfaceType) (*InterfaceType, error) {
+func parseInterface(imports []ImportStatment, node *ast.InterfaceType) *InterfaceType {
 	methods := []*Method{}
 	embeddeds := []Type{}
 	for _, f := range node.Methods.List {
 		switch m := f.Type.(type) {
 		case *ast.FuncType:
-			typ, err := parseFn(local, imports, typeParams, m)
-			if err != nil {
-				return nil, err
-			}
+			typ := parseFn(imports, m)
 			if len(f.Names) == 0 {
 				// embedded
-				methods = append(methods, &Method{Name: "", Func: typ, isExported: !typ.IsOpaque()})
+				methods = append(methods, &Method{Name: "", Func: typ})
 			} else {
 				for _, n := range f.Names {
-					methods = append(methods, &Method{Name: n.Name, Func: typ, isExported: n.IsExported()})
+					methods = append(methods, &Method{Name: n.Name, Func: typ})
 				}
 			}
 		default:
-			parsed, err := parseType(local, imports, typeParams, m)
-			if err != nil {
-				return nil, err
-			}
-			if p, ok := parsed.(*pseudoType); ok {
-				parsed = resolveBareNameType(local, typeParams, p.Name)
-			}
-			embeddeds = append(embeddeds, parsed)
+			embeddeds = append(embeddeds, parseType(imports, m))
 		}
 	}
-	return &InterfaceType{Methods: methods, Embedded: embeddeds}, nil
+	in := &InterfaceType{Methods: methods, Embedded: embeddeds}
+	return in
 }
 
-func parseFn(local *Import, imports map[string]*Import, tps []*TypeParam, fnode *ast.FuncType) (*FuncType, error) {
+func parseFn(imports []ImportStatment, fnode *ast.FuncType) *FuncType {
 	params := []*FuncIOParam{}
 	var ellip *FuncIOParam
 	for _, param := range fnode.Params.List {
@@ -528,32 +549,14 @@ func parseFn(local *Import, imports map[string]*Import, tps []*TypeParam, fnode 
 		for _, name := range names {
 			switch p := param.Type.(type) {
 			case *ast.Ellipsis:
-				e, err := parseType(local, imports, tps, p.Elt)
-				if err != nil {
-					return nil, err
-				}
-				for _, tp := range tps {
-					if tp.Name == e.PlainName() {
-						e = tp
-						break
-					}
-				}
+				e := parseType(imports, p.Elt)
 				ellip = &FuncIOParam{
 					ParamName: name,
 					Type:      e,
 					Variadic:  true,
 				}
 			default:
-				e, err := parseType(local, imports, tps, p)
-				if err != nil {
-					return nil, err
-				}
-				for _, tp := range tps {
-					if tp.Name == e.PlainName() {
-						e = tp
-						break
-					}
-				}
+				e := parseType(imports, p)
 				params = append(params, &FuncIOParam{
 					ParamName: name,
 					Type:      e,
@@ -565,27 +568,18 @@ func parseFn(local *Import, imports map[string]*Import, tps []*TypeParam, fnode 
 	returns := []*FuncIOParam{}
 	if fnode.Results != nil {
 		for _, result := range fnode.Results.List {
-			r, err := parseType(local, imports, tps, result.Type)
-			if err != nil {
-				return nil, err
-			}
-			for _, tp := range tps {
-				if tp.Name == r.PlainName() {
-					r = tp
-					break
-				}
-			}
+			r := parseType(imports, result.Type)
 			if names := result.Names; len(names) == 0 {
-				returns = append(returns, &FuncIOParam{
-					ParamName: "",
-					Type:      r,
-				})
+				returns = append(
+					returns,
+					&FuncIOParam{ParamName: "", Type: r},
+				)
 			} else {
 				for _, name := range names {
-					returns = append(returns, &FuncIOParam{
-						ParamName: name.Name,
-						Type:      r,
-					})
+					returns = append(
+						returns,
+						&FuncIOParam{ParamName: name.Name, Type: r},
+					)
 				}
 			}
 		}
@@ -593,7 +587,7 @@ func parseFn(local *Import, imports map[string]*Import, tps []*TypeParam, fnode 
 
 	return &FuncType{
 		Args: params, VarArg: ellip, Returns: returns,
-	}, nil
+	}
 }
 
 func safeDeref[T any](val *T) T {

@@ -9,7 +9,8 @@ import (
 	config "github.com/youta-t/its/config"
 	itskit "github.com/youta-t/its/itskit"
 	itsio "github.com/youta-t/its/itskit/itsio"
-	testee "github.com/youta-t/its/structer/example/internal/types/sub2"
+
+	pkg1 "github.com/youta-t/its/structer/example/internal/generate_test/sub2"
 )
 
 type Sub2Spec struct {
@@ -18,14 +19,14 @@ type Sub2Spec struct {
 
 type _Sub2Matcher struct {
 	label  itskit.Label
-	fields []its.Matcher[testee.Sub2]
+	fields []its.Matcher[pkg1.Sub2]
 }
 
-func ItsSub2(want Sub2Spec) its.Matcher[testee.Sub2] {
+func ItsSub2(want Sub2Spec) its.Matcher[pkg1.Sub2] {
 	cancel := itskit.SkipStack()
 	defer cancel()
 
-	sub := []its.Matcher[testee.Sub2]{}
+	sub := []its.Matcher[pkg1.Sub2]{}
 
 	{
 		matcher := want.IntField
@@ -38,9 +39,9 @@ func ItsSub2(want Sub2Spec) its.Matcher[testee.Sub2] {
 		}
 		sub = append(
 			sub,
-			its.Property[testee.Sub2, int](
+			its.Property[pkg1.Sub2, int](
 				".IntField",
-				func(got testee.Sub2) int { return got.IntField },
+				func(got pkg1.Sub2) int { return got.IntField },
 				matcher,
 			),
 		)
@@ -52,7 +53,7 @@ func ItsSub2(want Sub2Spec) its.Matcher[testee.Sub2] {
 	}
 }
 
-func (m _Sub2Matcher) Match(got testee.Sub2) itskit.Match {
+func (m _Sub2Matcher) Match(got pkg1.Sub2) itskit.Match {
 	ok := 0
 	sub := []itskit.Match{}
 	for _, f := range m.fields {
@@ -63,11 +64,7 @@ func (m _Sub2Matcher) Match(got testee.Sub2) itskit.Match {
 		sub = append(sub, m)
 	}
 
-	return itskit.NewMatch(
-		len(sub) == ok,
-		m.label.Fill(got),
-		sub...,
-	)
+	return itskit.NewMatch(len(sub) == ok, m.label.Fill(got), sub...)
 }
 
 func (m _Sub2Matcher) Write(ww itsio.Writer) error {

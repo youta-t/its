@@ -54,6 +54,19 @@ type C3 interface {
 	io.Writer
 }
 
+type C4 interface {
+	interface {
+		Method()
+	}
+	interface {
+		io.Reader
+		interface {
+			AnotherMethod()
+			io.Closer
+		}
+	}
+}
+
 func init() {
 	var x i6
 	_ = x

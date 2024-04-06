@@ -1,14 +1,15 @@
-package types_test
+package generatetest_test
 
 import (
 	"io"
 	"testing"
 
 	"github.com/youta-t/its"
-	"github.com/youta-t/its/structer/example/internal/types"
-	"github.com/youta-t/its/structer/example/internal/types/gen_structer"
-	"github.com/youta-t/its/structer/example/internal/types/sub1"
-	"github.com/youta-t/its/structer/example/internal/types/sub2"
+	types "github.com/youta-t/its/structer/example/internal/generate_test"
+	"github.com/youta-t/its/structer/example/internal/generate_test/dot"
+	"github.com/youta-t/its/structer/example/internal/generate_test/gen_structer"
+	"github.com/youta-t/its/structer/example/internal/generate_test/sub1"
+	"github.com/youta-t/its/structer/example/internal/generate_test/sub2"
 )
 
 func TestT(T *testing.T) {
@@ -31,10 +32,10 @@ func TestT(T *testing.T) {
 			}),
 		}),
 
-		F6: its.ForItems(its.Slice, gen_structer.ItsU, []gen_structer.USpec{
-			{FieldU1: its.EqEq(true)},
-			{FieldU1: its.EqEq(false)},
-			{FieldU1: its.EqEq(true)},
+		F6: its.ForItems(its.Slice, its.EqEq[types.U], []types.U{
+			{FieldU1: true},
+			{FieldU1: false},
+			{FieldU1: true},
 		}),
 		F7: its.ForItems(its.Slice, its.EqEq, []int{3, 2, 1}),
 
@@ -56,9 +57,9 @@ func TestT(T *testing.T) {
 		F11: its.ForEntries(its.Map, its.EqEq, map[string]int{
 			"a": 1, "b": 2, "c": 3,
 		}),
-		F12: its.ForEntries(its.Map, gen_structer.ItsU, map[string]gen_structer.USpec{
-			"no":  {FieldU1: its.EqEq(false)},
-			"yes": {FieldU1: its.EqEq(true)},
+		F12: its.ForEntries(its.Map, its.EqEq, map[string]types.U{
+			"no":  {FieldU1: false},
+			"yes": {FieldU1: true},
 		}),
 		F13: its.ForEntries(its.Map, its.EqEq, map[types.U]int{
 			{FieldU1: false}: 0,
@@ -77,15 +78,45 @@ func TestT(T *testing.T) {
 			M(string, types.X, ...int) (int, error)
 		}]()),
 
-		U: gen_structer.ItsU(gen_structer.USpec{
-			FieldU1: its.EqEq(true),
-		}),
+		U: its.EqEq(types.U{FieldU1: true}),
 		X: its.Pointer(its.EqEq[types.X]("X")),
 		Sub2: its.EqEq(sub2.Sub2{
 			IntField: 123,
 		}),
 		G: gen_structer.ItsG(gen_structer.GSpec[int]{
 			Fx: its.EqEq(987),
+		}),
+
+		DS: its.EqEq(dot.DotStruct{
+			Value: "E",
+		}),
+
+		DI: its.Nil[dot.DotInterface](),
+
+		DF: its.Nil[dot.DotFunc](),
+
+		DN: its.EqEq(dot.DotName(42)),
+
+		DSStar: its.Pointer(its.EqEq(dot.DotStruct{
+			Value: "EStar",
+		})),
+
+		GDS: gen_structer.ItsG(gen_structer.GSpec[dot.DotStruct]{
+			Fx: its.EqEq(dot.DotStruct{
+				Value: "GDS",
+			}),
+		}),
+
+		GDI: gen_structer.ItsG(gen_structer.GSpec[dot.DotInterface]{
+			Fx: its.Nil[dot.DotInterface](),
+		}),
+
+		GDF: gen_structer.ItsG(gen_structer.GSpec[dot.DotFunc]{
+			Fx: its.Nil[dot.DotFunc](),
+		}),
+
+		GDN: gen_structer.ItsG(gen_structer.GSpec[dot.DotName]{
+			Fx: its.EqEq(dot.DotName(42)),
 		}),
 	})
 
@@ -142,6 +173,32 @@ func TestT(T *testing.T) {
 		X:    &x,
 		Sub2: sub2.Sub2{IntField: 123},
 		G:    types.G[int]{Fx: 987},
+
+		DS: dot.DotStruct{
+			Value: "E",
+		},
+		DI: nil,
+		DF: nil,
+		DN: 42,
+
+		DSStar: &dot.DotStruct{
+			Value: "Estar",
+		},
+
+		GDS: types.G[dot.DotStruct]{
+			Fx: dot.DotStruct{
+				Value: "GDS",
+			},
+		},
+		GDI: types.G[dot.DotInterface]{
+			Fx: nil,
+		},
+		GDF: types.G[dot.DotFunc]{
+			Fx: nil,
+		},
+		GDN: types.G[dot.DotName]{
+			Fx: 42,
+		},
 	})
 }
 
