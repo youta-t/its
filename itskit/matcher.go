@@ -74,18 +74,31 @@ type namedMatcher[T any] struct {
 	m    Matcher[T]
 }
 
-func Named[T any, M Matcher[T]](
-	name string,
+func Named[T any, M Matcher[T], L string | Label](
+	name L,
 	m M,
 ) Matcher[T] {
+	var label Label
+	switch n := (any(name)).(type) {
+	case string:
+		if !strings.HasSuffix(n, ":") {
+			n += " :"
+		}
+		label = NewLabel(n)
+	case Label:
+		label = n
+	}
 	return namedMatcher[T]{
-		name: NewLabel(name + " :"),
+		name: label,
 		m:    m,
 	}
 }
 
 func (n namedMatcher[T]) Match(got T) Match {
-	return n.m.Match(got)
+	m := n.m.Match(got)
+	return NewMatch(
+		m.Ok(), n.name.Fill(got), m,
+	)
 }
 
 func (k namedMatcher[T]) Write(w itsio.Writer) error {

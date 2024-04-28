@@ -1,12 +1,13 @@
 //go:generate go run github.com/youta-t/its/structer
 //go:generate gofmt -w ./gen_structer/type.go
-package types
+package generatetest
 
 import (
 	"io"
 
-	"github.com/youta-t/its/structer/example/internal/types/sub1"
-	"github.com/youta-t/its/structer/example/internal/types/sub2"
+	. "github.com/youta-t/its/structer/example/internal/generate_test/dot" // dot import to test
+	"github.com/youta-t/its/structer/example/internal/generate_test/sub1"
+	renamed "github.com/youta-t/its/structer/example/internal/generate_test/sub2"
 )
 
 // perfect example
@@ -69,17 +70,27 @@ type T[P interface {
 	// embedded
 	U
 	*X
-	sub2.Sub2
+	renamed.Sub2
 	G[int]
+
+	DS     DotStruct
+	DSStar *DotStruct
+
+	DI DotInterface
+
+	DF DotFunc
+
+	DN DotName
+
+	GDS G[DotStruct]
+	GDI G[DotInterface]
+	GDF G[DotFunc]
+	GDN G[DotName]
 }
 
 func F() any {
 	type Inner struct{}
 	return Inner{}
-}
-
-type U struct {
-	FieldU1 bool
 }
 
 type G[H any] struct {
@@ -97,8 +108,6 @@ type I1 interface {
 	String() string
 	Int() int
 }
-
-type I2 interface{}
 
 type private struct{}
 

@@ -1,10 +1,12 @@
 //go:generate go run github.com/youta-t/its/mocker
-package types
+//go:generate gofmt -w gen_mock/type_interfaces.go
+package generatetest
 
 import (
 	"io"
 
 	"github.com/youta-t/its/mocker/internal/example/sub"
+	. "github.com/youta-t/its/mocker/internal/generate_test/dot"
 )
 
 type I0 interface {
@@ -49,9 +51,36 @@ type C2 interface {
 	~string
 }
 
+type S struct{}
+
+type CS interface {
+	S
+}
+
 type C3 interface {
 	io.Reader
 	io.Writer
+}
+
+type C4 interface {
+	DotInterface
+
+	interface {
+		Method()
+	}
+	interface {
+		io.Reader
+		interface {
+			AnotherMethod()
+			io.Closer
+		}
+	}
+}
+
+type C5 interface {
+	DotStruct
+
+	M()
 }
 
 func init() {

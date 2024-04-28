@@ -1,3 +1,3 @@
-package types
+package generatetest
 
 type private struct{}
