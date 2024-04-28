@@ -1,11 +1,12 @@
-package types_test
+package generatetest_test
 
 import (
 	"testing"
 
 	"github.com/youta-t/its"
-	types "github.com/youta-t/its/mocker/internal/types"
-	"github.com/youta-t/its/mocker/internal/types/gen_mock"
+	types "github.com/youta-t/its/mocker/internal/generate_test"
+	"github.com/youta-t/its/mocker/internal/generate_test/dot"
+	"github.com/youta-t/its/mocker/internal/generate_test/gen_mock"
 )
 
 // This test file tests not only behaviour but also compilability.
@@ -441,5 +442,72 @@ func TestF20(t *testing.T) {
 			Fn(t)
 		r1 := testee(42)
 		its.EqEq(99).Match(r1).OrError(t)
+	}
+}
+
+func TestF25(t *testing.T) {
+	{
+		testee := gen_mock.F25_Expects(its.EqEq(dot.DotStruct{ThisIsDotStruct: "yes"})).
+			ThenReturn(nil).
+			Fn(t)
+
+		var ret dot.DotInterface = testee(dot.DotStruct{
+			ThisIsDotStruct: "yes",
+		})
+		its.Nil[dot.DotInterface]().Match(ret).OrError(t)
+	}
+	{
+		testee := gen_mock.F25_Expects(its.EqEq(dot.DotStruct{ThisIsDotStruct: "yes"})).
+			ThenEffect(func(d dot.DotStruct) dot.DotInterface { return nil }).
+			Fn(t)
+
+		var ret dot.DotInterface = testee(dot.DotStruct{
+			ThisIsDotStruct: "yes",
+		})
+		its.Nil[dot.DotInterface]().Match(ret).OrError(t)
+	}
+}
+
+func TestF26(t *testing.T) {
+	{
+		testee := gen_mock.F26_Expects(its.Nil[dot.DotInterface]()).
+			ThenReturn(dot.DotStruct{ThisIsDotStruct: "ok"}).
+			Fn(t)
+
+		var ret dot.DotStruct = testee(nil)
+		its.EqEq(dot.DotStruct{ThisIsDotStruct: "ok"}).Match(ret).OrError(t)
+	}
+	{
+		testee := gen_mock.F26_Expects(its.Nil[dot.DotInterface]()).
+			ThenEffect(func(d dot.DotInterface) dot.DotStruct {
+				return dot.DotStruct{
+					ThisIsDotStruct: "ok",
+				}
+			}).
+			Fn(t)
+
+		var ret dot.DotStruct = testee(nil)
+		its.EqEq(dot.DotStruct{ThisIsDotStruct: "ok"}).Match(ret).OrError(t)
+	}
+}
+
+func TestF27(t *testing.T) {
+	{
+		testee := gen_mock.F27_Expects(its.Nil[dot.DotInterface]()).
+			ThenReturn(nil).
+			Fn(t)
+
+		var ret dot.DotInterface = testee(nil)
+		its.Nil[dot.DotInterface]().Match(ret).OrError(t)
+	}
+	{
+		testee := gen_mock.F27_Expects(its.Nil[dot.DotInterface]()).
+			ThenEffect(func(d dot.DotInterface) dot.DotInterface {
+				return nil
+			}).
+			Fn(t)
+
+		var ret dot.DotInterface = testee(nil)
+		its.Nil[dot.DotInterface]().Match(ret).OrError(t)
 	}
 }

@@ -3,12 +3,10 @@ package main
 import (
 	"flag"
 	"fmt"
-	"go/build"
 	"log"
 	"os"
 	"path"
 	"path/filepath"
-	"slices"
 	"sort"
 	"strings"
 	"text/template"
@@ -85,6 +83,8 @@ The new file, has "Matcher" and "Spec" types, is placed in "./gen_structer" dire
 		log.Fatalf("-source is required")
 		flag.Usage()
 		return
+	} else {
+		source = try.To(filepath.Abs(source)).OrFatal(logger)
 	}
 	if dest == "" {
 		log.Fatalf("-dest is required")
@@ -92,75 +92,52 @@ The new file, has "Matcher" and "Spec" types, is placed in "./gen_structer" dire
 		return
 	}
 
-	sources := []string{}
+	parserInstance := try.To(parser.New()).OrFatal(logger)
 
-	if !*sourceAsPackage {
-		sources = append(sources, source)
+	var pkg *parser.Package
+	targetFile := ""
+
+	if *sourceAsPackage {
+		pkg = try.To(parserInstance.Import(source)).OrFatal(logger)
 	} else {
-		p := try.To(build.Default.Import(source, ".", 0)).OrFatal(logger)
-		for _, gof := range p.GoFiles {
-			sources = append(sources, filepath.Join(p.Dir, gof))
+		dir := filepath.Dir(source)
+		targetFile = source
+		pkg = try.To(parserInstance.ImportDir(dir)).OrFatal(logger)
+	}
+
+	structs := map[string][]*parser.TypeStructDecl{}
+	{
+		_structs := pkg.Types.Structs.Slice()
+		for i := range _structs {
+			s := _structs[i]
+			if targetFile != "" && s.DefinedIn != targetFile {
+				continue
+			}
+			structs[s.DefinedIn] = append(structs[s.DefinedIn], s)
 		}
 	}
 
-	for _, s := range sources {
-		f := try.To(parser.Parse(s)).OrFatal(logger)
-		newFile := generatingFile{
+	for sourcepath, defs := range structs {
+		genFile := generatingFile{
 			PackageName: path.Base(dest),
+			Imports:     new(parser.Imports),
 		}
-		requiredImports := map[string]*parser.Import{
-			"its":    {Name: "its", Path: "github.com/youta-t/its"},
-			"itskit": {Name: "itskit", Path: "github.com/youta-t/its/itskit"},
-			"itsio":  {Name: "itsio", Path: "github.com/youta-t/its/itskit/itsio"},
-			"config": {Name: "config", Path: "github.com/youta-t/its/config"},
-		}
-		usedImports := map[string]*parser.Import{}
+		genFile.Imports.Add(pkg.Path)
 
-		for i := range f.Types.Structs {
-			s := f.Types.Structs[i]
-
-			if _, ok := targetStructs[s.Name]; len(targetStructs) != 0 && !ok {
-				continue
-			}
-
-			newFile.Structs = append(newFile.Structs, s)
-
-			types := s.Require()
-			for i := range types {
-				t := types[i]
-				usedImports[t.Name] = t
+		for i := range defs {
+			s := defs[i]
+			genFile.Structs = append(genFile.Structs, s)
+			for _, req := range s.Require() {
+				genFile.Imports.Add(req)
 			}
 		}
 
-		if len(newFile.Structs) == 0 {
+		if len(genFile.Structs) == 0 {
 			continue
 		}
 
-		for i := range requiredImports {
-			newFile.Imports = append(newFile.Imports, requiredImports[i])
-		}
-		slices.SortFunc(newFile.Imports, func(a, b *parser.Import) int {
-			if a.Path < b.Path {
-				return -1
-			}
-			if b.Path < a.Path {
-				return 1
-			}
-			return 0
-		})
-
-		for i := range usedImports {
-			imp := usedImports[i]
-			if imp.Name == "" {
-				imp.Name = "testee"
-			} else {
-				imp.Name = "u_" + imp.Name
-			}
-			newFile.Imports = append(newFile.Imports, imp)
-		}
-
-		err := writeFile(filepath.Join(dest, s), newFile)
-		if err != nil {
+		fname := filepath.Base(sourcepath)
+		if err := writeFile(filepath.Join(dest, fname), genFile); err != nil {
 			logger.Fatal(err)
 		}
 	}
@@ -194,66 +171,93 @@ func writeFile(dest string, newFile generatingFile) error {
 
 type generatingFile struct {
 	PackageName string
-	Imports     []*parser.Import
+	Imports     *parser.Imports
 	Structs     []*parser.TypeStructDecl
 }
 
-const tpl = `// Code generated -- DO NOT EDIT
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
+const tpl = `// Code generated -- DO NOT EDIT
+{{ $imports := .Imports }}
 package {{ .PackageName }}
 import (
 	"strings"
 
-	{{ range .Imports }}
+	its "github.com/youta-t/its"
+	itskit "github.com/youta-t/its/itskit"
+	itsio "github.com/youta-t/its/itskit/itsio"
+	config "github.com/youta-t/its/config"
+
+	{{ range .Imports.Slice }}
 	{{- .Name }} "{{ .Path }}"
 	{{ end }}
 )
 {{ range .Structs }}
 {{ $s := . }}
-type {{ .Name }}Spec{{ .GenericExpr true }} struct {
-	{{ range .Body.Fields -}}{{ if .IsOpaque }}{{ continue }}{{ end }}
-	{{- .Name }} its.Matcher[{{ .Type.Expr }}]
+type {{ .Name }}Spec{{ .GenericExpr $imports true }} struct {
+	{{ range .Body.Fields }}{{ if .IsOpaque }}{{ continue }}{{ end }}
+	{{ .Name }} its.Matcher[{{ .Type.Expr $imports }}]
 	{{ end }}
 }
 
-type _{{ .Name }}Matcher{{ .GenericExpr true }} struct {
+type _{{ .Name }}Matcher{{ .GenericExpr $imports true }} struct {
 	label  itskit.Label
-	fields []its.Matcher[{{ .Expr }}]
+	fields []its.Matcher[{{ .Expr $imports }}]
 }
 
-func Its{{ .Name }}{{ .GenericExpr true }}(want {{ .Name }}Spec{{ .GenericExpr false }}) its.Matcher[{{ .Expr }}] {
+func Its{{ .Name }}{{ .GenericExpr $imports true }}(want {{ .Name }}Spec{{ .GenericExpr $imports false }}) its.Matcher[{{ .Expr $imports }}] {
 	cancel := itskit.SkipStack()
 	defer cancel()
 
-	sub := []its.Matcher[{{ .Expr }}]{}
+	sub := []its.Matcher[{{ .Expr $imports }}]{}
 	{{ range .Body.Fields }}{{ if .IsOpaque }}{{ continue }}{{ end }}
 	{
 		matcher := want.{{ .Name }}
 		if matcher == nil {
 			if config.StrictModeForStruct {
-				matcher = its.Never[{{ .Type.Expr }}]()
+				matcher = its.Never[{{ .Type.Expr $imports }}]()
 			} else {
-				matcher = its.Always[{{ .Type.Expr }}]()
+				matcher = its.Always[{{ .Type.Expr $imports }}]()
 			}
 		}
 		sub = append(
 			sub,
-			its.Property[{{ $s.Expr }}, {{ .Type.Expr }}](
+			its.Property[{{ $s.Expr $imports }}, {{ .Type.Expr $imports }}](
 				".{{ .Name }}",
-				func(got {{ $s.Expr }}) {{ .Type.Expr }} { return got.{{ .Name }} },
+				func(got {{ $s.Expr $imports }}) {{ .Type.Expr $imports }} { return got.{{ .Name }} },
 				matcher,
 			),
 		)
 	}
 	{{ end }}
 
-	return _{{ .Name }}Matcher{{ .GenericExpr false }}{
+	return _{{ .Name }}Matcher{{ .GenericExpr $imports false }}{
 		label: itskit.NewLabelWithLocation("type {{ .Name }}:"),
 		fields: sub,
 	}
 }
 
-func (m _{{ .Name }}Matcher{{ .GenericExpr false }}) Match(got {{ .Expr }}) itskit.Match {
+func (m _{{ .Name }}Matcher{{ .GenericExpr $imports false }}) Match(got {{ .Expr $imports }}) itskit.Match {
 	ok := 0
 	sub := []itskit.Match{}
 	for _, f := range m.fields {
@@ -264,18 +268,14 @@ func (m _{{ .Name }}Matcher{{ .GenericExpr false }}) Match(got {{ .Expr }}) itsk
 		sub = append(sub, m)
 	}
 
-	return itskit.NewMatch(
-		len(sub) == ok,
-		m.label.Fill(got),
-		sub...,
-	)
+	return itskit.NewMatch(len(sub) == ok, m.label.Fill(got), sub...)
 }
 
-func (m _{{ .Name }}Matcher{{ .GenericExpr false }}) Write(ww itsio.Writer) error {
+func (m _{{ .Name }}Matcher{{ .GenericExpr $imports false }}) Write(ww itsio.Writer) error {
 	return itsio.WriteBlock(ww, "type {{ .Name }}:", m.fields)
 }
 
-func (m _{{ .Name }}Matcher{{ .GenericExpr false }}) String() string {
+func (m _{{ .Name }}Matcher{{ .GenericExpr $imports false }}) String() string {
 	sb := new(strings.Builder)
 	w := itsio.Wrap(sb)
 	m.Write(w)

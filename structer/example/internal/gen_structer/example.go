@@ -9,26 +9,29 @@ import (
 	config "github.com/youta-t/its/config"
 	itskit "github.com/youta-t/its/itskit"
 	itsio "github.com/youta-t/its/itskit/itsio"
-	testee "github.com/youta-t/its/structer/example/internal"
-	u_time "time"
+
+	pkg1 "github.com/youta-t/its/structer/example/internal"
+	pkg2 "time"
 )
 
 type MyStructSpec struct {
-	Name      its.Matcher[string]
-	Value     its.Matcher[[]int]
-	Timestamp its.Matcher[u_time.Time]
+	Name its.Matcher[string]
+
+	Value its.Matcher[[]int]
+
+	Timestamp its.Matcher[pkg2.Time]
 }
 
 type _MyStructMatcher struct {
 	label  itskit.Label
-	fields []its.Matcher[testee.MyStruct]
+	fields []its.Matcher[pkg1.MyStruct]
 }
 
-func ItsMyStruct(want MyStructSpec) its.Matcher[testee.MyStruct] {
+func ItsMyStruct(want MyStructSpec) its.Matcher[pkg1.MyStruct] {
 	cancel := itskit.SkipStack()
 	defer cancel()
 
-	sub := []its.Matcher[testee.MyStruct]{}
+	sub := []its.Matcher[pkg1.MyStruct]{}
 
 	{
 		matcher := want.Name
@@ -41,9 +44,9 @@ func ItsMyStruct(want MyStructSpec) its.Matcher[testee.MyStruct] {
 		}
 		sub = append(
 			sub,
-			its.Property[testee.MyStruct, string](
+			its.Property[pkg1.MyStruct, string](
 				".Name",
-				func(got testee.MyStruct) string { return got.Name },
+				func(got pkg1.MyStruct) string { return got.Name },
 				matcher,
 			),
 		)
@@ -60,9 +63,9 @@ func ItsMyStruct(want MyStructSpec) its.Matcher[testee.MyStruct] {
 		}
 		sub = append(
 			sub,
-			its.Property[testee.MyStruct, []int](
+			its.Property[pkg1.MyStruct, []int](
 				".Value",
-				func(got testee.MyStruct) []int { return got.Value },
+				func(got pkg1.MyStruct) []int { return got.Value },
 				matcher,
 			),
 		)
@@ -72,16 +75,16 @@ func ItsMyStruct(want MyStructSpec) its.Matcher[testee.MyStruct] {
 		matcher := want.Timestamp
 		if matcher == nil {
 			if config.StrictModeForStruct {
-				matcher = its.Never[u_time.Time]()
+				matcher = its.Never[pkg2.Time]()
 			} else {
-				matcher = its.Always[u_time.Time]()
+				matcher = its.Always[pkg2.Time]()
 			}
 		}
 		sub = append(
 			sub,
-			its.Property[testee.MyStruct, u_time.Time](
+			its.Property[pkg1.MyStruct, pkg2.Time](
 				".Timestamp",
-				func(got testee.MyStruct) u_time.Time { return got.Timestamp },
+				func(got pkg1.MyStruct) pkg2.Time { return got.Timestamp },
 				matcher,
 			),
 		)
@@ -93,7 +96,7 @@ func ItsMyStruct(want MyStructSpec) its.Matcher[testee.MyStruct] {
 	}
 }
 
-func (m _MyStructMatcher) Match(got testee.MyStruct) itskit.Match {
+func (m _MyStructMatcher) Match(got pkg1.MyStruct) itskit.Match {
 	ok := 0
 	sub := []itskit.Match{}
 	for _, f := range m.fields {
@@ -104,11 +107,7 @@ func (m _MyStructMatcher) Match(got testee.MyStruct) itskit.Match {
 		sub = append(sub, m)
 	}
 
-	return itskit.NewMatch(
-		len(sub) == ok,
-		m.label.Fill(got),
-		sub...,
-	)
+	return itskit.NewMatch(len(sub) == ok, m.label.Fill(got), sub...)
 }
 
 func (m _MyStructMatcher) Write(ww itsio.Writer) error {

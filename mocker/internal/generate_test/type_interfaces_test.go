@@ -1,4 +1,4 @@
-package types_test
+package generatetest_test
 
 import (
 	"errors"
@@ -6,8 +6,8 @@ import (
 
 	"github.com/youta-t/its"
 	"github.com/youta-t/its/mocker/internal/example/sub"
-	types "github.com/youta-t/its/mocker/internal/types"
-	"github.com/youta-t/its/mocker/internal/types/gen_mock"
+	types "github.com/youta-t/its/mocker/internal/generate_test"
+	"github.com/youta-t/its/mocker/internal/generate_test/gen_mock"
 )
 
 func TestI0(t *testing.T) {
@@ -92,4 +92,54 @@ func TestI3(t *testing.T) {
 
 	r1 := testee.M0("foo")
 	its.EqEq(mystr("bar")).Match(r1).OrError(t)
+}
+
+func TestC3(t *testing.T) {
+	readErr := errors.New("read error")
+	writeErr := errors.New("write err")
+	var testee types.C3 = gen_mock.C3_Build(t, gen_mock.C3_Spec{
+		Read:  gen_mock.C3_Read_Expects(its.Not(its.Nil[[]byte]())).ThenReturn(7, readErr),
+		Write: gen_mock.C3_Write_Expects(its.Not(its.Nil[[]byte]())).ThenReturn(42, writeErr),
+	})
+
+	{
+		buf := make([]byte, 3)
+		n, err := testee.Read(buf)
+		its.EqEq(7).Match(n).OrError(t)
+		its.Error(readErr).Match(err).OrError(t)
+	}
+
+	{
+		buf := make([]byte, 3)
+		n, err := testee.Write(buf)
+		its.EqEq(42).Match(n).OrError(t)
+		its.Error(writeErr).Match(err).OrError(t)
+	}
+}
+
+func TestC4(t *testing.T) {
+	readErr := errors.New("read err")
+	closeErr := errors.New("close err")
+	testee := gen_mock.C4_Build(t, gen_mock.C4_Spec{
+		Read:          gen_mock.C4_Read_Expects(its.Not(its.Nil[[]byte]())).ThenReturn(10, readErr),
+		Close:         gen_mock.C4_Close_Expects().ThenReturn(closeErr),
+		Method:        gen_mock.C4_Method_Expects().ThenReturn(),
+		AnotherMethod: gen_mock.C4_AnotherMethod_Expects().ThenReturn(),
+		DotMethod:     gen_mock.C4_DotMethod_Expects().ThenReturn(),
+	})
+
+	{
+		buf := make([]byte, 3)
+		n, err := testee.Read(buf)
+		its.EqEq(10).Match(n).OrError(t)
+		its.EqEq(readErr).Match(err).OrError(t)
+	}
+	{
+		err := testee.Close()
+		its.Error(closeErr).Match(err).OrError(t)
+	}
+	testee.Method()
+	testee.DotMethod()
+	testee.AnotherMethod()
+
 }
