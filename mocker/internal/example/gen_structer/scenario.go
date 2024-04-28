@@ -5,30 +5,33 @@ import (
 	"strings"
 
 	its "github.com/youta-t/its"
-	config "github.com/youta-t/its/config"
 	itskit "github.com/youta-t/its/itskit"
 	itsio "github.com/youta-t/its/itskit/itsio"
-	testee "github.com/youta-t/its/mocker/internal/example"
+	config "github.com/youta-t/its/config"
+
+	pkg1 "github.com/youta-t/its/mocker/internal/example"
 	
 )
 
 
 type UserSpec struct {
+	
 	Id its.Matcher[string]
+	
 	Name its.Matcher[string]
 	
 }
 
 type _UserMatcher struct {
 	label  itskit.Label
-	fields []its.Matcher[testee.User]
+	fields []its.Matcher[pkg1.User]
 }
 
-func ItsUser(want UserSpec) its.Matcher[testee.User] {
+func ItsUser(want UserSpec) its.Matcher[pkg1.User] {
 	cancel := itskit.SkipStack()
 	defer cancel()
 
-	sub := []its.Matcher[testee.User]{}
+	sub := []its.Matcher[pkg1.User]{}
 	
 	{
 		matcher := want.Id
@@ -41,9 +44,9 @@ func ItsUser(want UserSpec) its.Matcher[testee.User] {
 		}
 		sub = append(
 			sub,
-			its.Property[testee.User, string](
+			its.Property[pkg1.User, string](
 				".Id",
-				func(got testee.User) string { return got.Id },
+				func(got pkg1.User) string { return got.Id },
 				matcher,
 			),
 		)
@@ -60,9 +63,9 @@ func ItsUser(want UserSpec) its.Matcher[testee.User] {
 		}
 		sub = append(
 			sub,
-			its.Property[testee.User, string](
+			its.Property[pkg1.User, string](
 				".Name",
-				func(got testee.User) string { return got.Name },
+				func(got pkg1.User) string { return got.Name },
 				matcher,
 			),
 		)
@@ -75,7 +78,7 @@ func ItsUser(want UserSpec) its.Matcher[testee.User] {
 	}
 }
 
-func (m _UserMatcher) Match(got testee.User) itskit.Match {
+func (m _UserMatcher) Match(got pkg1.User) itskit.Match {
 	ok := 0
 	sub := []itskit.Match{}
 	for _, f := range m.fields {
@@ -86,11 +89,7 @@ func (m _UserMatcher) Match(got testee.User) itskit.Match {
 		sub = append(sub, m)
 	}
 
-	return itskit.NewMatch(
-		len(sub) == ok,
-		m.label.Fill(got),
-		sub...,
-	)
+	return itskit.NewMatch(len(sub) == ok, m.label.Fill(got), sub...)
 }
 
 func (m _UserMatcher) Write(ww itsio.Writer) error {

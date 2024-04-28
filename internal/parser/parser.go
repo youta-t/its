@@ -531,8 +531,7 @@ func parseInterface(imports []ImportStatment, node *ast.InterfaceType) *Interfac
 			embeddeds = append(embeddeds, parseType(imports, m))
 		}
 	}
-	in := &InterfaceType{Methods: methods, Embedded: embeddeds}
-	return in
+	return &InterfaceType{Methods: methods, Embedded: embeddeds}
 }
 
 func parseFn(imports []ImportStatment, fnode *ast.FuncType) *FuncType {

@@ -1010,8 +1010,14 @@ func (in *InterfaceType) IsOpaque() bool {
 
 func (in *InterfaceType) Inlined(bc ParseContext) (*InterfaceType, error) {
 	inlined := &InterfaceType{
-		Methods:  make([]*Method, len(in.Methods)),
+		Methods:  make([]*Method, 0, len(in.Methods)),
 		Embedded: []Type{},
+	}
+
+	methods := map[string]*Method{}
+	for i := range in.Methods {
+		m := in.Methods[i]
+		methods[m.Name] = m
 	}
 
 	resolving := make([]Type, len(in.Embedded))
@@ -1021,7 +1027,7 @@ func (in *InterfaceType) Inlined(bc ParseContext) (*InterfaceType, error) {
 		resolving = resolving[1:]
 
 		switch typ := r.(type) {
-		case *TypeConstraint:
+		case *TypeConstraint, *TypeUnion:
 			inlined.Embedded = append(inlined.Embedded, typ)
 		case *NamedType:
 			if typ.ImportPath == "" {
@@ -1034,16 +1040,16 @@ func (in *InterfaceType) Inlined(bc ParseContext) (*InterfaceType, error) {
 			if err != nil {
 				return nil, err
 			}
-			if ifc, ok := pkg.Types.Interfaces.Get(typ.Name); ok {
-				resolving = append(resolving, ifc)
-				continue
-			}
 			if fn, ok := pkg.Types.Funcs.Get(typ.Name); ok {
-				inlined.Embedded = append(inlined.Embedded, fn)
+				inlined.Embedded = append(inlined.Embedded, fn.Body)
 				continue
 			}
-			if s, ok := pkg.Types.Interfaces.Get(typ.Name); ok {
-				inlined.Embedded = append(inlined.Embedded, s)
+			if s, ok := pkg.Types.Structs.Get(typ.Name); ok {
+				inlined.Embedded = append(inlined.Embedded, s.Body)
+				continue
+			}
+			if ifc, ok := pkg.Types.Interfaces.Get(typ.Name); ok {
+				resolving = append(resolving, ifc.Body)
 				continue
 			}
 			if n, ok := pkg.Types.Names.Get(typ.Name); ok {
@@ -1056,10 +1062,18 @@ func (in *InterfaceType) Inlined(bc ParseContext) (*InterfaceType, error) {
 			if err != nil {
 				return nil, err
 			}
-			inlined.Methods = append(inlined.Methods, typ_.Methods...)
+			for i := range typ_.Methods {
+				m := typ_.Methods[i]
+				methods[m.Name] = m
+			}
 			inlined.Embedded = append(inlined.Embedded, typ_.Embedded...)
 		}
 	}
+
+	for name := range methods {
+		inlined.Methods = append(inlined.Methods, methods[name])
+	}
+	slices.SortFunc(inlined.Methods, func(a, b *Method) int { return cmp.Compare(a.Name, b.Name) })
 	return inlined, nil
 }
 
@@ -1068,7 +1082,7 @@ type Method struct {
 	Func *FuncType
 }
 
-func (m *Method) IsOpaque() bool { return isPrivateName(m.Name) && m.Func.IsOpaque() }
+func (m *Method) IsOpaque() bool { return isPrivateName(m.Name) || m.Func.IsOpaque() }
 
 type ParseError struct {
 	expected string

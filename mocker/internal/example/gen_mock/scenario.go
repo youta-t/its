@@ -5,9 +5,10 @@ import (
 	its "github.com/youta-t/its"
 	itskit "github.com/youta-t/its/itskit"
 	mockkit "github.com/youta-t/its/mocker/mockkit"
-	testee "github.com/youta-t/its/mocker/internal/example"
+	pkg1 "github.com/youta-t/its/mocker/internal/example"
 	
 )
+
 type _SessionStoreCallSpec struct {
 	cookie its.Matcher[string]
 	
@@ -120,6 +121,114 @@ func (c _SessionStoreCall) ThenEffect(effect func(cookie string) (userId string,
 }
 
 
+type _UserRegistry_DeleteCallSpec struct {
+	arg0 its.Matcher[pkg1.User]
+	
+	
+}
+
+type _UserRegistry_DeleteCall struct {
+	name itskit.Label
+	spec _UserRegistry_DeleteCallSpec
+}
+
+func UserRegistry_Delete_Expects(
+	arg0 its.Matcher[pkg1.User],
+	
+) _UserRegistry_DeleteCall {
+	cancel := itskit.SkipStack()
+	defer cancel()
+
+	spec := _UserRegistry_DeleteCallSpec {}
+	spec.arg0 = itskit.Named(
+		"arg0",
+		arg0,
+	)
+	
+	
+	return _UserRegistry_DeleteCall{
+		name: itskit.NewLabelWithLocation("func UserRegistry_Delete"),
+		spec: spec,
+	}
+}
+
+type _UserRegistry_DeleteBehavior  struct {
+	name itskit.Label
+	spec _UserRegistry_DeleteCallSpec
+	effect func(arg0 pkg1.User) error
+}
+
+func (b *_UserRegistry_DeleteBehavior) Fn(t mockkit.TestLike) func(arg0 pkg1.User) error {
+	return func (
+		
+		arg0 pkg1.User,
+		
+		
+	) (
+		error,
+		
+	) {
+		if h, ok := t.(interface { Helper() }); ok {
+			h.Helper()
+		}
+		ok := 0
+		matches := []itskit.Match{}
+		
+		{
+			matcher := b.spec.arg0
+			if matcher == nil {
+				matcher = its.Never[pkg1.User]()
+			}
+			m := matcher.Match(arg0)
+			if m.Ok() {
+				ok += 1
+			}
+			matches = append(matches, m)
+		}
+		
+		itskit.NewMatch(
+			ok == len(matches),
+			b.name.Fill(itskit.Missing),
+			matches...,
+		).OrError(t)
+		return b.effect(
+			
+			arg0,
+			
+			
+		)
+	}
+}
+
+func (c _UserRegistry_DeleteCall) ThenReturn(
+
+	ret0 error,
+
+) mockkit.FuncBehavior[ func (arg0 pkg1.User) error  ] {
+	return c.ThenEffect(func(
+		
+		pkg1.User,
+		
+		
+	)(
+		error,
+		
+	){
+		
+		return ret0
+		
+	})
+}
+
+func (c _UserRegistry_DeleteCall) ThenEffect(effect func(arg0 pkg1.User) error) mockkit.FuncBehavior[ func (arg0 pkg1.User) error ] {
+	return &_UserRegistry_DeleteBehavior {
+		name: c.name,
+		spec: c.spec,
+		effect: effect,
+	}
+}
+
+
 type _UserRegistry_GetCallSpec struct {
 	userId its.Matcher[string]
 	
@@ -154,17 +263,17 @@ func UserRegistry_Get_Expects(
 type _UserRegistry_GetBehavior  struct {
 	name itskit.Label
 	spec _UserRegistry_GetCallSpec
-	effect func(userId string) ( testee.User,  error)
+	effect func(userId string) ( pkg1.User,  error)
 }
 
-func (b *_UserRegistry_GetBehavior) Fn(t mockkit.TestLike) func(userId string) ( testee.User,  error) {
+func (b *_UserRegistry_GetBehavior) Fn(t mockkit.TestLike) func(userId string) ( pkg1.User,  error) {
 	return func (
 		
 		arg0 string,
 		
 		
 	) (
-		testee.User,
+		pkg1.User,
 		error,
 		
 	) {
@@ -202,18 +311,18 @@ func (b *_UserRegistry_GetBehavior) Fn(t mockkit.TestLike) func(userId string) (
 
 func (c _UserRegistry_GetCall) ThenReturn(
 
-	ret0 testee.User,
+	ret0 pkg1.User,
 
 	ret1 error,
 
-) mockkit.FuncBehavior[ func (userId string) ( testee.User,  error)  ] {
+) mockkit.FuncBehavior[ func (userId string) ( pkg1.User,  error)  ] {
 	return c.ThenEffect(func(
 		
 		string,
 		
 		
 	)(
-		testee.User,
+		pkg1.User,
 		error,
 		
 	){
@@ -223,7 +332,7 @@ func (c _UserRegistry_GetCall) ThenReturn(
 	})
 }
 
-func (c _UserRegistry_GetCall) ThenEffect(effect func(userId string) ( testee.User,  error)) mockkit.FuncBehavior[ func (userId string) ( testee.User,  error) ] {
+func (c _UserRegistry_GetCall) ThenEffect(effect func(userId string) ( pkg1.User,  error)) mockkit.FuncBehavior[ func (userId string) ( pkg1.User,  error) ] {
 	return &_UserRegistry_GetBehavior {
 		name: c.name,
 		spec: c.spec,
@@ -233,7 +342,7 @@ func (c _UserRegistry_GetCall) ThenEffect(effect func(userId string) ( testee.Us
 
 
 type _UserRegistry_UpdateCallSpec struct {
-	arg0 its.Matcher[testee.User]
+	arg0 its.Matcher[pkg1.User]
 	
 	
 }
@@ -244,7 +353,7 @@ type _UserRegistry_UpdateCall struct {
 }
 
 func UserRegistry_Update_Expects(
-	arg0 its.Matcher[testee.User],
+	arg0 its.Matcher[pkg1.User],
 	
 ) _UserRegistry_UpdateCall {
 	cancel := itskit.SkipStack()
@@ -266,13 +375,13 @@ func UserRegistry_Update_Expects(
 type _UserRegistry_UpdateBehavior  struct {
 	name itskit.Label
 	spec _UserRegistry_UpdateCallSpec
-	effect func(arg0 testee.User) error
+	effect func(arg0 pkg1.User) error
 }
 
-func (b *_UserRegistry_UpdateBehavior) Fn(t mockkit.TestLike) func(arg0 testee.User) error {
+func (b *_UserRegistry_UpdateBehavior) Fn(t mockkit.TestLike) func(arg0 pkg1.User) error {
 	return func (
 		
-		arg0 testee.User,
+		arg0 pkg1.User,
 		
 		
 	) (
@@ -288,7 +397,7 @@ func (b *_UserRegistry_UpdateBehavior) Fn(t mockkit.TestLike) func(arg0 testee.U
 		{
 			matcher := b.spec.arg0
 			if matcher == nil {
-				matcher = its.Never[testee.User]()
+				matcher = its.Never[pkg1.User]()
 			}
 			m := matcher.Match(arg0)
 			if m.Ok() {
@@ -315,10 +424,10 @@ func (c _UserRegistry_UpdateCall) ThenReturn(
 
 	ret0 error,
 
-) mockkit.FuncBehavior[ func (arg0 testee.User) error  ] {
+) mockkit.FuncBehavior[ func (arg0 pkg1.User) error  ] {
 	return c.ThenEffect(func(
 		
-		testee.User,
+		pkg1.User,
 		
 		
 	)(
@@ -331,116 +440,8 @@ func (c _UserRegistry_UpdateCall) ThenReturn(
 	})
 }
 
-func (c _UserRegistry_UpdateCall) ThenEffect(effect func(arg0 testee.User) error) mockkit.FuncBehavior[ func (arg0 testee.User) error ] {
+func (c _UserRegistry_UpdateCall) ThenEffect(effect func(arg0 pkg1.User) error) mockkit.FuncBehavior[ func (arg0 pkg1.User) error ] {
 	return &_UserRegistry_UpdateBehavior {
-		name: c.name,
-		spec: c.spec,
-		effect: effect,
-	}
-}
-
-
-type _UserRegistry_DeleteCallSpec struct {
-	arg0 its.Matcher[testee.User]
-	
-	
-}
-
-type _UserRegistry_DeleteCall struct {
-	name itskit.Label
-	spec _UserRegistry_DeleteCallSpec
-}
-
-func UserRegistry_Delete_Expects(
-	arg0 its.Matcher[testee.User],
-	
-) _UserRegistry_DeleteCall {
-	cancel := itskit.SkipStack()
-	defer cancel()
-
-	spec := _UserRegistry_DeleteCallSpec {}
-	spec.arg0 = itskit.Named(
-		"arg0",
-		arg0,
-	)
-	
-	
-	return _UserRegistry_DeleteCall{
-		name: itskit.NewLabelWithLocation("func UserRegistry_Delete"),
-		spec: spec,
-	}
-}
-
-type _UserRegistry_DeleteBehavior  struct {
-	name itskit.Label
-	spec _UserRegistry_DeleteCallSpec
-	effect func(arg0 testee.User) error
-}
-
-func (b *_UserRegistry_DeleteBehavior) Fn(t mockkit.TestLike) func(arg0 testee.User) error {
-	return func (
-		
-		arg0 testee.User,
-		
-		
-	) (
-		error,
-		
-	) {
-		if h, ok := t.(interface { Helper() }); ok {
-			h.Helper()
-		}
-		ok := 0
-		matches := []itskit.Match{}
-		
-		{
-			matcher := b.spec.arg0
-			if matcher == nil {
-				matcher = its.Never[testee.User]()
-			}
-			m := matcher.Match(arg0)
-			if m.Ok() {
-				ok += 1
-			}
-			matches = append(matches, m)
-		}
-		
-		itskit.NewMatch(
-			ok == len(matches),
-			b.name.Fill(itskit.Missing),
-			matches...,
-		).OrError(t)
-		return b.effect(
-			
-			arg0,
-			
-			
-		)
-	}
-}
-
-func (c _UserRegistry_DeleteCall) ThenReturn(
-
-	ret0 error,
-
-) mockkit.FuncBehavior[ func (arg0 testee.User) error  ] {
-	return c.ThenEffect(func(
-		
-		testee.User,
-		
-		
-	)(
-		error,
-		
-	){
-		
-		return ret0
-		
-	})
-}
-
-func (c _UserRegistry_DeleteCall) ThenEffect(effect func(arg0 testee.User) error) mockkit.FuncBehavior[ func (arg0 testee.User) error ] {
-	return &_UserRegistry_DeleteBehavior {
 		name: c.name,
 		spec: c.spec,
 		effect: effect,
@@ -452,14 +453,18 @@ func (c _UserRegistry_DeleteCall) ThenEffect(effect func(arg0 testee.User) error
 
 type _UserRegistryImpl struct {
 	
-	Get func(userId string) ( testee.User,  error)
-	Update func(arg0 testee.User) error
-	Delete func(arg0 testee.User) error
+	Delete func(arg0 pkg1.User) error
+	Get func(userId string) ( pkg1.User,  error)
+	Update func(arg0 pkg1.User) error
 }
 
-func UserRegistry_Build(t mockkit.TestLike, spec UserRegistry_Spec) testee.UserRegistry {
+func UserRegistry_Build(t mockkit.TestLike, spec UserRegistry_Spec) pkg1.UserRegistry {
 	impl := _UserRegistryImpl{}
 
+	
+	if spec.Delete != nil {
+		impl.Delete = spec.Delete.Fn(t)
+	}
 	
 	if spec.Get != nil {
 		impl.Get = spec.Get.Fn(t)
@@ -467,10 +472,6 @@ func UserRegistry_Build(t mockkit.TestLike, spec UserRegistry_Spec) testee.UserR
 	
 	if spec.Update != nil {
 		impl.Update = spec.Update.Fn(t)
-	}
-	
-	if spec.Delete != nil {
-		impl.Delete = spec.Delete.Fn(t)
 	}
 	
 
@@ -482,49 +483,8 @@ type _UserRegistryMock struct {
 	impl _UserRegistryImpl
 }
 
-func (m _UserRegistryMock) Get (
-	userId string,
-) (
-	testee.User,
-	error,
-) {
-	cancel := itskit.SkipStack()
-	defer cancel()
-
-	if m.impl.Get == nil {
-		itskit.NG(
-			itskit.NewLabelWithLocation("UserRegistry.Get is not mocked").String(),
-		).OrFatal(m.t)
-	}
-
-	return m.impl.Get(
-		userId,
-	)
-}
-
-
-func (m _UserRegistryMock) Update (
-	arg0 testee.User,
-) (
-	error,
-) {
-	cancel := itskit.SkipStack()
-	defer cancel()
-
-	if m.impl.Update == nil {
-		itskit.NG(
-			itskit.NewLabelWithLocation("UserRegistry.Update is not mocked").String(),
-		).OrFatal(m.t)
-	}
-
-	return m.impl.Update(
-		arg0,
-	)
-}
-
-
 func (m _UserRegistryMock) Delete (
-	arg0 testee.User,
+	arg0 pkg1.User,
 ) (
 	error,
 ) {
@@ -543,13 +503,54 @@ func (m _UserRegistryMock) Delete (
 }
 
 
+func (m _UserRegistryMock) Get (
+	userId string,
+) (
+	pkg1.User,
+	error,
+) {
+	cancel := itskit.SkipStack()
+	defer cancel()
+
+	if m.impl.Get == nil {
+		itskit.NG(
+			itskit.NewLabelWithLocation("UserRegistry.Get is not mocked").String(),
+		).OrFatal(m.t)
+	}
+
+	return m.impl.Get(
+		userId,
+	)
+}
+
+
+func (m _UserRegistryMock) Update (
+	arg0 pkg1.User,
+) (
+	error,
+) {
+	cancel := itskit.SkipStack()
+	defer cancel()
+
+	if m.impl.Update == nil {
+		itskit.NG(
+			itskit.NewLabelWithLocation("UserRegistry.Update is not mocked").String(),
+		).OrFatal(m.t)
+	}
+
+	return m.impl.Update(
+		arg0,
+	)
+}
+
+
 type UserRegistry_Spec struct {
 	
-	Get mockkit.FuncBehavior[func (userId string) ( testee.User,  error)]
+	Delete mockkit.FuncBehavior[func (arg0 pkg1.User) error]
 	
-	Update mockkit.FuncBehavior[func (arg0 testee.User) error]
+	Get mockkit.FuncBehavior[func (userId string) ( pkg1.User,  error)]
 	
-	Delete mockkit.FuncBehavior[func (arg0 testee.User) error]
+	Update mockkit.FuncBehavior[func (arg0 pkg1.User) error]
 	
 }
 

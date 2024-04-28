@@ -8,7 +8,6 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"slices"
 	"sort"
 	"strings"
 
@@ -39,7 +38,7 @@ func (n names) String() string {
 
 type generatingFile struct {
 	PackageName string
-	Imports     []*parser.ImportPath
+	Imports     *parser.Imports
 	Interfaces  []*parser.TypeInterfaceDecl
 	Funcs       []*parser.TypeFuncDecl
 }
@@ -84,6 +83,8 @@ It generates a file with same name as a file having go:generate directive.
 		log.Fatalf("-source is required")
 		flag.Usage()
 		return
+	} else {
+		source = try.To(filepath.Abs(source)).OrFatal(logger)
 	}
 	if dest == "" {
 		log.Fatalf("-dest is required")
@@ -91,41 +92,77 @@ It generates a file with same name as a file having go:generate directive.
 		return
 	}
 
-	gomod := parser.New(".")
+	parserInstance := try.To(parser.New()).OrFatal(logger)
 
 	var pkg *parser.Package
 	targetFile := ""
 
 	if *sourceAsPackage {
-		pkg = try.To(gomod.Import(source, ".")).OrFatal(logger)
+		pkg = try.To(parserInstance.Import(source)).OrFatal(logger)
 	} else {
-		dir, t := filepath.Split(source)
-		targetFile = t
-		pkg = try.To(gomod.ImportDir(dir)).OrFatal(logger)
+		dir, _ := filepath.Split(source)
+		targetFile = source
+		pkg = try.To(parserInstance.ImportDir(dir)).OrFatal(logger)
 	}
 
-	target := pkg.Types
-	if targetFile != "" {
-		f, ok := pkg.Types[targetFile]
-		if !ok {
-			os.Exit(0) // nothing to do.
+	interfaces := map[string][]*parser.TypeInterfaceDecl{}
+	functions := map[string][]*parser.TypeFuncDecl{}
+	filenames := map[string]struct{}{}
+
+	{
+		funcs := pkg.Types.Funcs.Slice()
+		for i := range funcs {
+			def := funcs[i]
+			if targetFile != "" && def.DefinedIn != targetFile {
+				continue
+			}
+			if _, ok := targetTypeName[def.Name]; len(targetTypeName) != 0 && !ok {
+				continue
+			}
+			filenames[def.DefinedIn] = struct{}{}
+			functions[def.DefinedIn] = append(functions[def.DefinedIn], def)
 		}
-
-		target = map[string]*parser.File{targetFile: f}
 	}
 
-	for fname, content := range target {
+	{
+		intfs := pkg.Types.Interfaces.Slice()
+		for i := range intfs {
+			def := intfs[i]
+
+			if targetFile != "" && def.DefinedIn != targetFile {
+				continue
+			}
+			if _, ok := targetTypeName[def.Name]; len(targetTypeName) != 0 && !ok {
+				continue
+			}
+
+			def.Body = try.To(def.Body.Inlined(parserInstance)).OrFatal(logger)
+
+			filenames[def.DefinedIn] = struct{}{}
+			interfaces[def.DefinedIn] = append(interfaces[def.DefinedIn], def)
+
+			for j := range def.Body.Methods {
+				meth := def.Body.Methods[j]
+				functions[def.DefinedIn] = append(functions[def.DefinedIn], &parser.TypeFuncDecl{
+					DefinedIn:  def.DefinedIn,
+					ImportPath: def.ImportPath,
+					Name:       fmt.Sprintf("%s_%s", def.Name, meth.Name),
+					TypeParams: def.TypeParams,
+					Body:       meth.Func,
+				})
+			}
+		}
+	}
+
+	for fname := range filenames {
 		newFile := generatingFile{
 			PackageName: path.Base(dest),
+			Imports:     new(parser.Imports),
 		}
-		requiredImports := map[string]*parser.ImportPath{
-			"its":     {Name: "its", Path: "github.com/youta-t/its"},
-			"itskit":  {Name: "itskit", Path: "github.com/youta-t/its/itskit"},
-			"mockkit": {Name: "mockkit", Path: "github.com/youta-t/its/mocker/mockkit"},
-		}
-		usedImports := map[string]*parser.ImportPath{}
 
-		funcs := content.Types.Funcs.Slice()
+		funcs := functions[fname]
+		intfs := interfaces[fname]
+
 		for i := range funcs {
 			s := funcs[i]
 
@@ -141,13 +178,12 @@ It generates a file with same name as a file having go:generate directive.
 			types := s.Require()
 			for i := range types {
 				t := types[i]
-				usedImports[t.Name] = t
+				newFile.Imports.Add(t)
 			}
 		}
 
-		interfaces := content.Types.Interfaces.Slice()
-		for i := range interfaces {
-			s := interfaces[i]
+		for i := range intfs {
+			s := intfs[i]
 
 			if _, ok := targetTypeName[s.Name]; len(targetTypeName) != 0 && !ok {
 				continue
@@ -157,21 +193,10 @@ It generates a file with same name as a file having go:generate directive.
 			}
 
 			newFile.Interfaces = append(newFile.Interfaces, s)
-
 			types := s.Require()
 			for i := range types {
 				t := types[i]
-				usedImports[t.Name] = t
-			}
-
-			for _, m := range s.Body.Methods {
-				fd := &parser.TypeFuncDecl{
-					Name:       fmt.Sprintf("%s_%s", s.Name, m.Name),
-					Package:    s.Package,
-					TypeParams: m.Func.TypeParams(),
-					Body:       m.Func,
-				}
-				funcs = append(funcs, fd)
+				newFile.Imports.Add(t)
 			}
 		}
 
@@ -179,30 +204,7 @@ It generates a file with same name as a file having go:generate directive.
 			continue
 		}
 
-		for i := range requiredImports {
-			newFile.Imports = append(newFile.Imports, requiredImports[i])
-		}
-		slices.SortFunc(newFile.Imports, func(a, b *parser.ImportPath) int {
-			if a.Path < b.Path {
-				return -1
-			}
-			if b.Path < a.Path {
-				return 1
-			}
-			return 0
-		})
-
-		for i := range usedImports {
-			imp := usedImports[i]
-			if imp.Name == "" {
-				imp.Name = "testee"
-			} else {
-				imp.Name = "u_" + imp.Name
-			}
-			newFile.Imports = append(newFile.Imports, imp)
-		}
-
-		if err := writeFile(filepath.Join(dest, fname), newFile); err != nil {
+		if err := writeFile(filepath.Join(dest, filepath.Base(fname)), newFile); err != nil {
 			logger.Fatal(err)
 		}
 	}
@@ -216,28 +218,6 @@ func writeFile(dest string, newFile generatingFile) error {
 		return err
 	}
 	t := template.New("")
-	t.Funcs(template.FuncMap{
-		"export": func(val string) string {
-			initial := val[0]
-			rest := val[1:]
-			return strings.ToUpper(string(initial)) + rest
-		},
-		"genericExpr": func(back bool, t parser.Type) string {
-			params := []string{}
-			for _, p := range t.TypeParams() {
-				expr := p.Name
-				if back {
-					expr += " " + p.Constraint.Expr()
-				}
-				params = append(params, expr)
-			}
-
-			if len(params) == 0 {
-				return ""
-			}
-			return "[" + strings.Join(params, ", ") + "]"
-		},
-	})
 
 	t, err := t.Parse(tpl)
 	if err != nil {
@@ -256,77 +236,26 @@ func writeFile(dest string, newFile generatingFile) error {
 	return nil
 }
 
-func inlineInterface(bc parser.BuildContext, intf *parser.InterfaceType) (*parser.InterfaceType, error) {
-	embededds := []parser.Type{}
-	methods := append([]*parser.Method{}, intf.Methods...)
-
-	type namedTypeInstance struct {
-		Type           *parser.NamedType
-		GivenTypeParam []parser.Type
-	}
-
-	embeddedNames := []*parser.NamedType{}
-	embeddedInterfaces := []*parser.InterfaceType{}
-	for i := range intf.Embedded {
-		switch t := intf.Embedded[i].(type) {
-		case *parser.NamedType:
-			embeddedNames = append(embeddedNames, t)
-		case *parser.InterfaceType:
-			ii, err := inlineInterface(bc, t)
-			if err != nil {
-				return nil, err
-			}
-			embeddedInterfaces = append(embeddedInterfaces, ii)
-		default:
-			embededds = append(embededds, t)
-		}
-	}
-
-	for 0 < len(embeddedNames) {
-		n := embeddedNames[0]
-		embeddedNames = embeddedNames[1:]
-
-		pkg, err := bc.Import(n.Pkg.Path, ".")
-		if err != nil {
-			return nil, err
-		}
-
-		for _, f := range pkg.Types {
-			if found, ok := f.Types.Interfaces.Get(n.PlainName()); ok {
-				b := found.Body
-
-				b, err := inlineInterface(bc, found.Body)
-				if err != nil {
-					return nil, err
-				}
-				embeddedInterfaces = append(embeddedInterfaces, b)
-				break
-			}
-
-			nn, ok := f.Types.Names.Get(n.PlainName())
-			if !ok {
-				continue
-			}
-			nt := &parser.NamedType{
-				Pkg:    nn.Body.Pkg,
-				Name:   nn.Body.Name,
-				Params: n.Params,
-			}
-			embeddedNames = append(embeddedNames, nt)
-		}
-	}
-
-	for i := range embeddedInterfaces {
-		methods = append(methods, embeddedInterfaces[i].Methods...)
-		embededds = append(embededds, embeddedInterfaces[i].Embedded...)
-	}
-
-	return &parser.InterfaceType{
-		Embedded: embededds,
-		Methods:  methods,
-	}, nil
-}
-
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -373,35 +302,38 @@ const tpl = `// Code generated -- DO NOT EDIT
 package {{ .PackageName }}
 
 import (
-	{{ range .Imports }}
+	its "github.com/youta-t/its"
+	itskit "github.com/youta-t/its/itskit"
+	mockkit "github.com/youta-t/its/mocker/mockkit"
+	{{ range .Imports.Slice }}
 	{{- .Name }} "{{ .Path }}"
 	{{ end }}
 )
-
+{{ $imports := .Imports }}
 {{- range .Funcs -}}
 {{- $func := . }}
-type _{{ .Name }}CallSpec{{ .GenericExpr true }} struct {
+type _{{ .Name }}CallSpec{{ .GenericExpr $imports true }} struct {
 	{{- range $idx, $p := .Body.Args}}
-	{{ $p.ParamNameOr (printf "arg%d" $idx) }} its.Matcher[{{ $p.Expr }}]
+	{{ $p.ParamNameOr (printf "arg%d" $idx) }} its.Matcher[{{ $p.Expr $imports }}]
 	{{ end }}
-	{{ if .Body.VarArg }}{{ .Body.VarArg.ParamNameOr "vararg" }} its.Matcher[[]{{ .Body.VarArg.Type.Expr }}]{{ end }}
+	{{ if .Body.VarArg }}{{ .Body.VarArg.ParamNameOr "vararg" }} its.Matcher[[]{{ .Body.VarArg.Type.Expr $imports }}]{{ end }}
 }
 
-type _{{ .Name }}Call{{ .GenericExpr true }} struct {
+type _{{ .Name }}Call{{ .GenericExpr $imports true }} struct {
 	name itskit.Label
-	spec _{{ .Name }}CallSpec{{ .GenericExpr false }}
+	spec _{{ .Name }}CallSpec{{ .GenericExpr $imports false }}
 }
 
-func {{ .Name }}_Expects{{ .GenericExpr true }}(
+func {{ .Name }}_Expects{{ .GenericExpr $imports true }}(
 	{{- range $idx, $p := .Body.Args}}
-	{{ $p.ParamNameOr (printf "arg%d" $idx) }} its.Matcher[{{ $p.Expr }}],
+	{{ $p.ParamNameOr (printf "arg%d" $idx) }} its.Matcher[{{ $p.Expr $imports }}],
 	{{ end -}}
-	{{ if .Body.VarArg }}{{ .Body.VarArg.ParamNameOr "vararg" }} its.Matcher[[]{{ .Body.VarArg.Type.Expr }}],{{ end }}
-) _{{ .Name }}Call{{ .GenericExpr false }} {
+	{{ if .Body.VarArg }}{{ .Body.VarArg.ParamNameOr "vararg" }} its.Matcher[[]{{ .Body.VarArg.Type.Expr $imports }}],{{ end }}
+) _{{ .Name }}Call{{ .GenericExpr $imports false }} {
 	cancel := itskit.SkipStack()
 	defer cancel()
 
-	spec := _{{ .Name }}CallSpec{{ .GenericExpr false }} {}
+	spec := _{{ .Name }}CallSpec{{ .GenericExpr $imports false }} {}
 	{{- range $idx, $p := .Body.Args}}
 	spec.{{ $p.ParamNameOr (printf "arg%d" $idx) }} = itskit.Named(
 		"{{ $p.ParamNameOr (printf "arg%d" $idx) }}",
@@ -412,26 +344,26 @@ func {{ .Name }}_Expects{{ .GenericExpr true }}(
 		"{{ .Body.VarArg.ParamNameOr "vararg" }}",
 		{{ .Body.VarArg.ParamNameOr "vararg" }},
 	){{ end }}
-	return _{{ .Name }}Call{{ .GenericExpr false }}{
+	return _{{ .Name }}Call{{ .GenericExpr $imports false }}{
 		name: itskit.NewLabelWithLocation("func {{ .Name }}"),
 		spec: spec,
 	}
 }
 
-type _{{ .Name }}Behavior {{ .GenericExpr true }} struct {
+type _{{ .Name }}Behavior {{ .GenericExpr $imports true }} struct {
 	name itskit.Label
-	spec _{{ .Name }}CallSpec{{ .GenericExpr false }}
-	effect {{ .Body.Expr }}
+	spec _{{ .Name }}CallSpec{{ .GenericExpr $imports false }}
+	effect {{ .Body.Expr $imports }}
 }
 
-func (b *_{{ .Name }}Behavior{{ .GenericExpr false }}) Fn(t mockkit.TestLike) {{ .Body.Expr }} {
+func (b *_{{ .Name }}Behavior{{ .GenericExpr $imports false }}) Fn(t mockkit.TestLike) {{ .Body.Expr $imports }} {
 	return func (
 		{{ range $idx, $p :=  .Body.Args }}
-		{{ printf "arg%d" $idx }} {{ $p.Expr }},
+		{{ printf "arg%d" $idx }} {{ $p.Expr $imports }},
 		{{ end }}
-		{{ if .Body.VarArg }}vararg {{ .Body.VarArg.Expr }},{{ end }}
+		{{ if .Body.VarArg }}vararg {{ .Body.VarArg.Expr $imports }},{{ end }}
 	) {{ if .Body.Returns }}(
-		{{ range .Body.Returns }}{{ .Expr }},
+		{{ range .Body.Returns }}{{ .Expr $imports }},
 		{{ end }}
 	){{ end }} {
 		if h, ok := t.(interface { Helper() }); ok {
@@ -443,7 +375,7 @@ func (b *_{{ .Name }}Behavior{{ .GenericExpr false }}) Fn(t mockkit.TestLike) {{
 		{
 			matcher := b.spec.{{ $p.ParamNameOr (printf "arg%d" $idx) }}
 			if matcher == nil {
-				matcher = its.Never[{{$p.Expr}}]()
+				matcher = its.Never[{{ $p.Expr $imports }}]()
 			}
 			m := matcher.Match({{ printf "arg%d" $idx }})
 			if m.Ok() {
@@ -456,7 +388,7 @@ func (b *_{{ .Name }}Behavior{{ .GenericExpr false }}) Fn(t mockkit.TestLike) {{
 		{
 			matcher := b.spec.{{ .Body.VarArg.ParamNameOr "vararg" }}
 			if matcher == nil {
-				matcher = its.Never[[]{{ .Body.VarArg.Type.Expr }}]()
+				matcher = its.Never[[]{{ .Body.VarArg.Type.Expr $imports }}]()
 			}
 			m := matcher.Match(vararg)
 			if m.Ok() {
@@ -481,18 +413,18 @@ func (b *_{{ .Name }}Behavior{{ .GenericExpr false }}) Fn(t mockkit.TestLike) {{
 	}
 }
 
-func (c _{{.Name}}Call{{ .GenericExpr false }}) ThenReturn(
+func (c _{{.Name}}Call{{ .GenericExpr $imports false }}) ThenReturn(
 {{ range $idx, $p := .Body.Returns }}
-	{{printf "ret%d" $idx}} {{  $p.Expr }},
+	{{printf "ret%d" $idx}} {{  $p.Expr $imports }},
 {{end}}
-) mockkit.FuncBehavior[ func {{ .Body.Signature false }}  ] {
+) mockkit.FuncBehavior[ func {{ .Body.Signature $imports false }}  ] {
 	return c.ThenEffect(func(
 		{{range .Body.Args}}
-		{{ .Expr }},
+		{{ .Expr $imports }},
 		{{ end }}
-		{{ if .Body.VarArg }}{{ .Body.VarArg.Expr }},{{ end }}
+		{{ if .Body.VarArg }}{{ .Body.VarArg.Expr $imports }},{{ end }}
 	){{ if .Body.Returns }}(
-		{{ range .Body.Returns }}{{ .Expr }},
+		{{ range .Body.Returns }}{{ .Expr $imports }},
 		{{end}}
 	){{ end }}{
 		{{ if .Body.Returns }}
@@ -501,8 +433,8 @@ func (c _{{.Name}}Call{{ .GenericExpr false }}) ThenReturn(
 	})
 }
 
-func (c _{{ .Name }}Call{{ .GenericExpr false }}) ThenEffect(effect {{ .Body.Expr }}) mockkit.FuncBehavior[ func {{ .Body.Signature false }} ] {
-	return &_{{ .Name }}Behavior{{ .GenericExpr false }} {
+func (c _{{ .Name }}Call{{ .GenericExpr $imports false }}) ThenEffect(effect {{ .Body.Expr $imports }}) mockkit.FuncBehavior[ func {{ .Body.Signature $imports false }} ] {
+	return &_{{ .Name }}Behavior{{ .GenericExpr $imports false }} {
 		name: c.name,
 		spec: c.spec,
 		effect: effect,
@@ -512,14 +444,14 @@ func (c _{{ .Name }}Call{{ .GenericExpr false }}) ThenEffect(effect {{ .Body.Exp
 {{ end }}
 
 {{ range .Interfaces }}
-type _{{ .Name }}Impl{{ .GenericExpr true }} struct {
+type _{{ .Name }}Impl{{ .GenericExpr $imports true }} struct {
 	{{ range .Body.Methods }}
-	{{ .Name }} {{ .Func.Expr }}
+	{{ .Name }} {{ .Func.Expr $imports }}
 	{{- end }}
 }
 
-func {{ .Name }}_Build{{ .GenericExpr true }}(t mockkit.TestLike, spec {{ .Name }}_Spec{{ .GenericExpr false }}) testee.{{ .Name }}{{ .GenericExpr false }} {
-	impl := _{{ .Name }}Impl{{ .GenericExpr false }}{}
+func {{ .Name }}_Build{{ .GenericExpr $imports true }}(t mockkit.TestLike, spec {{ .Name }}_Spec{{ .GenericExpr $imports false }}) {{ .Expr $imports }} {
+	impl := _{{ .Name }}Impl{{ .GenericExpr $imports false }}{}
 
 	{{ range .Body.Methods }}
 	if spec.{{ .Name }} != nil {
@@ -527,23 +459,23 @@ func {{ .Name }}_Build{{ .GenericExpr true }}(t mockkit.TestLike, spec {{ .Name 
 	}
 	{{ end }}
 
-	return _{{ .Name }}Mock{{ .GenericExpr false }} { t: t, impl: impl }
+	return _{{ .Name }}Mock{{ .GenericExpr $imports false }} { t: t, impl: impl }
 }
 
-type _{{ .Name }}Mock{{ .GenericExpr true }} struct {
+type _{{ .Name }}Mock{{ .GenericExpr $imports true }} struct {
 	t mockkit.TestLike
-	impl _{{ .Name }}Impl{{ .GenericExpr false }}
+	impl _{{ .Name }}Impl{{ .GenericExpr $imports false }}
 }
 
 {{- $i := . -}}
 {{- range .Body.Methods }}
 
-func (m _{{ $i.Name }}Mock{{ $i.GenericExpr false }}) {{ .Name }} ({{ range $idx, $param := .Func.Args }}
-	{{ $param.ParamNameOr (printf "arg%d" $idx) }} {{ .Expr }},{{ end -}}
+func (m _{{ $i.Name }}Mock{{ $i.GenericExpr $imports false }}) {{ .Name }} ({{ range $idx, $param := .Func.Args }}
+	{{ $param.ParamNameOr (printf "arg%d" $idx) }} {{ .Expr $imports }},{{ end -}}
 	{{- if .Func.VarArg }}
-	{{ .Func.VarArg.ParamNameOr "vararg" }} {{ .Func.VarArg.Expr }},{{ end }}
+	{{ .Func.VarArg.ParamNameOr "vararg" }} {{ .Func.VarArg.Expr $imports }},{{ end }}
 ){{ if .Func.Returns }} ({{ range $idx, $param := .Func.Returns }}
-	{{ if.ParamName }}{{ .ParamName }} {{ end }}{{ .Expr }},{{ end }}
+	{{ if.ParamName }}{{ .ParamName }} {{ end }}{{ .Expr $imports }},{{ end }}
 ){{ end }} {
 	cancel := itskit.SkipStack()
 	defer cancel()
@@ -562,9 +494,9 @@ func (m _{{ $i.Name }}Mock{{ $i.GenericExpr false }}) {{ .Name }} ({{ range $idx
 }
 {{ end }}
 
-type {{ $i.Name }}_Spec{{ $i.GenericExpr true }} struct {
+type {{ $i.Name }}_Spec{{ $i.GenericExpr $imports true }} struct {
 	{{ range .Body.Methods }}
-	{{ .Name }} mockkit.FuncBehavior[func {{ .Func.Signature false }}]
+	{{ .Name }} mockkit.FuncBehavior[func {{ .Func.Signature $imports false }}]
 	{{ end }}
 }
 {{ end }}

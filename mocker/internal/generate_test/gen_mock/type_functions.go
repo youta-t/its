@@ -4,12 +4,12 @@ package gen_mock
 import (
 	its "github.com/youta-t/its"
 	itskit "github.com/youta-t/its/itskit"
+	pkg1 "github.com/youta-t/its/mocker/internal/generate_test"
+	pkg2 "github.com/youta-t/its/mocker/internal/generate_test/dot"
 	mockkit "github.com/youta-t/its/mocker/mockkit"
-	testee "github.com/youta-t/its/mocker/internal/types"
-	
 )
+
 type _F1CallSpec struct {
-	
 }
 
 type _F1Call struct {
@@ -17,70 +17,56 @@ type _F1Call struct {
 	spec _F1CallSpec
 }
 
-func F1_Expects(
-) _F1Call {
+func F1_Expects() _F1Call {
 	cancel := itskit.SkipStack()
 	defer cancel()
 
-	spec := _F1CallSpec {}
-	
+	spec := _F1CallSpec{}
+
 	return _F1Call{
 		name: itskit.NewLabelWithLocation("func F1"),
 		spec: spec,
 	}
 }
 
-type _F1Behavior  struct {
-	name itskit.Label
-	spec _F1CallSpec
+type _F1Behavior struct {
+	name   itskit.Label
+	spec   _F1CallSpec
 	effect func()
 }
 
 func (b *_F1Behavior) Fn(t mockkit.TestLike) func() {
-	return func (
-		
-		
-	)  {
-		if h, ok := t.(interface { Helper() }); ok {
+	return func() {
+		if h, ok := t.(interface{ Helper() }); ok {
 			h.Helper()
 		}
 		ok := 0
 		matches := []itskit.Match{}
-		
+
 		itskit.NewMatch(
 			ok == len(matches),
 			b.name.Fill(itskit.Missing),
 			matches...,
 		).OrError(t)
-		b.effect(
-			
-			
-		)
+		b.effect()
 	}
 }
 
-func (c _F1Call) ThenReturn(
+func (c _F1Call) ThenReturn() mockkit.FuncBehavior[func()] {
+	return c.ThenEffect(func() {
 
-) mockkit.FuncBehavior[ func ()  ] {
-	return c.ThenEffect(func(
-		
-		
-	){
-		
 	})
 }
 
-func (c _F1Call) ThenEffect(effect func()) mockkit.FuncBehavior[ func () ] {
-	return &_F1Behavior {
-		name: c.name,
-		spec: c.spec,
+func (c _F1Call) ThenEffect(effect func()) mockkit.FuncBehavior[func()] {
+	return &_F1Behavior{
+		name:   c.name,
+		spec:   c.spec,
 		effect: effect,
 	}
 }
 
-
 type _F2CallSpec struct {
-	
 }
 
 type _F2Call struct {
@@ -88,48 +74,38 @@ type _F2Call struct {
 	spec _F2CallSpec
 }
 
-func F2_Expects(
-) _F2Call {
+func F2_Expects() _F2Call {
 	cancel := itskit.SkipStack()
 	defer cancel()
 
-	spec := _F2CallSpec {}
-	
+	spec := _F2CallSpec{}
+
 	return _F2Call{
 		name: itskit.NewLabelWithLocation("func F2"),
 		spec: spec,
 	}
 }
 
-type _F2Behavior  struct {
-	name itskit.Label
-	spec _F2CallSpec
+type _F2Behavior struct {
+	name   itskit.Label
+	spec   _F2CallSpec
 	effect func() int
 }
 
 func (b *_F2Behavior) Fn(t mockkit.TestLike) func() int {
-	return func (
-		
-		
-	) (
-		int,
-		
-	) {
-		if h, ok := t.(interface { Helper() }); ok {
+	return func() int {
+		if h, ok := t.(interface{ Helper() }); ok {
 			h.Helper()
 		}
 		ok := 0
 		matches := []itskit.Match{}
-		
+
 		itskit.NewMatch(
 			ok == len(matches),
 			b.name.Fill(itskit.Missing),
 			matches...,
 		).OrError(t)
-		return b.effect(
-			
-			
-		)
+		return b.effect()
 	}
 }
 
@@ -137,31 +113,23 @@ func (c _F2Call) ThenReturn(
 
 	ret0 int,
 
-) mockkit.FuncBehavior[ func () int  ] {
-	return c.ThenEffect(func(
-		
-		
-	)(
-		int,
-		
-	){
-		
+) mockkit.FuncBehavior[func() int] {
+	return c.ThenEffect(func() int {
+
 		return ret0
-		
+
 	})
 }
 
-func (c _F2Call) ThenEffect(effect func() int) mockkit.FuncBehavior[ func () int ] {
-	return &_F2Behavior {
-		name: c.name,
-		spec: c.spec,
+func (c _F2Call) ThenEffect(effect func() int) mockkit.FuncBehavior[func() int] {
+	return &_F2Behavior{
+		name:   c.name,
+		spec:   c.spec,
 		effect: effect,
 	}
 }
 
-
 type _F3CallSpec struct {
-	
 }
 
 type _F3Call struct {
@@ -169,49 +137,42 @@ type _F3Call struct {
 	spec _F3CallSpec
 }
 
-func F3_Expects(
-) _F3Call {
+func F3_Expects() _F3Call {
 	cancel := itskit.SkipStack()
 	defer cancel()
 
-	spec := _F3CallSpec {}
-	
+	spec := _F3CallSpec{}
+
 	return _F3Call{
 		name: itskit.NewLabelWithLocation("func F3"),
 		spec: spec,
 	}
 }
 
-type _F3Behavior  struct {
-	name itskit.Label
-	spec _F3CallSpec
-	effect func() ( int,  string)
+type _F3Behavior struct {
+	name   itskit.Label
+	spec   _F3CallSpec
+	effect func() (int, string)
 }
 
-func (b *_F3Behavior) Fn(t mockkit.TestLike) func() ( int,  string) {
-	return func (
-		
-		
-	) (
+func (b *_F3Behavior) Fn(t mockkit.TestLike) func() (int, string) {
+	return func() (
 		int,
 		string,
-		
+
 	) {
-		if h, ok := t.(interface { Helper() }); ok {
+		if h, ok := t.(interface{ Helper() }); ok {
 			h.Helper()
 		}
 		ok := 0
 		matches := []itskit.Match{}
-		
+
 		itskit.NewMatch(
 			ok == len(matches),
 			b.name.Fill(itskit.Missing),
 			matches...,
 		).OrError(t)
-		return b.effect(
-			
-			
-		)
+		return b.effect()
 	}
 }
 
@@ -221,32 +182,27 @@ func (c _F3Call) ThenReturn(
 
 	ret1 string,
 
-) mockkit.FuncBehavior[ func () ( int,  string)  ] {
-	return c.ThenEffect(func(
-		
-		
-	)(
+) mockkit.FuncBehavior[func() (int, string)] {
+	return c.ThenEffect(func() (
 		int,
 		string,
-		
-	){
-		
-		return ret0,  ret1
-		
+
+	) {
+
+		return ret0, ret1
+
 	})
 }
 
-func (c _F3Call) ThenEffect(effect func() ( int,  string)) mockkit.FuncBehavior[ func () ( int,  string) ] {
-	return &_F3Behavior {
-		name: c.name,
-		spec: c.spec,
+func (c _F3Call) ThenEffect(effect func() (int, string)) mockkit.FuncBehavior[func() (int, string)] {
+	return &_F3Behavior{
+		name:   c.name,
+		spec:   c.spec,
 		effect: effect,
 	}
 }
 
-
 type _F4CallSpec struct {
-	
 }
 
 type _F4Call struct {
@@ -254,49 +210,42 @@ type _F4Call struct {
 	spec _F4CallSpec
 }
 
-func F4_Expects(
-) _F4Call {
+func F4_Expects() _F4Call {
 	cancel := itskit.SkipStack()
 	defer cancel()
 
-	spec := _F4CallSpec {}
-	
+	spec := _F4CallSpec{}
+
 	return _F4Call{
 		name: itskit.NewLabelWithLocation("func F4"),
 		spec: spec,
 	}
 }
 
-type _F4Behavior  struct {
-	name itskit.Label
-	spec _F4CallSpec
+type _F4Behavior struct {
+	name   itskit.Label
+	spec   _F4CallSpec
 	effect func() (i int, s string)
 }
 
 func (b *_F4Behavior) Fn(t mockkit.TestLike) func() (i int, s string) {
-	return func (
-		
-		
-	) (
+	return func() (
 		int,
 		string,
-		
+
 	) {
-		if h, ok := t.(interface { Helper() }); ok {
+		if h, ok := t.(interface{ Helper() }); ok {
 			h.Helper()
 		}
 		ok := 0
 		matches := []itskit.Match{}
-		
+
 		itskit.NewMatch(
 			ok == len(matches),
 			b.name.Fill(itskit.Missing),
 			matches...,
 		).OrError(t)
-		return b.effect(
-			
-			
-		)
+		return b.effect()
 	}
 }
 
@@ -306,36 +255,30 @@ func (c _F4Call) ThenReturn(
 
 	ret1 string,
 
-) mockkit.FuncBehavior[ func () (i int, s string)  ] {
-	return c.ThenEffect(func(
-		
-		
-	)(
+) mockkit.FuncBehavior[func() (i int, s string)] {
+	return c.ThenEffect(func() (
 		int,
 		string,
-		
-	){
-		
-		return ret0,  ret1
-		
+
+	) {
+
+		return ret0, ret1
+
 	})
 }
 
-func (c _F4Call) ThenEffect(effect func() (i int, s string)) mockkit.FuncBehavior[ func () (i int, s string) ] {
-	return &_F4Behavior {
-		name: c.name,
-		spec: c.spec,
+func (c _F4Call) ThenEffect(effect func() (i int, s string)) mockkit.FuncBehavior[func() (i int, s string)] {
+	return &_F4Behavior{
+		name:   c.name,
+		spec:   c.spec,
 		effect: effect,
 	}
 }
 
-
 type _F5CallSpec struct {
 	arg0 its.Matcher[int]
-	
+
 	arg1 its.Matcher[string]
-	
-	
 }
 
 type _F5Call struct {
@@ -345,52 +288,50 @@ type _F5Call struct {
 
 func F5_Expects(
 	arg0 its.Matcher[int],
-	
+
 	arg1 its.Matcher[string],
-	
+
 ) _F5Call {
 	cancel := itskit.SkipStack()
 	defer cancel()
 
-	spec := _F5CallSpec {}
+	spec := _F5CallSpec{}
 	spec.arg0 = itskit.Named(
 		"arg0",
 		arg0,
 	)
-	
+
 	spec.arg1 = itskit.Named(
 		"arg1",
 		arg1,
 	)
-	
-	
+
 	return _F5Call{
 		name: itskit.NewLabelWithLocation("func F5"),
 		spec: spec,
 	}
 }
 
-type _F5Behavior  struct {
-	name itskit.Label
-	spec _F5CallSpec
+type _F5Behavior struct {
+	name   itskit.Label
+	spec   _F5CallSpec
 	effect func(arg0 int, arg1 string)
 }
 
 func (b *_F5Behavior) Fn(t mockkit.TestLike) func(arg0 int, arg1 string) {
-	return func (
-		
+	return func(
+
 		arg0 int,
-		
+
 		arg1 string,
-		
-		
-	)  {
-		if h, ok := t.(interface { Helper() }); ok {
+
+	) {
+		if h, ok := t.(interface{ Helper() }); ok {
 			h.Helper()
 		}
 		ok := 0
 		matches := []itskit.Match{}
-		
+
 		{
 			matcher := b.spec.arg0
 			if matcher == nil {
@@ -402,7 +343,7 @@ func (b *_F5Behavior) Fn(t mockkit.TestLike) func(arg0 int, arg1 string) {
 			}
 			matches = append(matches, m)
 		}
-		
+
 		{
 			matcher := b.spec.arg1
 			if matcher == nil {
@@ -414,50 +355,44 @@ func (b *_F5Behavior) Fn(t mockkit.TestLike) func(arg0 int, arg1 string) {
 			}
 			matches = append(matches, m)
 		}
-		
+
 		itskit.NewMatch(
 			ok == len(matches),
 			b.name.Fill(itskit.Missing),
 			matches...,
 		).OrError(t)
 		b.effect(
-			
+
 			arg0,
-			
+
 			arg1,
-			
-			
 		)
 	}
 }
 
-func (c _F5Call) ThenReturn(
-
-) mockkit.FuncBehavior[ func (arg0 int, arg1 string)  ] {
+func (c _F5Call) ThenReturn() mockkit.FuncBehavior[func(arg0 int, arg1 string)] {
 	return c.ThenEffect(func(
-		
+
 		int,
-		
+
 		string,
-		
-		
-	){
-		
+
+	) {
+
 	})
 }
 
-func (c _F5Call) ThenEffect(effect func(arg0 int, arg1 string)) mockkit.FuncBehavior[ func (arg0 int, arg1 string) ] {
-	return &_F5Behavior {
-		name: c.name,
-		spec: c.spec,
+func (c _F5Call) ThenEffect(effect func(arg0 int, arg1 string)) mockkit.FuncBehavior[func(arg0 int, arg1 string)] {
+	return &_F5Behavior{
+		name:   c.name,
+		spec:   c.spec,
 		effect: effect,
 	}
 }
 
-
 type _F6CallSpec struct {
 	arg0 its.Matcher[int]
-	
+
 	vararg its.Matcher[[]string]
 }
 
@@ -473,12 +408,12 @@ func F6_Expects(
 	cancel := itskit.SkipStack()
 	defer cancel()
 
-	spec := _F6CallSpec {}
+	spec := _F6CallSpec{}
 	spec.arg0 = itskit.Named(
 		"arg0",
 		arg0,
 	)
-	
+
 	spec.vararg = itskit.Named(
 		"vararg",
 		vararg,
@@ -489,25 +424,25 @@ func F6_Expects(
 	}
 }
 
-type _F6Behavior  struct {
-	name itskit.Label
-	spec _F6CallSpec
+type _F6Behavior struct {
+	name   itskit.Label
+	spec   _F6CallSpec
 	effect func(arg0 int, vararg ...string)
 }
 
 func (b *_F6Behavior) Fn(t mockkit.TestLike) func(arg0 int, vararg ...string) {
-	return func (
-		
+	return func(
+
 		arg0 int,
-		
+
 		vararg ...string,
-	)  {
-		if h, ok := t.(interface { Helper() }); ok {
+	) {
+		if h, ok := t.(interface{ Helper() }); ok {
 			h.Helper()
 		}
 		ok := 0
 		matches := []itskit.Match{}
-		
+
 		{
 			matcher := b.spec.arg0
 			if matcher == nil {
@@ -519,7 +454,7 @@ func (b *_F6Behavior) Fn(t mockkit.TestLike) func(arg0 int, vararg ...string) {
 			}
 			matches = append(matches, m)
 		}
-		
+
 		{
 			matcher := b.spec.vararg
 			if matcher == nil {
@@ -531,44 +466,39 @@ func (b *_F6Behavior) Fn(t mockkit.TestLike) func(arg0 int, vararg ...string) {
 			}
 			matches = append(matches, m)
 		}
-		
+
 		itskit.NewMatch(
 			ok == len(matches),
 			b.name.Fill(itskit.Missing),
 			matches...,
 		).OrError(t)
 		b.effect(
-			
+
 			arg0,
-			
-			
+
 			vararg...,
-			
 		)
 	}
 }
 
-func (c _F6Call) ThenReturn(
-
-) mockkit.FuncBehavior[ func (arg0 int, vararg ...string)  ] {
+func (c _F6Call) ThenReturn() mockkit.FuncBehavior[func(arg0 int, vararg ...string)] {
 	return c.ThenEffect(func(
-		
+
 		int,
-		
+
 		...string,
-	){
-		
+	) {
+
 	})
 }
 
-func (c _F6Call) ThenEffect(effect func(arg0 int, vararg ...string)) mockkit.FuncBehavior[ func (arg0 int, vararg ...string) ] {
-	return &_F6Behavior {
-		name: c.name,
-		spec: c.spec,
+func (c _F6Call) ThenEffect(effect func(arg0 int, vararg ...string)) mockkit.FuncBehavior[func(arg0 int, vararg ...string)] {
+	return &_F6Behavior{
+		name:   c.name,
+		spec:   c.spec,
 		effect: effect,
 	}
 }
-
 
 type _F7CallSpec struct {
 	vararg its.Matcher[[]string]
@@ -584,7 +514,7 @@ func F7_Expects(vararg its.Matcher[[]string],
 	cancel := itskit.SkipStack()
 	defer cancel()
 
-	spec := _F7CallSpec {}
+	spec := _F7CallSpec{}
 	spec.vararg = itskit.Named(
 		"vararg",
 		vararg,
@@ -595,23 +525,23 @@ func F7_Expects(vararg its.Matcher[[]string],
 	}
 }
 
-type _F7Behavior  struct {
-	name itskit.Label
-	spec _F7CallSpec
+type _F7Behavior struct {
+	name   itskit.Label
+	spec   _F7CallSpec
 	effect func(vararg ...string)
 }
 
 func (b *_F7Behavior) Fn(t mockkit.TestLike) func(vararg ...string) {
-	return func (
-		
+	return func(
+
 		vararg ...string,
-	)  {
-		if h, ok := t.(interface { Helper() }); ok {
+	) {
+		if h, ok := t.(interface{ Helper() }); ok {
 			h.Helper()
 		}
 		ok := 0
 		matches := []itskit.Match{}
-		
+
 		{
 			matcher := b.spec.vararg
 			if matcher == nil {
@@ -623,47 +553,40 @@ func (b *_F7Behavior) Fn(t mockkit.TestLike) func(vararg ...string) {
 			}
 			matches = append(matches, m)
 		}
-		
+
 		itskit.NewMatch(
 			ok == len(matches),
 			b.name.Fill(itskit.Missing),
 			matches...,
 		).OrError(t)
 		b.effect(
-			
-			
+
 			vararg...,
-			
 		)
 	}
 }
 
-func (c _F7Call) ThenReturn(
-
-) mockkit.FuncBehavior[ func (vararg ...string)  ] {
+func (c _F7Call) ThenReturn() mockkit.FuncBehavior[func(vararg ...string)] {
 	return c.ThenEffect(func(
-		
+
 		...string,
-	){
-		
+	) {
+
 	})
 }
 
-func (c _F7Call) ThenEffect(effect func(vararg ...string)) mockkit.FuncBehavior[ func (vararg ...string) ] {
-	return &_F7Behavior {
-		name: c.name,
-		spec: c.spec,
+func (c _F7Call) ThenEffect(effect func(vararg ...string)) mockkit.FuncBehavior[func(vararg ...string)] {
+	return &_F7Behavior{
+		name:   c.name,
+		spec:   c.spec,
 		effect: effect,
 	}
 }
 
-
 type _F8CallSpec struct {
 	i its.Matcher[int]
-	
+
 	s its.Matcher[string]
-	
-	
 }
 
 type _F8Call struct {
@@ -673,52 +596,50 @@ type _F8Call struct {
 
 func F8_Expects(
 	i its.Matcher[int],
-	
+
 	s its.Matcher[string],
-	
+
 ) _F8Call {
 	cancel := itskit.SkipStack()
 	defer cancel()
 
-	spec := _F8CallSpec {}
+	spec := _F8CallSpec{}
 	spec.i = itskit.Named(
 		"i",
 		i,
 	)
-	
+
 	spec.s = itskit.Named(
 		"s",
 		s,
 	)
-	
-	
+
 	return _F8Call{
 		name: itskit.NewLabelWithLocation("func F8"),
 		spec: spec,
 	}
 }
 
-type _F8Behavior  struct {
-	name itskit.Label
-	spec _F8CallSpec
+type _F8Behavior struct {
+	name   itskit.Label
+	spec   _F8CallSpec
 	effect func(i int, s string)
 }
 
 func (b *_F8Behavior) Fn(t mockkit.TestLike) func(i int, s string) {
-	return func (
-		
+	return func(
+
 		arg0 int,
-		
+
 		arg1 string,
-		
-		
-	)  {
-		if h, ok := t.(interface { Helper() }); ok {
+
+	) {
+		if h, ok := t.(interface{ Helper() }); ok {
 			h.Helper()
 		}
 		ok := 0
 		matches := []itskit.Match{}
-		
+
 		{
 			matcher := b.spec.i
 			if matcher == nil {
@@ -730,7 +651,7 @@ func (b *_F8Behavior) Fn(t mockkit.TestLike) func(i int, s string) {
 			}
 			matches = append(matches, m)
 		}
-		
+
 		{
 			matcher := b.spec.s
 			if matcher == nil {
@@ -742,50 +663,44 @@ func (b *_F8Behavior) Fn(t mockkit.TestLike) func(i int, s string) {
 			}
 			matches = append(matches, m)
 		}
-		
+
 		itskit.NewMatch(
 			ok == len(matches),
 			b.name.Fill(itskit.Missing),
 			matches...,
 		).OrError(t)
 		b.effect(
-			
+
 			arg0,
-			
+
 			arg1,
-			
-			
 		)
 	}
 }
 
-func (c _F8Call) ThenReturn(
-
-) mockkit.FuncBehavior[ func (i int, s string)  ] {
+func (c _F8Call) ThenReturn() mockkit.FuncBehavior[func(i int, s string)] {
 	return c.ThenEffect(func(
-		
+
 		int,
-		
+
 		string,
-		
-		
-	){
-		
+
+	) {
+
 	})
 }
 
-func (c _F8Call) ThenEffect(effect func(i int, s string)) mockkit.FuncBehavior[ func (i int, s string) ] {
-	return &_F8Behavior {
-		name: c.name,
-		spec: c.spec,
+func (c _F8Call) ThenEffect(effect func(i int, s string)) mockkit.FuncBehavior[func(i int, s string)] {
+	return &_F8Behavior{
+		name:   c.name,
+		spec:   c.spec,
 		effect: effect,
 	}
 }
 
-
 type _F9CallSpec struct {
 	i its.Matcher[int]
-	
+
 	ss its.Matcher[[]string]
 }
 
@@ -801,12 +716,12 @@ func F9_Expects(
 	cancel := itskit.SkipStack()
 	defer cancel()
 
-	spec := _F9CallSpec {}
+	spec := _F9CallSpec{}
 	spec.i = itskit.Named(
 		"i",
 		i,
 	)
-	
+
 	spec.ss = itskit.Named(
 		"ss",
 		ss,
@@ -817,25 +732,25 @@ func F9_Expects(
 	}
 }
 
-type _F9Behavior  struct {
-	name itskit.Label
-	spec _F9CallSpec
+type _F9Behavior struct {
+	name   itskit.Label
+	spec   _F9CallSpec
 	effect func(i int, ss ...string)
 }
 
 func (b *_F9Behavior) Fn(t mockkit.TestLike) func(i int, ss ...string) {
-	return func (
-		
+	return func(
+
 		arg0 int,
-		
+
 		vararg ...string,
-	)  {
-		if h, ok := t.(interface { Helper() }); ok {
+	) {
+		if h, ok := t.(interface{ Helper() }); ok {
 			h.Helper()
 		}
 		ok := 0
 		matches := []itskit.Match{}
-		
+
 		{
 			matcher := b.spec.i
 			if matcher == nil {
@@ -847,7 +762,7 @@ func (b *_F9Behavior) Fn(t mockkit.TestLike) func(i int, ss ...string) {
 			}
 			matches = append(matches, m)
 		}
-		
+
 		{
 			matcher := b.spec.ss
 			if matcher == nil {
@@ -859,44 +774,39 @@ func (b *_F9Behavior) Fn(t mockkit.TestLike) func(i int, ss ...string) {
 			}
 			matches = append(matches, m)
 		}
-		
+
 		itskit.NewMatch(
 			ok == len(matches),
 			b.name.Fill(itskit.Missing),
 			matches...,
 		).OrError(t)
 		b.effect(
-			
+
 			arg0,
-			
-			
+
 			vararg...,
-			
 		)
 	}
 }
 
-func (c _F9Call) ThenReturn(
-
-) mockkit.FuncBehavior[ func (i int, ss ...string)  ] {
+func (c _F9Call) ThenReturn() mockkit.FuncBehavior[func(i int, ss ...string)] {
 	return c.ThenEffect(func(
-		
+
 		int,
-		
+
 		...string,
-	){
-		
+	) {
+
 	})
 }
 
-func (c _F9Call) ThenEffect(effect func(i int, ss ...string)) mockkit.FuncBehavior[ func (i int, ss ...string) ] {
-	return &_F9Behavior {
-		name: c.name,
-		spec: c.spec,
+func (c _F9Call) ThenEffect(effect func(i int, ss ...string)) mockkit.FuncBehavior[func(i int, ss ...string)] {
+	return &_F9Behavior{
+		name:   c.name,
+		spec:   c.spec,
 		effect: effect,
 	}
 }
-
 
 type _F10CallSpec struct {
 	ss its.Matcher[[]string]
@@ -912,7 +822,7 @@ func F10_Expects(ss its.Matcher[[]string],
 	cancel := itskit.SkipStack()
 	defer cancel()
 
-	spec := _F10CallSpec {}
+	spec := _F10CallSpec{}
 	spec.ss = itskit.Named(
 		"ss",
 		ss,
@@ -923,23 +833,23 @@ func F10_Expects(ss its.Matcher[[]string],
 	}
 }
 
-type _F10Behavior  struct {
-	name itskit.Label
-	spec _F10CallSpec
+type _F10Behavior struct {
+	name   itskit.Label
+	spec   _F10CallSpec
 	effect func(ss ...string)
 }
 
 func (b *_F10Behavior) Fn(t mockkit.TestLike) func(ss ...string) {
-	return func (
-		
+	return func(
+
 		vararg ...string,
-	)  {
-		if h, ok := t.(interface { Helper() }); ok {
+	) {
+		if h, ok := t.(interface{ Helper() }); ok {
 			h.Helper()
 		}
 		ok := 0
 		matches := []itskit.Match{}
-		
+
 		{
 			matcher := b.spec.ss
 			if matcher == nil {
@@ -951,47 +861,40 @@ func (b *_F10Behavior) Fn(t mockkit.TestLike) func(ss ...string) {
 			}
 			matches = append(matches, m)
 		}
-		
+
 		itskit.NewMatch(
 			ok == len(matches),
 			b.name.Fill(itskit.Missing),
 			matches...,
 		).OrError(t)
 		b.effect(
-			
-			
+
 			vararg...,
-			
 		)
 	}
 }
 
-func (c _F10Call) ThenReturn(
-
-) mockkit.FuncBehavior[ func (ss ...string)  ] {
+func (c _F10Call) ThenReturn() mockkit.FuncBehavior[func(ss ...string)] {
 	return c.ThenEffect(func(
-		
+
 		...string,
-	){
-		
+	) {
+
 	})
 }
 
-func (c _F10Call) ThenEffect(effect func(ss ...string)) mockkit.FuncBehavior[ func (ss ...string) ] {
-	return &_F10Behavior {
-		name: c.name,
-		spec: c.spec,
+func (c _F10Call) ThenEffect(effect func(ss ...string)) mockkit.FuncBehavior[func(ss ...string)] {
+	return &_F10Behavior{
+		name:   c.name,
+		spec:   c.spec,
 		effect: effect,
 	}
 }
 
-
 type _F11CallSpec struct {
 	arg0 its.Matcher[int]
-	
+
 	arg1 its.Matcher[string]
-	
-	
 }
 
 type _F11Call struct {
@@ -1001,52 +904,50 @@ type _F11Call struct {
 
 func F11_Expects(
 	arg0 its.Matcher[int],
-	
+
 	arg1 its.Matcher[string],
-	
+
 ) _F11Call {
 	cancel := itskit.SkipStack()
 	defer cancel()
 
-	spec := _F11CallSpec {}
+	spec := _F11CallSpec{}
 	spec.arg0 = itskit.Named(
 		"arg0",
 		arg0,
 	)
-	
+
 	spec.arg1 = itskit.Named(
 		"arg1",
 		arg1,
 	)
-	
-	
+
 	return _F11Call{
 		name: itskit.NewLabelWithLocation("func F11"),
 		spec: spec,
 	}
 }
 
-type _F11Behavior  struct {
-	name itskit.Label
-	spec _F11CallSpec
+type _F11Behavior struct {
+	name   itskit.Label
+	spec   _F11CallSpec
 	effect func(arg0 int, arg1 string)
 }
 
 func (b *_F11Behavior) Fn(t mockkit.TestLike) func(arg0 int, arg1 string) {
-	return func (
-		
+	return func(
+
 		arg0 int,
-		
+
 		arg1 string,
-		
-		
-	)  {
-		if h, ok := t.(interface { Helper() }); ok {
+
+	) {
+		if h, ok := t.(interface{ Helper() }); ok {
 			h.Helper()
 		}
 		ok := 0
 		matches := []itskit.Match{}
-		
+
 		{
 			matcher := b.spec.arg0
 			if matcher == nil {
@@ -1058,7 +959,7 @@ func (b *_F11Behavior) Fn(t mockkit.TestLike) func(arg0 int, arg1 string) {
 			}
 			matches = append(matches, m)
 		}
-		
+
 		{
 			matcher := b.spec.arg1
 			if matcher == nil {
@@ -1070,50 +971,44 @@ func (b *_F11Behavior) Fn(t mockkit.TestLike) func(arg0 int, arg1 string) {
 			}
 			matches = append(matches, m)
 		}
-		
+
 		itskit.NewMatch(
 			ok == len(matches),
 			b.name.Fill(itskit.Missing),
 			matches...,
 		).OrError(t)
 		b.effect(
-			
+
 			arg0,
-			
+
 			arg1,
-			
-			
 		)
 	}
 }
 
-func (c _F11Call) ThenReturn(
-
-) mockkit.FuncBehavior[ func (arg0 int, arg1 string)  ] {
+func (c _F11Call) ThenReturn() mockkit.FuncBehavior[func(arg0 int, arg1 string)] {
 	return c.ThenEffect(func(
-		
+
 		int,
-		
+
 		string,
-		
-		
-	){
-		
+
+	) {
+
 	})
 }
 
-func (c _F11Call) ThenEffect(effect func(arg0 int, arg1 string)) mockkit.FuncBehavior[ func (arg0 int, arg1 string) ] {
-	return &_F11Behavior {
-		name: c.name,
-		spec: c.spec,
+func (c _F11Call) ThenEffect(effect func(arg0 int, arg1 string)) mockkit.FuncBehavior[func(arg0 int, arg1 string)] {
+	return &_F11Behavior{
+		name:   c.name,
+		spec:   c.spec,
 		effect: effect,
 	}
 }
 
-
 type _F12CallSpec struct {
 	arg0 its.Matcher[int]
-	
+
 	vararg its.Matcher[[]string]
 }
 
@@ -1129,12 +1024,12 @@ func F12_Expects(
 	cancel := itskit.SkipStack()
 	defer cancel()
 
-	spec := _F12CallSpec {}
+	spec := _F12CallSpec{}
 	spec.arg0 = itskit.Named(
 		"arg0",
 		arg0,
 	)
-	
+
 	spec.vararg = itskit.Named(
 		"vararg",
 		vararg,
@@ -1145,25 +1040,25 @@ func F12_Expects(
 	}
 }
 
-type _F12Behavior  struct {
-	name itskit.Label
-	spec _F12CallSpec
+type _F12Behavior struct {
+	name   itskit.Label
+	spec   _F12CallSpec
 	effect func(arg0 int, vararg ...string)
 }
 
 func (b *_F12Behavior) Fn(t mockkit.TestLike) func(arg0 int, vararg ...string) {
-	return func (
-		
+	return func(
+
 		arg0 int,
-		
+
 		vararg ...string,
-	)  {
-		if h, ok := t.(interface { Helper() }); ok {
+	) {
+		if h, ok := t.(interface{ Helper() }); ok {
 			h.Helper()
 		}
 		ok := 0
 		matches := []itskit.Match{}
-		
+
 		{
 			matcher := b.spec.arg0
 			if matcher == nil {
@@ -1175,7 +1070,7 @@ func (b *_F12Behavior) Fn(t mockkit.TestLike) func(arg0 int, vararg ...string) {
 			}
 			matches = append(matches, m)
 		}
-		
+
 		{
 			matcher := b.spec.vararg
 			if matcher == nil {
@@ -1187,44 +1082,39 @@ func (b *_F12Behavior) Fn(t mockkit.TestLike) func(arg0 int, vararg ...string) {
 			}
 			matches = append(matches, m)
 		}
-		
+
 		itskit.NewMatch(
 			ok == len(matches),
 			b.name.Fill(itskit.Missing),
 			matches...,
 		).OrError(t)
 		b.effect(
-			
+
 			arg0,
-			
-			
+
 			vararg...,
-			
 		)
 	}
 }
 
-func (c _F12Call) ThenReturn(
-
-) mockkit.FuncBehavior[ func (arg0 int, vararg ...string)  ] {
+func (c _F12Call) ThenReturn() mockkit.FuncBehavior[func(arg0 int, vararg ...string)] {
 	return c.ThenEffect(func(
-		
+
 		int,
-		
+
 		...string,
-	){
-		
+	) {
+
 	})
 }
 
-func (c _F12Call) ThenEffect(effect func(arg0 int, vararg ...string)) mockkit.FuncBehavior[ func (arg0 int, vararg ...string) ] {
-	return &_F12Behavior {
-		name: c.name,
-		spec: c.spec,
+func (c _F12Call) ThenEffect(effect func(arg0 int, vararg ...string)) mockkit.FuncBehavior[func(arg0 int, vararg ...string)] {
+	return &_F12Behavior{
+		name:   c.name,
+		spec:   c.spec,
 		effect: effect,
 	}
 }
-
 
 type _F13CallSpec struct {
 	vararg its.Matcher[[]string]
@@ -1240,7 +1130,7 @@ func F13_Expects(vararg its.Matcher[[]string],
 	cancel := itskit.SkipStack()
 	defer cancel()
 
-	spec := _F13CallSpec {}
+	spec := _F13CallSpec{}
 	spec.vararg = itskit.Named(
 		"vararg",
 		vararg,
@@ -1251,23 +1141,23 @@ func F13_Expects(vararg its.Matcher[[]string],
 	}
 }
 
-type _F13Behavior  struct {
-	name itskit.Label
-	spec _F13CallSpec
+type _F13Behavior struct {
+	name   itskit.Label
+	spec   _F13CallSpec
 	effect func(vararg ...string)
 }
 
 func (b *_F13Behavior) Fn(t mockkit.TestLike) func(vararg ...string) {
-	return func (
-		
+	return func(
+
 		vararg ...string,
-	)  {
-		if h, ok := t.(interface { Helper() }); ok {
+	) {
+		if h, ok := t.(interface{ Helper() }); ok {
 			h.Helper()
 		}
 		ok := 0
 		matches := []itskit.Match{}
-		
+
 		{
 			matcher := b.spec.vararg
 			if matcher == nil {
@@ -1279,47 +1169,40 @@ func (b *_F13Behavior) Fn(t mockkit.TestLike) func(vararg ...string) {
 			}
 			matches = append(matches, m)
 		}
-		
+
 		itskit.NewMatch(
 			ok == len(matches),
 			b.name.Fill(itskit.Missing),
 			matches...,
 		).OrError(t)
 		b.effect(
-			
-			
+
 			vararg...,
-			
 		)
 	}
 }
 
-func (c _F13Call) ThenReturn(
-
-) mockkit.FuncBehavior[ func (vararg ...string)  ] {
+func (c _F13Call) ThenReturn() mockkit.FuncBehavior[func(vararg ...string)] {
 	return c.ThenEffect(func(
-		
+
 		...string,
-	){
-		
+	) {
+
 	})
 }
 
-func (c _F13Call) ThenEffect(effect func(vararg ...string)) mockkit.FuncBehavior[ func (vararg ...string) ] {
-	return &_F13Behavior {
-		name: c.name,
-		spec: c.spec,
+func (c _F13Call) ThenEffect(effect func(vararg ...string)) mockkit.FuncBehavior[func(vararg ...string)] {
+	return &_F13Behavior{
+		name:   c.name,
+		spec:   c.spec,
 		effect: effect,
 	}
 }
 
-
 type _F14CallSpec struct {
 	arg0 its.Matcher[int]
-	
+
 	arg1 its.Matcher[string]
-	
-	
 }
 
 type _F14Call struct {
@@ -1329,55 +1212,50 @@ type _F14Call struct {
 
 func F14_Expects(
 	arg0 its.Matcher[int],
-	
+
 	arg1 its.Matcher[string],
-	
+
 ) _F14Call {
 	cancel := itskit.SkipStack()
 	defer cancel()
 
-	spec := _F14CallSpec {}
+	spec := _F14CallSpec{}
 	spec.arg0 = itskit.Named(
 		"arg0",
 		arg0,
 	)
-	
+
 	spec.arg1 = itskit.Named(
 		"arg1",
 		arg1,
 	)
-	
-	
+
 	return _F14Call{
 		name: itskit.NewLabelWithLocation("func F14"),
 		spec: spec,
 	}
 }
 
-type _F14Behavior  struct {
-	name itskit.Label
-	spec _F14CallSpec
+type _F14Behavior struct {
+	name   itskit.Label
+	spec   _F14CallSpec
 	effect func(arg0 int, arg1 string) (f float64)
 }
 
 func (b *_F14Behavior) Fn(t mockkit.TestLike) func(arg0 int, arg1 string) (f float64) {
-	return func (
-		
+	return func(
+
 		arg0 int,
-		
+
 		arg1 string,
-		
-		
-	) (
-		float64,
-		
-	) {
-		if h, ok := t.(interface { Helper() }); ok {
+
+	) float64 {
+		if h, ok := t.(interface{ Helper() }); ok {
 			h.Helper()
 		}
 		ok := 0
 		matches := []itskit.Match{}
-		
+
 		{
 			matcher := b.spec.arg0
 			if matcher == nil {
@@ -1389,7 +1267,7 @@ func (b *_F14Behavior) Fn(t mockkit.TestLike) func(arg0 int, arg1 string) (f flo
 			}
 			matches = append(matches, m)
 		}
-		
+
 		{
 			matcher := b.spec.arg1
 			if matcher == nil {
@@ -1401,19 +1279,17 @@ func (b *_F14Behavior) Fn(t mockkit.TestLike) func(arg0 int, arg1 string) (f flo
 			}
 			matches = append(matches, m)
 		}
-		
+
 		itskit.NewMatch(
 			ok == len(matches),
 			b.name.Fill(itskit.Missing),
 			matches...,
 		).OrError(t)
 		return b.effect(
-			
+
 			arg0,
-			
+
 			arg1,
-			
-			
 		)
 	}
 }
@@ -1422,36 +1298,31 @@ func (c _F14Call) ThenReturn(
 
 	ret0 float64,
 
-) mockkit.FuncBehavior[ func (arg0 int, arg1 string) (f float64)  ] {
+) mockkit.FuncBehavior[func(arg0 int, arg1 string) (f float64)] {
 	return c.ThenEffect(func(
-		
+
 		int,
-		
+
 		string,
-		
-		
-	)(
-		float64,
-		
-	){
-		
+
+	) float64 {
+
 		return ret0
-		
+
 	})
 }
 
-func (c _F14Call) ThenEffect(effect func(arg0 int, arg1 string) (f float64)) mockkit.FuncBehavior[ func (arg0 int, arg1 string) (f float64) ] {
-	return &_F14Behavior {
-		name: c.name,
-		spec: c.spec,
+func (c _F14Call) ThenEffect(effect func(arg0 int, arg1 string) (f float64)) mockkit.FuncBehavior[func(arg0 int, arg1 string) (f float64)] {
+	return &_F14Behavior{
+		name:   c.name,
+		spec:   c.spec,
 		effect: effect,
 	}
 }
 
-
 type _F15CallSpec struct {
 	i its.Matcher[int]
-	
+
 	ss its.Matcher[[]string]
 }
 
@@ -1467,12 +1338,12 @@ func F15_Expects(
 	cancel := itskit.SkipStack()
 	defer cancel()
 
-	spec := _F15CallSpec {}
+	spec := _F15CallSpec{}
 	spec.i = itskit.Named(
 		"i",
 		i,
 	)
-	
+
 	spec.ss = itskit.Named(
 		"ss",
 		ss,
@@ -1483,28 +1354,25 @@ func F15_Expects(
 	}
 }
 
-type _F15Behavior  struct {
-	name itskit.Label
-	spec _F15CallSpec
+type _F15Behavior struct {
+	name   itskit.Label
+	spec   _F15CallSpec
 	effect func(i int, ss ...string) float64
 }
 
 func (b *_F15Behavior) Fn(t mockkit.TestLike) func(i int, ss ...string) float64 {
-	return func (
-		
+	return func(
+
 		arg0 int,
-		
+
 		vararg ...string,
-	) (
-		float64,
-		
-	) {
-		if h, ok := t.(interface { Helper() }); ok {
+	) float64 {
+		if h, ok := t.(interface{ Helper() }); ok {
 			h.Helper()
 		}
 		ok := 0
 		matches := []itskit.Match{}
-		
+
 		{
 			matcher := b.spec.i
 			if matcher == nil {
@@ -1516,7 +1384,7 @@ func (b *_F15Behavior) Fn(t mockkit.TestLike) func(i int, ss ...string) float64 
 			}
 			matches = append(matches, m)
 		}
-		
+
 		{
 			matcher := b.spec.ss
 			if matcher == nil {
@@ -1528,19 +1396,17 @@ func (b *_F15Behavior) Fn(t mockkit.TestLike) func(i int, ss ...string) float64 
 			}
 			matches = append(matches, m)
 		}
-		
+
 		itskit.NewMatch(
 			ok == len(matches),
 			b.name.Fill(itskit.Missing),
 			matches...,
 		).OrError(t)
 		return b.effect(
-			
+
 			arg0,
-			
-			
+
 			vararg...,
-			
 		)
 	}
 }
@@ -1549,35 +1415,29 @@ func (c _F15Call) ThenReturn(
 
 	ret0 float64,
 
-) mockkit.FuncBehavior[ func (i int, ss ...string) float64  ] {
+) mockkit.FuncBehavior[func(i int, ss ...string) float64] {
 	return c.ThenEffect(func(
-		
+
 		int,
-		
+
 		...string,
-	)(
-		float64,
-		
-	){
-		
+	) float64 {
+
 		return ret0
-		
+
 	})
 }
 
-func (c _F15Call) ThenEffect(effect func(i int, ss ...string) float64) mockkit.FuncBehavior[ func (i int, ss ...string) float64 ] {
-	return &_F15Behavior {
-		name: c.name,
-		spec: c.spec,
+func (c _F15Call) ThenEffect(effect func(i int, ss ...string) float64) mockkit.FuncBehavior[func(i int, ss ...string) float64] {
+	return &_F15Behavior{
+		name:   c.name,
+		spec:   c.spec,
 		effect: effect,
 	}
 }
 
-
 type _F16CallSpec[T any] struct {
-	arg0 its.Matcher[testee.F16[T]]
-	
-	
+	arg0 its.Matcher[pkg1.F16[T]]
 }
 
 type _F16Call[T any] struct {
@@ -1586,51 +1446,46 @@ type _F16Call[T any] struct {
 }
 
 func F16_Expects[T any](
-	arg0 its.Matcher[testee.F16[T]],
-	
+	arg0 its.Matcher[pkg1.F16[T]],
+
 ) _F16Call[T] {
 	cancel := itskit.SkipStack()
 	defer cancel()
 
-	spec := _F16CallSpec[T] {}
+	spec := _F16CallSpec[T]{}
 	spec.arg0 = itskit.Named(
 		"arg0",
 		arg0,
 	)
-	
-	
+
 	return _F16Call[T]{
 		name: itskit.NewLabelWithLocation("func F16"),
 		spec: spec,
 	}
 }
 
-type _F16Behavior [T any] struct {
-	name itskit.Label
-	spec _F16CallSpec[T]
-	effect func(arg0 testee.F16[T]) T
+type _F16Behavior[T any] struct {
+	name   itskit.Label
+	spec   _F16CallSpec[T]
+	effect func(arg0 pkg1.F16[T]) T
 }
 
-func (b *_F16Behavior[T]) Fn(t mockkit.TestLike) func(arg0 testee.F16[T]) T {
-	return func (
-		
-		arg0 testee.F16[T],
-		
-		
-	) (
-		T,
-		
-	) {
-		if h, ok := t.(interface { Helper() }); ok {
+func (b *_F16Behavior[T]) Fn(t mockkit.TestLike) func(arg0 pkg1.F16[T]) T {
+	return func(
+
+		arg0 pkg1.F16[T],
+
+	) T {
+		if h, ok := t.(interface{ Helper() }); ok {
 			h.Helper()
 		}
 		ok := 0
 		matches := []itskit.Match{}
-		
+
 		{
 			matcher := b.spec.arg0
 			if matcher == nil {
-				matcher = its.Never[testee.F16[T]]()
+				matcher = its.Never[pkg1.F16[T]]()
 			}
 			m := matcher.Match(arg0)
 			if m.Ok() {
@@ -1638,17 +1493,15 @@ func (b *_F16Behavior[T]) Fn(t mockkit.TestLike) func(arg0 testee.F16[T]) T {
 			}
 			matches = append(matches, m)
 		}
-		
+
 		itskit.NewMatch(
 			ok == len(matches),
 			b.name.Fill(itskit.Missing),
 			matches...,
 		).OrError(t)
 		return b.effect(
-			
+
 			arg0,
-			
-			
 		)
 	}
 }
@@ -1657,92 +1510,80 @@ func (c _F16Call[T]) ThenReturn(
 
 	ret0 T,
 
-) mockkit.FuncBehavior[ func (arg0 testee.F16[T]) T  ] {
+) mockkit.FuncBehavior[func(arg0 pkg1.F16[T]) T] {
 	return c.ThenEffect(func(
-		
-		testee.F16[T],
-		
-		
-	)(
-		T,
-		
-	){
-		
+
+		pkg1.F16[T],
+
+	) T {
+
 		return ret0
-		
+
 	})
 }
 
-func (c _F16Call[T]) ThenEffect(effect func(arg0 testee.F16[T]) T) mockkit.FuncBehavior[ func (arg0 testee.F16[T]) T ] {
-	return &_F16Behavior[T] {
-		name: c.name,
-		spec: c.spec,
+func (c _F16Call[T]) ThenEffect(effect func(arg0 pkg1.F16[T]) T) mockkit.FuncBehavior[func(arg0 pkg1.F16[T]) T] {
+	return &_F16Behavior[T]{
+		name:   c.name,
+		spec:   c.spec,
 		effect: effect,
 	}
 }
 
-
-type _F17CallSpec[T ~struct{
+type _F17CallSpec[T ~struct {
 	Foo int
 }] struct {
 	arg0 its.Matcher[T]
-	
-	
 }
 
-type _F17Call[T ~struct{
+type _F17Call[T ~struct {
 	Foo int
 }] struct {
 	name itskit.Label
 	spec _F17CallSpec[T]
 }
 
-func F17_Expects[T ~struct{
+func F17_Expects[T ~struct {
 	Foo int
 }](
 	arg0 its.Matcher[T],
-	
+
 ) _F17Call[T] {
 	cancel := itskit.SkipStack()
 	defer cancel()
 
-	spec := _F17CallSpec[T] {}
+	spec := _F17CallSpec[T]{}
 	spec.arg0 = itskit.Named(
 		"arg0",
 		arg0,
 	)
-	
-	
+
 	return _F17Call[T]{
 		name: itskit.NewLabelWithLocation("func F17"),
 		spec: spec,
 	}
 }
 
-type _F17Behavior [T ~struct{
+type _F17Behavior[T ~struct {
 	Foo int
 }] struct {
-	name itskit.Label
-	spec _F17CallSpec[T]
+	name   itskit.Label
+	spec   _F17CallSpec[T]
 	effect func(arg0 T) T
 }
 
 func (b *_F17Behavior[T]) Fn(t mockkit.TestLike) func(arg0 T) T {
-	return func (
-		
+	return func(
+
 		arg0 T,
-		
-		
-	) (
-		T,
-		
-	) {
-		if h, ok := t.(interface { Helper() }); ok {
+
+	) T {
+		if h, ok := t.(interface{ Helper() }); ok {
 			h.Helper()
 		}
 		ok := 0
 		matches := []itskit.Match{}
-		
+
 		{
 			matcher := b.spec.arg0
 			if matcher == nil {
@@ -1754,17 +1595,15 @@ func (b *_F17Behavior[T]) Fn(t mockkit.TestLike) func(arg0 T) T {
 			}
 			matches = append(matches, m)
 		}
-		
+
 		itskit.NewMatch(
 			ok == len(matches),
 			b.name.Fill(itskit.Missing),
 			matches...,
 		).OrError(t)
 		return b.effect(
-			
+
 			arg0,
-			
-			
 		)
 	}
 }
@@ -1773,35 +1612,28 @@ func (c _F17Call[T]) ThenReturn(
 
 	ret0 T,
 
-) mockkit.FuncBehavior[ func (arg0 T) T  ] {
+) mockkit.FuncBehavior[func(arg0 T) T] {
 	return c.ThenEffect(func(
-		
+
 		T,
-		
-		
-	)(
-		T,
-		
-	){
-		
+
+	) T {
+
 		return ret0
-		
+
 	})
 }
 
-func (c _F17Call[T]) ThenEffect(effect func(arg0 T) T) mockkit.FuncBehavior[ func (arg0 T) T ] {
-	return &_F17Behavior[T] {
-		name: c.name,
-		spec: c.spec,
+func (c _F17Call[T]) ThenEffect(effect func(arg0 T) T) mockkit.FuncBehavior[func(arg0 T) T] {
+	return &_F17Behavior[T]{
+		name:   c.name,
+		spec:   c.spec,
 		effect: effect,
 	}
 }
 
-
 type _F18CallSpec[T any, U any] struct {
 	arg0 its.Matcher[func(arg0 T, arg1 U)]
-	
-	
 }
 
 type _F18Call[T any, U any] struct {
@@ -1811,46 +1643,41 @@ type _F18Call[T any, U any] struct {
 
 func F18_Expects[T any, U any](
 	arg0 its.Matcher[func(arg0 T, arg1 U)],
-	
+
 ) _F18Call[T, U] {
 	cancel := itskit.SkipStack()
 	defer cancel()
 
-	spec := _F18CallSpec[T, U] {}
+	spec := _F18CallSpec[T, U]{}
 	spec.arg0 = itskit.Named(
 		"arg0",
 		arg0,
 	)
-	
-	
+
 	return _F18Call[T, U]{
 		name: itskit.NewLabelWithLocation("func F18"),
 		spec: spec,
 	}
 }
 
-type _F18Behavior [T any, U any] struct {
-	name itskit.Label
-	spec _F18CallSpec[T, U]
+type _F18Behavior[T any, U any] struct {
+	name   itskit.Label
+	spec   _F18CallSpec[T, U]
 	effect func(arg0 func(arg0 T, arg1 U)) func(arg0 T, arg1 U)
 }
 
 func (b *_F18Behavior[T, U]) Fn(t mockkit.TestLike) func(arg0 func(arg0 T, arg1 U)) func(arg0 T, arg1 U) {
-	return func (
-		
+	return func(
+
 		arg0 func(arg0 T, arg1 U),
-		
-		
-	) (
-		func(arg0 T, arg1 U),
-		
-	) {
-		if h, ok := t.(interface { Helper() }); ok {
+
+	) func(arg0 T, arg1 U) {
+		if h, ok := t.(interface{ Helper() }); ok {
 			h.Helper()
 		}
 		ok := 0
 		matches := []itskit.Match{}
-		
+
 		{
 			matcher := b.spec.arg0
 			if matcher == nil {
@@ -1862,17 +1689,15 @@ func (b *_F18Behavior[T, U]) Fn(t mockkit.TestLike) func(arg0 func(arg0 T, arg1 
 			}
 			matches = append(matches, m)
 		}
-		
+
 		itskit.NewMatch(
 			ok == len(matches),
 			b.name.Fill(itskit.Missing),
 			matches...,
 		).OrError(t)
 		return b.effect(
-			
+
 			arg0,
-			
-			
 		)
 	}
 }
@@ -1881,35 +1706,28 @@ func (c _F18Call[T, U]) ThenReturn(
 
 	ret0 func(arg0 T, arg1 U),
 
-) mockkit.FuncBehavior[ func (arg0 func(arg0 T, arg1 U)) func(arg0 T, arg1 U)  ] {
+) mockkit.FuncBehavior[func(arg0 func(arg0 T, arg1 U)) func(arg0 T, arg1 U)] {
 	return c.ThenEffect(func(
-		
+
 		func(arg0 T, arg1 U),
-		
-		
-	)(
-		func(arg0 T, arg1 U),
-		
-	){
-		
+
+	) func(arg0 T, arg1 U) {
+
 		return ret0
-		
+
 	})
 }
 
-func (c _F18Call[T, U]) ThenEffect(effect func(arg0 func(arg0 T, arg1 U)) func(arg0 T, arg1 U)) mockkit.FuncBehavior[ func (arg0 func(arg0 T, arg1 U)) func(arg0 T, arg1 U) ] {
-	return &_F18Behavior[T, U] {
-		name: c.name,
-		spec: c.spec,
+func (c _F18Call[T, U]) ThenEffect(effect func(arg0 func(arg0 T, arg1 U)) func(arg0 T, arg1 U)) mockkit.FuncBehavior[func(arg0 func(arg0 T, arg1 U)) func(arg0 T, arg1 U)] {
+	return &_F18Behavior[T, U]{
+		name:   c.name,
+		spec:   c.spec,
 		effect: effect,
 	}
 }
 
-
 type _F19CallSpec[T ~int] struct {
-	arg0 its.Matcher[testee.F16[T]]
-	
-	
+	arg0 its.Matcher[pkg1.F16[T]]
 }
 
 type _F19Call[T ~int] struct {
@@ -1918,51 +1736,46 @@ type _F19Call[T ~int] struct {
 }
 
 func F19_Expects[T ~int](
-	arg0 its.Matcher[testee.F16[T]],
-	
+	arg0 its.Matcher[pkg1.F16[T]],
+
 ) _F19Call[T] {
 	cancel := itskit.SkipStack()
 	defer cancel()
 
-	spec := _F19CallSpec[T] {}
+	spec := _F19CallSpec[T]{}
 	spec.arg0 = itskit.Named(
 		"arg0",
 		arg0,
 	)
-	
-	
+
 	return _F19Call[T]{
 		name: itskit.NewLabelWithLocation("func F19"),
 		spec: spec,
 	}
 }
 
-type _F19Behavior [T ~int] struct {
-	name itskit.Label
-	spec _F19CallSpec[T]
-	effect func(arg0 testee.F16[T]) T
+type _F19Behavior[T ~int] struct {
+	name   itskit.Label
+	spec   _F19CallSpec[T]
+	effect func(arg0 pkg1.F16[T]) T
 }
 
-func (b *_F19Behavior[T]) Fn(t mockkit.TestLike) func(arg0 testee.F16[T]) T {
-	return func (
-		
-		arg0 testee.F16[T],
-		
-		
-	) (
-		T,
-		
-	) {
-		if h, ok := t.(interface { Helper() }); ok {
+func (b *_F19Behavior[T]) Fn(t mockkit.TestLike) func(arg0 pkg1.F16[T]) T {
+	return func(
+
+		arg0 pkg1.F16[T],
+
+	) T {
+		if h, ok := t.(interface{ Helper() }); ok {
 			h.Helper()
 		}
 		ok := 0
 		matches := []itskit.Match{}
-		
+
 		{
 			matcher := b.spec.arg0
 			if matcher == nil {
-				matcher = its.Never[testee.F16[T]]()
+				matcher = its.Never[pkg1.F16[T]]()
 			}
 			m := matcher.Match(arg0)
 			if m.Ok() {
@@ -1970,17 +1783,15 @@ func (b *_F19Behavior[T]) Fn(t mockkit.TestLike) func(arg0 testee.F16[T]) T {
 			}
 			matches = append(matches, m)
 		}
-		
+
 		itskit.NewMatch(
 			ok == len(matches),
 			b.name.Fill(itskit.Missing),
 			matches...,
 		).OrError(t)
 		return b.effect(
-			
+
 			arg0,
-			
-			
 		)
 	}
 }
@@ -1989,35 +1800,28 @@ func (c _F19Call[T]) ThenReturn(
 
 	ret0 T,
 
-) mockkit.FuncBehavior[ func (arg0 testee.F16[T]) T  ] {
+) mockkit.FuncBehavior[func(arg0 pkg1.F16[T]) T] {
 	return c.ThenEffect(func(
-		
-		testee.F16[T],
-		
-		
-	)(
-		T,
-		
-	){
-		
+
+		pkg1.F16[T],
+
+	) T {
+
 		return ret0
-		
+
 	})
 }
 
-func (c _F19Call[T]) ThenEffect(effect func(arg0 testee.F16[T]) T) mockkit.FuncBehavior[ func (arg0 testee.F16[T]) T ] {
-	return &_F19Behavior[T] {
-		name: c.name,
-		spec: c.spec,
+func (c _F19Call[T]) ThenEffect(effect func(arg0 pkg1.F16[T]) T) mockkit.FuncBehavior[func(arg0 pkg1.F16[T]) T] {
+	return &_F19Behavior[T]{
+		name:   c.name,
+		spec:   c.spec,
 		effect: effect,
 	}
 }
 
-
 type _F20CallSpec[T ~int | int8 | ~int16 | int32] struct {
 	arg0 its.Matcher[T]
-	
-	
 }
 
 type _F20Call[T ~int | int8 | ~int16 | int32] struct {
@@ -2027,46 +1831,41 @@ type _F20Call[T ~int | int8 | ~int16 | int32] struct {
 
 func F20_Expects[T ~int | int8 | ~int16 | int32](
 	arg0 its.Matcher[T],
-	
+
 ) _F20Call[T] {
 	cancel := itskit.SkipStack()
 	defer cancel()
 
-	spec := _F20CallSpec[T] {}
+	spec := _F20CallSpec[T]{}
 	spec.arg0 = itskit.Named(
 		"arg0",
 		arg0,
 	)
-	
-	
+
 	return _F20Call[T]{
 		name: itskit.NewLabelWithLocation("func F20"),
 		spec: spec,
 	}
 }
 
-type _F20Behavior [T ~int | int8 | ~int16 | int32] struct {
-	name itskit.Label
-	spec _F20CallSpec[T]
+type _F20Behavior[T ~int | int8 | ~int16 | int32] struct {
+	name   itskit.Label
+	spec   _F20CallSpec[T]
 	effect func(arg0 T) T
 }
 
 func (b *_F20Behavior[T]) Fn(t mockkit.TestLike) func(arg0 T) T {
-	return func (
-		
+	return func(
+
 		arg0 T,
-		
-		
-	) (
-		T,
-		
-	) {
-		if h, ok := t.(interface { Helper() }); ok {
+
+	) T {
+		if h, ok := t.(interface{ Helper() }); ok {
 			h.Helper()
 		}
 		ok := 0
 		matches := []itskit.Match{}
-		
+
 		{
 			matcher := b.spec.arg0
 			if matcher == nil {
@@ -2078,17 +1877,15 @@ func (b *_F20Behavior[T]) Fn(t mockkit.TestLike) func(arg0 T) T {
 			}
 			matches = append(matches, m)
 		}
-		
+
 		itskit.NewMatch(
 			ok == len(matches),
 			b.name.Fill(itskit.Missing),
 			matches...,
 		).OrError(t)
 		return b.effect(
-			
+
 			arg0,
-			
-			
 		)
 	}
 }
@@ -2097,30 +1894,304 @@ func (c _F20Call[T]) ThenReturn(
 
 	ret0 T,
 
-) mockkit.FuncBehavior[ func (arg0 T) T  ] {
+) mockkit.FuncBehavior[func(arg0 T) T] {
 	return c.ThenEffect(func(
-		
+
 		T,
-		
-		
-	)(
-		T,
-		
-	){
-		
+
+	) T {
+
 		return ret0
-		
+
 	})
 }
 
-func (c _F20Call[T]) ThenEffect(effect func(arg0 T) T) mockkit.FuncBehavior[ func (arg0 T) T ] {
-	return &_F20Behavior[T] {
-		name: c.name,
-		spec: c.spec,
+func (c _F20Call[T]) ThenEffect(effect func(arg0 T) T) mockkit.FuncBehavior[func(arg0 T) T] {
+	return &_F20Behavior[T]{
+		name:   c.name,
+		spec:   c.spec,
 		effect: effect,
 	}
 }
 
+type _F25CallSpec struct {
+	d its.Matcher[pkg2.DotStruct]
+}
 
+type _F25Call struct {
+	name itskit.Label
+	spec _F25CallSpec
+}
 
+func F25_Expects(
+	d its.Matcher[pkg2.DotStruct],
 
+) _F25Call {
+	cancel := itskit.SkipStack()
+	defer cancel()
+
+	spec := _F25CallSpec{}
+	spec.d = itskit.Named(
+		"d",
+		d,
+	)
+
+	return _F25Call{
+		name: itskit.NewLabelWithLocation("func F25"),
+		spec: spec,
+	}
+}
+
+type _F25Behavior struct {
+	name   itskit.Label
+	spec   _F25CallSpec
+	effect func(d pkg2.DotStruct) pkg2.DotInterface
+}
+
+func (b *_F25Behavior) Fn(t mockkit.TestLike) func(d pkg2.DotStruct) pkg2.DotInterface {
+	return func(
+
+		arg0 pkg2.DotStruct,
+
+	) pkg2.DotInterface {
+		if h, ok := t.(interface{ Helper() }); ok {
+			h.Helper()
+		}
+		ok := 0
+		matches := []itskit.Match{}
+
+		{
+			matcher := b.spec.d
+			if matcher == nil {
+				matcher = its.Never[pkg2.DotStruct]()
+			}
+			m := matcher.Match(arg0)
+			if m.Ok() {
+				ok += 1
+			}
+			matches = append(matches, m)
+		}
+
+		itskit.NewMatch(
+			ok == len(matches),
+			b.name.Fill(itskit.Missing),
+			matches...,
+		).OrError(t)
+		return b.effect(
+
+			arg0,
+		)
+	}
+}
+
+func (c _F25Call) ThenReturn(
+
+	ret0 pkg2.DotInterface,
+
+) mockkit.FuncBehavior[func(d pkg2.DotStruct) pkg2.DotInterface] {
+	return c.ThenEffect(func(
+
+		pkg2.DotStruct,
+
+	) pkg2.DotInterface {
+
+		return ret0
+
+	})
+}
+
+func (c _F25Call) ThenEffect(effect func(d pkg2.DotStruct) pkg2.DotInterface) mockkit.FuncBehavior[func(d pkg2.DotStruct) pkg2.DotInterface] {
+	return &_F25Behavior{
+		name:   c.name,
+		spec:   c.spec,
+		effect: effect,
+	}
+}
+
+type _F26CallSpec struct {
+	d its.Matcher[pkg2.DotInterface]
+}
+
+type _F26Call struct {
+	name itskit.Label
+	spec _F26CallSpec
+}
+
+func F26_Expects(
+	d its.Matcher[pkg2.DotInterface],
+
+) _F26Call {
+	cancel := itskit.SkipStack()
+	defer cancel()
+
+	spec := _F26CallSpec{}
+	spec.d = itskit.Named(
+		"d",
+		d,
+	)
+
+	return _F26Call{
+		name: itskit.NewLabelWithLocation("func F26"),
+		spec: spec,
+	}
+}
+
+type _F26Behavior struct {
+	name   itskit.Label
+	spec   _F26CallSpec
+	effect func(d pkg2.DotInterface) pkg2.DotStruct
+}
+
+func (b *_F26Behavior) Fn(t mockkit.TestLike) func(d pkg2.DotInterface) pkg2.DotStruct {
+	return func(
+
+		arg0 pkg2.DotInterface,
+
+	) pkg2.DotStruct {
+		if h, ok := t.(interface{ Helper() }); ok {
+			h.Helper()
+		}
+		ok := 0
+		matches := []itskit.Match{}
+
+		{
+			matcher := b.spec.d
+			if matcher == nil {
+				matcher = its.Never[pkg2.DotInterface]()
+			}
+			m := matcher.Match(arg0)
+			if m.Ok() {
+				ok += 1
+			}
+			matches = append(matches, m)
+		}
+
+		itskit.NewMatch(
+			ok == len(matches),
+			b.name.Fill(itskit.Missing),
+			matches...,
+		).OrError(t)
+		return b.effect(
+
+			arg0,
+		)
+	}
+}
+
+func (c _F26Call) ThenReturn(
+
+	ret0 pkg2.DotStruct,
+
+) mockkit.FuncBehavior[func(d pkg2.DotInterface) pkg2.DotStruct] {
+	return c.ThenEffect(func(
+
+		pkg2.DotInterface,
+
+	) pkg2.DotStruct {
+
+		return ret0
+
+	})
+}
+
+func (c _F26Call) ThenEffect(effect func(d pkg2.DotInterface) pkg2.DotStruct) mockkit.FuncBehavior[func(d pkg2.DotInterface) pkg2.DotStruct] {
+	return &_F26Behavior{
+		name:   c.name,
+		spec:   c.spec,
+		effect: effect,
+	}
+}
+
+type _F27CallSpec[T pkg2.DotInterface] struct {
+	d its.Matcher[T]
+}
+
+type _F27Call[T pkg2.DotInterface] struct {
+	name itskit.Label
+	spec _F27CallSpec[T]
+}
+
+func F27_Expects[T pkg2.DotInterface](
+	d its.Matcher[T],
+
+) _F27Call[T] {
+	cancel := itskit.SkipStack()
+	defer cancel()
+
+	spec := _F27CallSpec[T]{}
+	spec.d = itskit.Named(
+		"d",
+		d,
+	)
+
+	return _F27Call[T]{
+		name: itskit.NewLabelWithLocation("func F27"),
+		spec: spec,
+	}
+}
+
+type _F27Behavior[T pkg2.DotInterface] struct {
+	name   itskit.Label
+	spec   _F27CallSpec[T]
+	effect func(d T) T
+}
+
+func (b *_F27Behavior[T]) Fn(t mockkit.TestLike) func(d T) T {
+	return func(
+
+		arg0 T,
+
+	) T {
+		if h, ok := t.(interface{ Helper() }); ok {
+			h.Helper()
+		}
+		ok := 0
+		matches := []itskit.Match{}
+
+		{
+			matcher := b.spec.d
+			if matcher == nil {
+				matcher = its.Never[T]()
+			}
+			m := matcher.Match(arg0)
+			if m.Ok() {
+				ok += 1
+			}
+			matches = append(matches, m)
+		}
+
+		itskit.NewMatch(
+			ok == len(matches),
+			b.name.Fill(itskit.Missing),
+			matches...,
+		).OrError(t)
+		return b.effect(
+
+			arg0,
+		)
+	}
+}
+
+func (c _F27Call[T]) ThenReturn(
+
+	ret0 T,
+
+) mockkit.FuncBehavior[func(d T) T] {
+	return c.ThenEffect(func(
+
+		T,
+
+	) T {
+
+		return ret0
+
+	})
+}
+
+func (c _F27Call[T]) ThenEffect(effect func(d T) T) mockkit.FuncBehavior[func(d T) T] {
+	return &_F27Behavior[T]{
+		name:   c.name,
+		spec:   c.spec,
+		effect: effect,
+	}
+}

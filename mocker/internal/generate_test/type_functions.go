@@ -1,5 +1,8 @@
 //go:generate go run github.com/youta-t/its/mocker
-package types
+//go:generate gofmt -w gen_mock/type_functions.go
+package generatetest
+
+import . "github.com/youta-t/its/mocker/internal/generate_test/dot"
 
 type F1 func()
 type F2 func() int
@@ -26,6 +29,10 @@ type F21 func(p private) bool
 type F22 func() private
 type F23[T private] func() T
 type f24 func()
+
+type F25 func(d DotStruct) DotInterface
+type F26 func(d DotInterface) DotStruct
+type F27[T DotInterface] func(d T) T
 
 func init() {
 	var x f24 = nil
