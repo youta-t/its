@@ -128,8 +128,7 @@ func parseFile(bc ParseContext, pkg importTarget, filename string) (*TypeDeclara
 		case ".":
 			dot, err := bc.Import(p)
 			if err != nil {
-				// return nil, err
-				continue
+				continue // skip unused transitive import
 			}
 			for _, decl := range dot.Types.Structs.Slice() {
 				types[decl.Name] = &NamedType{ImportPath: p, Name: decl.Name}
@@ -147,8 +146,7 @@ func parseFile(bc ParseContext, pkg importTarget, filename string) (*TypeDeclara
 		case "":
 			imported, err := bc.Import(p)
 			if err != nil {
-				// return nil, err
-				continue
+				continue // skip unused transitive import
 			}
 			n = imported.DefaultName
 		}
