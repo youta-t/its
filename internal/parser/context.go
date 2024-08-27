@@ -95,18 +95,26 @@ func (pc *parseContext) detectSourceDir(importPath string) (importTarget, error)
 
 	importPathSlash := importPath + "/"
 
-	for module, dir := range pc.require {
-		m := module + "/"
-		if !strings.HasPrefix(importPathSlash, m) {
+	module := ""
+	dir := ""
+	for mod, d := range pc.require {
+		if !strings.HasPrefix(importPathSlash, mod+"/") {
 			continue
 		}
-		rel := filepath.FromSlash(importPath[len(m):])
-		targ.Dir = filepath.Join(dir, rel)
-
-		return targ, nil
+		if len(mod) <= len(module) {
+			continue
+		}
+		module = mod
+		rel := filepath.FromSlash(importPath[len(mod):])
+		dir = filepath.Join(d, rel)
 	}
 
-	targ.Dir = filepath.Join(pc.stdDir, filepath.FromSlash(importPath))
+	if len(module) != 0 {
+		targ.Dir = dir
+	} else {
+		targ.Dir = filepath.Join(pc.stdDir, filepath.FromSlash(importPath))
+	}
+
 	return targ, nil
 }
 

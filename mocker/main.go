@@ -38,6 +38,7 @@ func (n names) String() string {
 
 type generatingFile struct {
 	PackageName string
+	ItsIsNeeded bool
 	Imports     *parser.Imports
 	Interfaces  []*parser.TypeInterfaceDecl
 	Funcs       []*parser.TypeFuncDecl
@@ -83,8 +84,6 @@ It generates a file with same name as a file having go:generate directive.
 		log.Fatalf("-source is required")
 		flag.Usage()
 		return
-	} else {
-		source = try.To(filepath.Abs(source)).OrFatal(logger)
 	}
 	if dest == "" {
 		log.Fatalf("-dest is required")
@@ -100,7 +99,8 @@ It generates a file with same name as a file having go:generate directive.
 	if *sourceAsPackage {
 		pkg = try.To(parserInstance.Import(source)).OrFatal(logger)
 	} else {
-		dir, _ := filepath.Split(source)
+		source = try.To(filepath.Abs(source)).OrFatal(logger)
+		dir := filepath.Dir(source)
 		targetFile = source
 		pkg = try.To(parserInstance.ImportDir(dir)).OrFatal(logger)
 	}
@@ -156,6 +156,7 @@ It generates a file with same name as a file having go:generate directive.
 
 	for fname := range filenames {
 		newFile := generatingFile{
+			ItsIsNeeded: false,
 			PackageName: path.Base(dest),
 			Imports:     new(parser.Imports),
 		}
@@ -165,6 +166,7 @@ It generates a file with same name as a file having go:generate directive.
 
 		for i := range funcs {
 			s := funcs[i]
+			newFile.ItsIsNeeded = newFile.ItsIsNeeded || 0 < len(s.Body.Args)
 
 			if _, ok := targetTypeName[s.Name]; len(targetTypeName) != 0 && !ok {
 				continue
@@ -184,6 +186,9 @@ It generates a file with same name as a file having go:generate directive.
 
 		for i := range intfs {
 			s := intfs[i]
+			for _, m := range s.Body.Methods {
+				newFile.ItsIsNeeded = newFile.ItsIsNeeded || 0 < len(m.Func.Args)
+			}
 
 			if _, ok := targetTypeName[s.Name]; len(targetTypeName) != 0 && !ok {
 				continue
@@ -194,6 +199,7 @@ It generates a file with same name as a file having go:generate directive.
 
 			newFile.Interfaces = append(newFile.Interfaces, s)
 			types := s.Require()
+			newFile.Imports.Add(s.ImportPath)
 			for i := range types {
 				t := types[i]
 				newFile.Imports.Add(t)
@@ -302,7 +308,7 @@ const tpl = `// Code generated -- DO NOT EDIT
 package {{ .PackageName }}
 
 import (
-	its "github.com/youta-t/its"
+	{{ if .ItsIsNeeded }}its "github.com/youta-t/its"{{ end }}
 	itskit "github.com/youta-t/its/itskit"
 	mockkit "github.com/youta-t/its/mocker/mockkit"
 	{{ range .Imports.Slice }}
