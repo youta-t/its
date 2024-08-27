@@ -26,7 +26,7 @@ func parsePackage(bc ParseContext, pkg importTarget) (*Package, error) {
 		},
 	}
 
-	bpkg, err := build.ImportDir(pkg.Dir, 0)
+	bpkg, err := build.Import(pkg.ImportPath, ".", 0)
 	if err != nil {
 		return nil, err
 	}
@@ -128,7 +128,8 @@ func parseFile(bc ParseContext, pkg importTarget, filename string) (*TypeDeclara
 		case ".":
 			dot, err := bc.Import(p)
 			if err != nil {
-				return nil, err
+				// return nil, err
+				continue
 			}
 			for _, decl := range dot.Types.Structs.Slice() {
 				types[decl.Name] = &NamedType{ImportPath: p, Name: decl.Name}
@@ -146,7 +147,8 @@ func parseFile(bc ParseContext, pkg importTarget, filename string) (*TypeDeclara
 		case "":
 			imported, err := bc.Import(p)
 			if err != nil {
-				return nil, err
+				// return nil, err
+				continue
 			}
 			n = imported.DefaultName
 		}
@@ -477,6 +479,9 @@ func parseStruct(imports []ImportStatment, snode *ast.StructType) *StructType {
 
 		if 0 < len(f.Names) {
 			for _, n := range f.Names {
+				if isPrivateName(n.Name) {
+					continue
+				}
 				fields = append(fields, &Field{Name: n.Name, Type: typ})
 			}
 		} else {

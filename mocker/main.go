@@ -83,8 +83,6 @@ It generates a file with same name as a file having go:generate directive.
 		log.Fatalf("-source is required")
 		flag.Usage()
 		return
-	} else {
-		source = try.To(filepath.Abs(source)).OrFatal(logger)
 	}
 	if dest == "" {
 		log.Fatalf("-dest is required")
@@ -100,7 +98,8 @@ It generates a file with same name as a file having go:generate directive.
 	if *sourceAsPackage {
 		pkg = try.To(parserInstance.Import(source)).OrFatal(logger)
 	} else {
-		dir, _ := filepath.Split(source)
+		source = try.To(filepath.Abs(source)).OrFatal(logger)
+		dir := filepath.Dir(source)
 		targetFile = source
 		pkg = try.To(parserInstance.ImportDir(dir)).OrFatal(logger)
 	}
@@ -194,6 +193,7 @@ It generates a file with same name as a file having go:generate directive.
 
 			newFile.Interfaces = append(newFile.Interfaces, s)
 			types := s.Require()
+			newFile.Imports.Add(s.ImportPath)
 			for i := range types {
 				t := types[i]
 				newFile.Imports.Add(t)

@@ -83,8 +83,6 @@ The new file, has "Matcher" and "Spec" types, is placed in "./gen_structer" dire
 		log.Fatalf("-source is required")
 		flag.Usage()
 		return
-	} else {
-		source = try.To(filepath.Abs(source)).OrFatal(logger)
 	}
 	if dest == "" {
 		log.Fatalf("-dest is required")
@@ -100,6 +98,7 @@ The new file, has "Matcher" and "Spec" types, is placed in "./gen_structer" dire
 	if *sourceAsPackage {
 		pkg = try.To(parserInstance.Import(source)).OrFatal(logger)
 	} else {
+		source = try.To(filepath.Abs(source)).OrFatal(logger)
 		dir := filepath.Dir(source)
 		targetFile = source
 		pkg = try.To(parserInstance.ImportDir(dir)).OrFatal(logger)
