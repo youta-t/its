@@ -118,13 +118,15 @@ The new file, has "Matcher" and "Spec" types, is placed in "./gen_structer" dire
 
 	for sourcepath, defs := range structs {
 		genFile := generatingFile{
-			PackageName: path.Base(dest),
-			Imports:     new(parser.Imports),
+			PackageName:    path.Base(dest),
+			ConfigIsNeeded: false,
+			Imports:        new(parser.Imports),
 		}
 		genFile.Imports.Add(pkg.Path)
 
 		for i := range defs {
 			s := defs[i]
+			genFile.ConfigIsNeeded = genFile.ConfigIsNeeded || 0 < len(s.Body.Fields)
 			genFile.Structs = append(genFile.Structs, s)
 			for _, req := range s.Require() {
 				genFile.Imports.Add(req)
@@ -169,9 +171,10 @@ func writeFile(dest string, newFile generatingFile) error {
 }
 
 type generatingFile struct {
-	PackageName string
-	Imports     *parser.Imports
-	Structs     []*parser.TypeStructDecl
+	PackageName    string
+	ConfigIsNeeded bool
+	Imports        *parser.Imports
+	Structs        []*parser.TypeStructDecl
 }
 
 //
@@ -205,7 +208,7 @@ import (
 	its "github.com/youta-t/its"
 	itskit "github.com/youta-t/its/itskit"
 	itsio "github.com/youta-t/its/itskit/itsio"
-	config "github.com/youta-t/its/config"
+	{{ if .ConfigIsNeeded }}config "github.com/youta-t/its/config"{{ end }}
 
 	{{ range .Imports.Slice }}
 	{{- .Name }} "{{ .Path }}"
