@@ -104,7 +104,9 @@ The new file, has "Matcher" and "Spec" types, is placed in "./gen_structer" dire
 		pkg = try.To(parserInstance.ImportDir(dir)).OrFatal(logger)
 	}
 
-	structs := map[string][]*parser.TypeStructDecl{}
+	filenames := map[string]struct{}{}
+
+	structs := map[string][]*parser.TypeDecl[*parser.StructType]{}
 	{
 		_structs := pkg.Types.Structs.Slice()
 		for i := range _structs {
@@ -112,22 +114,97 @@ The new file, has "Matcher" and "Spec" types, is placed in "./gen_structer" dire
 			if targetFile != "" && s.DefinedIn != targetFile {
 				continue
 			}
+			filenames[s.DefinedIn] = struct{}{}
 			structs[s.DefinedIn] = append(structs[s.DefinedIn], s)
 		}
 	}
 
-	for sourcepath, defs := range structs {
+	maps := map[string][]*parser.TypeDecl[*parser.MapType]{}
+	{
+		_maps := pkg.Types.Maps.Slice()
+		for i := range _maps {
+			m := _maps[i]
+			if targetFile != "" && m.DefinedIn != targetFile {
+				continue
+			}
+			filenames[m.DefinedIn] = struct{}{}
+			maps[m.DefinedIn] = append(maps[m.DefinedIn], m)
+		}
+	}
+
+	slices := map[string][]*parser.TypeDecl[*parser.SliceType]{}
+	{
+		_slices := pkg.Types.Slices.Slice()
+		for i := range _slices {
+			s := _slices[i]
+			if targetFile != "" && s.DefinedIn != targetFile {
+				continue
+			}
+			filenames[s.DefinedIn] = struct{}{}
+			slices[s.DefinedIn] = append(slices[s.DefinedIn], s)
+		}
+	}
+
+	arrays := map[string][]*parser.TypeDecl[*parser.ArrayType]{}
+	{
+		_arrays := pkg.Types.Arrays.Slice()
+		for i := range _arrays {
+			a := _arrays[i]
+			if targetFile != "" && a.DefinedIn != targetFile {
+				continue
+			}
+			filenames[a.DefinedIn] = struct{}{}
+			arrays[a.DefinedIn] = append(arrays[a.DefinedIn], a)
+		}
+	}
+
+	for sourcepath := range filenames {
 		genFile := generatingFile{
-			PackageName: path.Base(dest),
-			Imports:     new(parser.Imports),
+			PackageName:    path.Base(dest),
+			ConfigIsNeeded: false,
+			Imports:        new(parser.Imports),
 		}
 		genFile.Imports.Add(pkg.Path)
 
-		for i := range defs {
-			s := defs[i]
-			genFile.Structs = append(genFile.Structs, s)
-			for _, req := range s.Require() {
-				genFile.Imports.Add(req)
+		{
+			defs := structs[sourcepath]
+			for i := range defs {
+				s := defs[i]
+				genFile.ConfigIsNeeded = genFile.ConfigIsNeeded || 0 < len(s.Body.Fields)
+				genFile.Structs = append(genFile.Structs, s)
+				for _, req := range s.Require() {
+					genFile.Imports.Add(req)
+				}
+			}
+		}
+		{
+			defs := maps[sourcepath]
+			for i := range defs {
+				m := defs[i]
+				genFile.Maps = append(genFile.Maps, m)
+				for _, req := range m.Require() {
+					genFile.Imports.Add(req)
+				}
+			}
+		}
+		{
+			defs := slices[sourcepath]
+			for i := range defs {
+				m := defs[i]
+				genFile.Slices = append(genFile.Slices, m)
+				for _, req := range m.Require() {
+					genFile.Imports.Add(req)
+				}
+			}
+		}
+		{
+			defs := arrays[sourcepath]
+			for i := range defs {
+				m := defs[i]
+				genFile.Arrays = append(genFile.Arrays, m)
+				for _, req := range m.Require() {
+					genFile.Imports.Add(req)
+				}
 			}
 		}
 
@@ -169,11 +246,35 @@ func writeFile(dest string, newFile generatingFile) error {
 }
 
 type generatingFile struct {
-	PackageName string
-	Imports     *parser.Imports
-	Structs     []*parser.TypeStructDecl
+	PackageName    string
+	ConfigIsNeeded bool
+	Imports        *parser.Imports
+	Structs        []*parser.TypeDecl[*parser.StructType]
+	Maps           []*parser.TypeDecl[*parser.MapType]
+	Slices         []*parser.TypeDecl[*parser.SliceType]
+	Arrays         []*parser.TypeDecl[*parser.ArrayType]
 }
 
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -205,7 +306,7 @@ import (
 	its "github.com/youta-t/its"
 	itskit "github.com/youta-t/its/itskit"
 	itsio "github.com/youta-t/its/itskit/itsio"
-	config "github.com/youta-t/its/config"
+	{{ if .ConfigIsNeeded }}config "github.com/youta-t/its/config"{{ end }}
 
 	{{ range .Imports.Slice }}
 	{{- .Name }} "{{ .Path }}"
@@ -281,4 +382,63 @@ func (m _{{ .Name }}Matcher{{ .GenericExpr $imports false }}) String() string {
 	return sb.String()
 }
 {{ end }}
+
+{{ range .Maps }}
+func Its{{ .Name }}{{ .GenericExpr $imports true }}(want its.Matcher[map[{{ .Body.Key.Expr $imports }}]{{ .Body.Elem.Expr $imports }}]) its.Matcher[ {{ .Expr $imports }} ] {
+	cancel := itskit.SkipStack()
+	defer cancel()
+
+	return _{{ .Name }}Matcher{{ .GenericExpr $imports false }}{matchers: want}
+}
+
+type _{{ .Name }}Matcher{{ .GenericExpr $imports true }} struct {
+	matchers its.Matcher[map[{{ .Body.Key.Expr $imports }}]{{ .Body.Elem.Expr $imports }}]
+}
+
+func (m _{{ .Name }}Matcher{{ .GenericExpr $imports false }}) Match(got {{ .Expr $imports }}) itskit.Match {
+	gotm := map[{{ .Body.Key.Expr $imports }}]{{ .Body.Elem.Expr $imports }}(got)
+	return m.matchers.Match(gotm)
+}
+
+func (m _{{ .Name }}Matcher{{ .GenericExpr $imports false }}) Write(ww itsio.Writer) error {
+	return itsio.WriteBlock(ww, "type {{ .Name }}:", []its.Matcher[map[{{ .Body.Key.Expr $imports }}]{{ .Body.Elem.Expr $imports }}]{m.matchers})
+}
+
+func (m _{{ .Name }}Matcher{{ .GenericExpr $imports false }}) String() string {
+	sb := new(strings.Builder)
+	w := itsio.Wrap(sb)
+	m.Write(w)
+	return sb.String()
+}
+{{ end }}
+
+{{ range .Slices }}
+func Its{{ .Name }}{{ .GenericExpr $imports true }}(want its.Matcher[[]{{ .Body.Elem.Expr $imports }}]) its.Matcher[{{ .Expr $imports }}] {
+	cancel := itskit.SkipStack()
+	defer cancel()
+
+	return _{{ .Name }}Matcher{{ .GenericExpr $imports false }}{ matcher: want }
+}
+
+type _{{ .Name }}Matcher{{ .GenericExpr $imports true }} struct {
+	matcher its.Matcher[[]{{ .Body.Elem.Expr $imports }}]
+}
+
+func (m _{{ .Name }}Matcher{{ .GenericExpr $imports false }}) Match(got {{ .Expr $imports }}) itskit.Match {
+	gots := []{{ .Body.Elem.Expr $imports }}(got)
+	return m.matcher.Match(gots)
+}
+
+func (m _{{ .Name }}Matcher{{ .GenericExpr $imports false }}) Write(ww itsio.Writer) error {
+	return itsio.WriteBlock(ww, "type {{ .Name }}:", []its.Matcher[[]{{ .Body.Elem.Expr $imports }}]{m.matcher})
+}
+
+func (m _{{ .Name }}Matcher{{ .GenericExpr $imports false }}) String() string {
+	sb := new(strings.Builder)
+	w := itsio.Wrap(sb)
+	m.Write(w)
+	return sb.String()
+}
+{{ end }}
+
 `

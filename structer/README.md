@@ -84,6 +84,45 @@ To use it, set mathcers as you like and pass `ItsMyStruct`.
 `ItsMyStruct` creates a mathcer testing for each field by each matcher.
 When all matchers are passed, `ItsMyStruct` is passed.
 
+Slices and Maps
+---------------
+
+its-structer also generates Matcher wrapper for types like
+
+```go
+type T E[]  // renamed slice
+```
+
+and
+
+```go
+type T map[K]V  // renamed map
+```
+
+.
+
+For Slice, you can
+
+```go
+gen_structer.ItsT(
+      its.Slice(  // or, its.SliceUnorderd, its.SliceUnorderdContaining
+            its....,
+      )
+)
+```
+
+Likely, for map,
+
+```go
+gen_structer.ItsT(
+      its.Map( // or, its.MapContaining
+            map[K]its.Matcher[V]{
+                  ...
+            }
+      )
+)
+```
+
 Advanced Usage
 ---------------
 

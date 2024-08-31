@@ -37,11 +37,12 @@ func (n names) String() string {
 }
 
 type generatingFile struct {
-	PackageName string
-	ItsIsNeeded bool
-	Imports     *parser.Imports
-	Interfaces  []*parser.TypeInterfaceDecl
-	Funcs       []*parser.TypeFuncDecl
+	PackageName    string
+	ItsIsNeeded    bool
+	ItskitIsNeeded bool
+	Imports        *parser.Imports
+	Interfaces     []*parser.TypeDecl[*parser.InterfaceType]
+	Funcs          []*parser.TypeDecl[*parser.FuncType]
 }
 
 func main() {
@@ -105,8 +106,8 @@ It generates a file with same name as a file having go:generate directive.
 		pkg = try.To(parserInstance.ImportDir(dir)).OrFatal(logger)
 	}
 
-	interfaces := map[string][]*parser.TypeInterfaceDecl{}
-	functions := map[string][]*parser.TypeFuncDecl{}
+	interfaces := map[string][]*parser.TypeDecl[*parser.InterfaceType]{}
+	functions := map[string][]*parser.TypeDecl[*parser.FuncType]{}
 	filenames := map[string]struct{}{}
 
 	{
@@ -143,7 +144,7 @@ It generates a file with same name as a file having go:generate directive.
 
 			for j := range def.Body.Methods {
 				meth := def.Body.Methods[j]
-				functions[def.DefinedIn] = append(functions[def.DefinedIn], &parser.TypeFuncDecl{
+				functions[def.DefinedIn] = append(functions[def.DefinedIn], &parser.TypeDecl[*parser.FuncType]{
 					DefinedIn:  def.DefinedIn,
 					ImportPath: def.ImportPath,
 					Name:       fmt.Sprintf("%s_%s", def.Name, meth.Name),
@@ -156,9 +157,10 @@ It generates a file with same name as a file having go:generate directive.
 
 	for fname := range filenames {
 		newFile := generatingFile{
-			ItsIsNeeded: false,
-			PackageName: path.Base(dest),
-			Imports:     new(parser.Imports),
+			ItsIsNeeded:    false,
+			ItskitIsNeeded: false,
+			PackageName:    path.Base(dest),
+			Imports:        new(parser.Imports),
 		}
 
 		funcs := functions[fname]
@@ -167,6 +169,7 @@ It generates a file with same name as a file having go:generate directive.
 		for i := range funcs {
 			s := funcs[i]
 			newFile.ItsIsNeeded = newFile.ItsIsNeeded || 0 < len(s.Body.Args)
+			newFile.ItskitIsNeeded = true
 
 			if _, ok := targetTypeName[s.Name]; len(targetTypeName) != 0 && !ok {
 				continue
@@ -188,6 +191,7 @@ It generates a file with same name as a file having go:generate directive.
 			s := intfs[i]
 			for _, m := range s.Body.Methods {
 				newFile.ItsIsNeeded = newFile.ItsIsNeeded || 0 < len(m.Func.Args)
+				newFile.ItskitIsNeeded = true
 			}
 
 			if _, ok := targetTypeName[s.Name]; len(targetTypeName) != 0 && !ok {
@@ -292,24 +296,13 @@ func writeFile(dest string, newFile generatingFile) error {
 //
 //
 //
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
 
 const tpl = `// Code generated -- DO NOT EDIT
 package {{ .PackageName }}
 
 import (
 	{{ if .ItsIsNeeded }}its "github.com/youta-t/its"{{ end }}
-	itskit "github.com/youta-t/its/itskit"
+	{{ if .ItskitIsNeeded }}itskit "github.com/youta-t/its/itskit" {{ end }}
 	mockkit "github.com/youta-t/its/mocker/mockkit"
 	{{ range .Imports.Slice }}
 	{{- .Name }} "{{ .Path }}"

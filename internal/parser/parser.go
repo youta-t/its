@@ -18,11 +18,14 @@ func parsePackage(bc ParseContext, pkg importTarget) (*Package, error) {
 		Path: pkg.ImportPath,
 		Src:  pkg.Dir,
 		Types: &TypeDeclarations{
-			Structs:    maps.NewOrdered[string, *TypeStructDecl](),
-			Interfaces: maps.NewOrdered[string, *TypeInterfaceDecl](),
-			Funcs:      maps.NewOrdered[string, *TypeFuncDecl](),
-			Names:      maps.NewOrdered[string, *TypeNameDecl](),
-			Unresolved: maps.NewOrdered[string, *TypeUnresolvedDecl](),
+			Structs:    maps.NewOrdered[string, *TypeDecl[*StructType]](),
+			Interfaces: maps.NewOrdered[string, *TypeDecl[*InterfaceType]](),
+			Funcs:      maps.NewOrdered[string, *TypeDecl[*FuncType]](),
+			Maps:       maps.NewOrdered[string, *TypeDecl[*MapType]](),
+			Slices:     maps.NewOrdered[string, *TypeDecl[*SliceType]](),
+			Arrays:     maps.NewOrdered[string, *TypeDecl[*ArrayType]](),
+			Names:      maps.NewOrdered[string, *TypeDecl[*NamedType]](),
+			Unresolved: maps.NewOrdered[string, *TypeDecl[*unknwonType]](),
 		},
 	}
 
@@ -41,23 +44,35 @@ func parsePackage(bc ParseContext, pkg importTarget) (*Package, error) {
 	}
 
 	types := map[string]Type{}
-	p.Types.Structs.Iter(func(s string, decl *TypeStructDecl) bool {
+	p.Types.Structs.Iter(func(s string, decl *TypeDecl[*StructType]) bool {
 		types[s] = &NamedType{ImportPath: p.Path, Name: s}
 		return true
 	})
-	p.Types.Interfaces.Iter(func(s string, decl *TypeInterfaceDecl) bool {
+	p.Types.Interfaces.Iter(func(s string, decl *TypeDecl[*InterfaceType]) bool {
 		types[s] = &NamedType{ImportPath: p.Path, Name: s}
 		return true
 	})
-	p.Types.Funcs.Iter(func(s string, decl *TypeFuncDecl) bool {
+	p.Types.Funcs.Iter(func(s string, decl *TypeDecl[*FuncType]) bool {
 		types[s] = &NamedType{ImportPath: p.Path, Name: s}
 		return true
 	})
-	p.Types.Names.Iter(func(s string, decl *TypeNameDecl) bool {
+	p.Types.Names.Iter(func(s string, decl *TypeDecl[*NamedType]) bool {
 		types[s] = &NamedType{ImportPath: p.Path, Name: s}
 		return true
 	})
-	p.Types.Unresolved.Iter(func(s string, decl *TypeUnresolvedDecl) bool {
+	p.Types.Maps.Iter(func(s string, decl *TypeDecl[*MapType]) bool {
+		types[s] = &NamedType{ImportPath: p.Path, Name: s}
+		return true
+	})
+	p.Types.Slices.Iter(func(s string, decl *TypeDecl[*SliceType]) bool {
+		types[s] = &NamedType{ImportPath: p.Path, Name: s}
+		return true
+	})
+	p.Types.Arrays.Iter(func(s string, decl *TypeDecl[*ArrayType]) bool {
+		types[s] = &NamedType{ImportPath: p.Path, Name: s}
+		return true
+	})
+	p.Types.Unresolved.Iter(func(s string, decl *TypeDecl[*unknwonType]) bool {
 		types[s] = &NamedType{ImportPath: p.Path, Name: s}
 		return true
 	})
@@ -72,7 +87,7 @@ func parsePackage(bc ParseContext, pkg importTarget) (*Package, error) {
 			}
 			if nt, ok := det.(*NamedType); ok {
 				p.Types.Unresolved.Delete(ur.Name)
-				p.Types.Names.Put(ur.Name, &TypeNameDecl{
+				p.Types.Names.Put(ur.Name, &TypeDecl[*NamedType]{
 					DefinedIn: ur.DefinedIn, ImportPath: ur.ImportPath,
 					Name: ur.Name, TypeParams: ur.TypeParams, Body: nt,
 				})
@@ -80,22 +95,37 @@ func parsePackage(bc ParseContext, pkg importTarget) (*Package, error) {
 		}
 	}
 
-	p.Types.Structs.Iter(func(s string, decl *TypeStructDecl) bool {
+	p.Types.Structs.Iter(func(s string, decl *TypeDecl[*StructType]) bool {
 		decl.resolve(types)
 		decl.resolve(builtin)
 		return true
 	})
-	p.Types.Interfaces.Iter(func(s string, decl *TypeInterfaceDecl) bool {
+	p.Types.Interfaces.Iter(func(s string, decl *TypeDecl[*InterfaceType]) bool {
 		decl.resolve(types)
 		decl.resolve(builtin)
 		return true
 	})
-	p.Types.Funcs.Iter(func(s string, decl *TypeFuncDecl) bool {
+	p.Types.Funcs.Iter(func(s string, decl *TypeDecl[*FuncType]) bool {
 		decl.resolve(types)
 		decl.resolve(builtin)
 		return true
 	})
-	p.Types.Names.Iter(func(s string, decl *TypeNameDecl) bool {
+	p.Types.Names.Iter(func(s string, decl *TypeDecl[*NamedType]) bool {
+		decl.resolve(types)
+		decl.resolve(builtin)
+		return true
+	})
+	p.Types.Maps.Iter(func(s string, decl *TypeDecl[*MapType]) bool {
+		decl.resolve(types)
+		decl.resolve(builtin)
+		return true
+	})
+	p.Types.Slices.Iter(func(s string, decl *TypeDecl[*SliceType]) bool {
+		decl.resolve(types)
+		decl.resolve(builtin)
+		return true
+	})
+	p.Types.Arrays.Iter(func(s string, decl *TypeDecl[*ArrayType]) bool {
 		decl.resolve(types)
 		decl.resolve(builtin)
 		return true
@@ -155,11 +185,14 @@ func parseFile(bc ParseContext, pkg importTarget, filename string) (*TypeDeclara
 	}
 
 	decls := &TypeDeclarations{
-		Structs:    maps.NewOrdered[string, *TypeStructDecl](),
-		Interfaces: maps.NewOrdered[string, *TypeInterfaceDecl](),
-		Funcs:      maps.NewOrdered[string, *TypeFuncDecl](),
-		Names:      maps.NewOrdered[string, *TypeNameDecl](),
-		Unresolved: maps.NewOrdered[string, *TypeUnresolvedDecl](),
+		Structs:    maps.NewOrdered[string, *TypeDecl[*StructType]](),
+		Interfaces: maps.NewOrdered[string, *TypeDecl[*InterfaceType]](),
+		Funcs:      maps.NewOrdered[string, *TypeDecl[*FuncType]](),
+		Names:      maps.NewOrdered[string, *TypeDecl[*NamedType]](),
+		Maps:       maps.NewOrdered[string, *TypeDecl[*MapType]](),
+		Slices:     maps.NewOrdered[string, *TypeDecl[*SliceType]](),
+		Arrays:     maps.NewOrdered[string, *TypeDecl[*ArrayType]](),
+		Unresolved: maps.NewOrdered[string, *TypeDecl[*unknwonType]](),
 	}
 
 	imp := pkg.ImportPath
@@ -195,31 +228,49 @@ func parseFile(bc ParseContext, pkg importTarget, filename string) (*TypeDeclara
 
 			switch b := body.(type) {
 			case *StructType:
-				decls.Structs.Put(name, &TypeStructDecl{
+				decls.Structs.Put(name, &TypeDecl[*StructType]{
 					DefinedIn: fullpath, ImportPath: imp,
 					Name: name, TypeParams: tps, Body: b,
 				})
 				types[name] = &NamedType{ImportPath: imp, Name: name}
 			case *InterfaceType:
-				decls.Interfaces.Put(name, &TypeInterfaceDecl{
+				decls.Interfaces.Put(name, &TypeDecl[*InterfaceType]{
 					DefinedIn: fullpath, ImportPath: imp,
 					Name: name, TypeParams: tps, Body: b,
 				})
 				types[name] = &NamedType{ImportPath: imp, Name: name}
 			case *FuncType:
-				decls.Funcs.Put(name, &TypeFuncDecl{
+				decls.Funcs.Put(name, &TypeDecl[*FuncType]{
 					DefinedIn: fullpath, ImportPath: imp,
 					Name: name, TypeParams: tps, Body: b,
 				})
 				types[name] = &NamedType{ImportPath: imp, Name: name}
 			case *NamedType:
-				decls.Names.Put(name, &TypeNameDecl{
+				decls.Names.Put(name, &TypeDecl[*NamedType]{
+					DefinedIn: fullpath, ImportPath: imp,
+					Name: name, TypeParams: tps, Body: b,
+				})
+				types[name] = &NamedType{ImportPath: imp, Name: name}
+			case *MapType:
+				decls.Maps.Put(name, &TypeDecl[*MapType]{
+					DefinedIn: fullpath, ImportPath: imp,
+					Name: name, TypeParams: tps, Body: b,
+				})
+				types[name] = &NamedType{ImportPath: imp, Name: name}
+			case *SliceType:
+				decls.Slices.Put(name, &TypeDecl[*SliceType]{
+					DefinedIn: fullpath, ImportPath: imp,
+					Name: name, TypeParams: tps, Body: b,
+				})
+				types[name] = &NamedType{ImportPath: imp, Name: name}
+			case *ArrayType:
+				decls.Arrays.Put(name, &TypeDecl[*ArrayType]{
 					DefinedIn: fullpath, ImportPath: imp,
 					Name: name, TypeParams: tps, Body: b,
 				})
 				types[name] = &NamedType{ImportPath: imp, Name: name}
 			case *unknwonType:
-				decls.Unresolved.Put(name, &TypeUnresolvedDecl{
+				decls.Unresolved.Put(name, &TypeDecl[*unknwonType]{
 					DefinedIn: fullpath, ImportPath: imp,
 					Name: name, TypeParams: tps, Body: b,
 				})
@@ -241,13 +292,22 @@ func parseFile(bc ParseContext, pkg importTarget, filename string) (*TypeDeclara
 	for _, decl := range decls.Names.Slice() {
 		decl.resolve(types)
 	}
+	for _, decl := range decls.Maps.Slice() {
+		decl.resolve(types)
+	}
+	for _, decl := range decls.Slices.Slice() {
+		decl.resolve(types)
+	}
+	for _, decl := range decls.Arrays.Slice() {
+		decl.resolve(types)
+	}
 	for _, decl := range decls.Unresolved.Slice() {
 		det := decl.Body.detect(types)
 		det.resolve(types)
 		switch dt := det.(type) {
 		case *NamedType:
 			decls.Unresolved.Delete(decl.Name)
-			decls.Names.Put(decl.Name, &TypeNameDecl{
+			decls.Names.Put(decl.Name, &TypeDecl[*NamedType]{
 				DefinedIn: decl.DefinedIn, ImportPath: decl.ImportPath,
 				Name: decl.Name, TypeParams: decl.TypeParams, Body: dt,
 			})
@@ -258,32 +318,47 @@ func parseFile(bc ParseContext, pkg importTarget, filename string) (*TypeDeclara
 }
 
 type TypeDeclarations struct {
-	Structs    maps.OrderedMap[string, *TypeStructDecl]
-	Interfaces maps.OrderedMap[string, *TypeInterfaceDecl]
-	Funcs      maps.OrderedMap[string, *TypeFuncDecl]
-	Names      maps.OrderedMap[string, *TypeNameDecl]
-	Unresolved maps.OrderedMap[string, *TypeUnresolvedDecl]
+	Structs    maps.OrderedMap[string, *TypeDecl[*StructType]]
+	Interfaces maps.OrderedMap[string, *TypeDecl[*InterfaceType]]
+	Funcs      maps.OrderedMap[string, *TypeDecl[*FuncType]]
+	Names      maps.OrderedMap[string, *TypeDecl[*NamedType]]
+	Maps       maps.OrderedMap[string, *TypeDecl[*MapType]]
+	Slices     maps.OrderedMap[string, *TypeDecl[*SliceType]]
+	Arrays     maps.OrderedMap[string, *TypeDecl[*ArrayType]]
+	Unresolved maps.OrderedMap[string, *TypeDecl[*unknwonType]]
 }
 
-func (td *TypeDeclarations) Merge(other *TypeDeclarations) {
-	other.Structs.Iter(func(s string, decl *TypeStructDecl) bool {
-		td.Structs.Put(s, decl)
+func (tds *TypeDeclarations) Merge(other *TypeDeclarations) {
+	other.Structs.Iter(func(s string, decl *TypeDecl[*StructType]) bool {
+		tds.Structs.Put(s, decl)
 		return true
 	})
-	other.Interfaces.Iter(func(s string, decl *TypeInterfaceDecl) bool {
-		td.Interfaces.Put(s, decl)
+	other.Interfaces.Iter(func(s string, decl *TypeDecl[*InterfaceType]) bool {
+		tds.Interfaces.Put(s, decl)
 		return true
 	})
-	other.Funcs.Iter(func(s string, decl *TypeFuncDecl) bool {
-		td.Funcs.Put(s, decl)
+	other.Funcs.Iter(func(s string, decl *TypeDecl[*FuncType]) bool {
+		tds.Funcs.Put(s, decl)
 		return true
 	})
-	other.Names.Iter(func(s string, decl *TypeNameDecl) bool {
-		td.Names.Put(s, decl)
+	other.Names.Iter(func(s string, decl *TypeDecl[*NamedType]) bool {
+		tds.Names.Put(s, decl)
 		return true
 	})
-	other.Unresolved.Iter(func(s string, decl *TypeUnresolvedDecl) bool {
-		td.Unresolved.Put(s, decl)
+	other.Maps.Iter(func(s string, decl *TypeDecl[*MapType]) bool {
+		tds.Maps.Put(s, decl)
+		return true
+	})
+	other.Slices.Iter(func(s string, decl *TypeDecl[*SliceType]) bool {
+		tds.Slices.Put(s, decl)
+		return true
+	})
+	other.Arrays.Iter(func(s string, decl *TypeDecl[*ArrayType]) bool {
+		tds.Arrays.Put(s, decl)
+		return true
+	})
+	other.Unresolved.Iter(func(s string, decl *TypeDecl[*unknwonType]) bool {
+		tds.Unresolved.Put(s, decl)
 		return true
 	})
 }
@@ -299,6 +374,7 @@ func init() {
 		"float32", "float64", "complex64", "complex128",
 		"bool", "rune", "byte", "uintptr",
 		"string", "error", "any",
+		"comparable",
 	} {
 		builtin[typename] = &NamedType{Name: typename}
 	}
