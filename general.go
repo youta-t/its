@@ -161,6 +161,19 @@ func After[T interface{ After(T) bool }](want T) Matcher[T] {
 	)
 }
 
+// DeepEqual tests with
+//
+//	reflect.DeepEqual(want, got)
+func DeepEqual[T any](want T) Matcher[T] {
+	cancel := itskit.SkipStack()
+	defer cancel()
+	return itskit.SimpleMatcher(
+		func(got T) bool { return reflect.DeepEqual(got, want) },
+		"reflect.DeepEqual(%+v, %+v)",
+		itskit.Got, itskit.Want(want),
+	)
+}
+
 // Equal tests with
 //
 //	expcted.Equal(got)
@@ -464,7 +477,6 @@ type nilMatcher[T any] struct {
 }
 
 func (n nilMatcher[T]) Match(got T) itskit.Match {
-
 	rg := reflect.ValueOf(got)
 	typ := reflect.ValueOf(*new(T))
 	switch k := typ.Kind(); k {
