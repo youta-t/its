@@ -9,7 +9,7 @@ import (
 	itsio "github.com/youta-t/its/itskit/itsio"
 	
 
-	pkg1 "github.com/youta-t/its/structer/example/empty_test/no_field"
+	pkg1 "github.com/youta-t/its/structer/example/internal/empty_test/no_field"
 	
 )
 
@@ -60,4 +60,9 @@ func (m _EmptyMatcher) String() string {
 	m.Write(w)
 	return sb.String()
 }
+
+
+
+
+
 

@@ -122,3 +122,43 @@ type fs float64
 func (fs) M() string {
 	return ""
 }
+
+type Map map[string]int
+
+type MapSV map[string]struct {
+	Field1 int
+}
+
+type MapGV[T any] map[string]T
+
+type MapGGV[T any] map[string]G[T]
+
+type MapGK[K comparable] map[K]string
+
+type MapSK map[struct {
+	Field int
+}]string
+
+type Slice []string
+
+type SliceS []struct {
+	Field1 int
+}
+
+type SliceG[T any] []T
+type SliceGG[T any] []G[T]
+
+type S1 struct {
+	Field string
+}
+
+type S2_2 S2
+type S2 S1
+
+type S3 struct {
+	Map    Map
+	MapSV  MapSV
+	MapSK  MapSK
+	Slice  Slice
+	SliceS SliceS
+}

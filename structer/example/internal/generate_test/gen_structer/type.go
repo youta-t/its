@@ -952,3 +952,511 @@ func (m _HMatcher[T, U]) String() string {
 	m.Write(w)
 	return sb.String()
 }
+
+type S1Spec struct {
+	Field its.Matcher[string]
+}
+
+type _S1Matcher struct {
+	label  itskit.Label
+	fields []its.Matcher[pkg1.S1]
+}
+
+func ItsS1(want S1Spec) its.Matcher[pkg1.S1] {
+	cancel := itskit.SkipStack()
+	defer cancel()
+
+	sub := []its.Matcher[pkg1.S1]{}
+
+	{
+		matcher := want.Field
+		if matcher == nil {
+			if config.StrictModeForStruct {
+				matcher = its.Never[string]()
+			} else {
+				matcher = its.Always[string]()
+			}
+		}
+		sub = append(
+			sub,
+			its.Property[pkg1.S1, string](
+				".Field",
+				func(got pkg1.S1) string { return got.Field },
+				matcher,
+			),
+		)
+	}
+
+	return _S1Matcher{
+		label:  itskit.NewLabelWithLocation("type S1:"),
+		fields: sub,
+	}
+}
+
+func (m _S1Matcher) Match(got pkg1.S1) itskit.Match {
+	ok := 0
+	sub := []itskit.Match{}
+	for _, f := range m.fields {
+		m := f.Match(got)
+		if m.Ok() {
+			ok += 1
+		}
+		sub = append(sub, m)
+	}
+
+	return itskit.NewMatch(len(sub) == ok, m.label.Fill(got), sub...)
+}
+
+func (m _S1Matcher) Write(ww itsio.Writer) error {
+	return itsio.WriteBlock(ww, "type S1:", m.fields)
+}
+
+func (m _S1Matcher) String() string {
+	sb := new(strings.Builder)
+	w := itsio.Wrap(sb)
+	m.Write(w)
+	return sb.String()
+}
+
+type S3Spec struct {
+	Map its.Matcher[pkg1.Map]
+
+	MapSV its.Matcher[pkg1.MapSV]
+
+	MapSK its.Matcher[pkg1.MapSK]
+
+	Slice its.Matcher[pkg1.Slice]
+
+	SliceS its.Matcher[pkg1.SliceS]
+}
+
+type _S3Matcher struct {
+	label  itskit.Label
+	fields []its.Matcher[pkg1.S3]
+}
+
+func ItsS3(want S3Spec) its.Matcher[pkg1.S3] {
+	cancel := itskit.SkipStack()
+	defer cancel()
+
+	sub := []its.Matcher[pkg1.S3]{}
+
+	{
+		matcher := want.Map
+		if matcher == nil {
+			if config.StrictModeForStruct {
+				matcher = its.Never[pkg1.Map]()
+			} else {
+				matcher = its.Always[pkg1.Map]()
+			}
+		}
+		sub = append(
+			sub,
+			its.Property[pkg1.S3, pkg1.Map](
+				".Map",
+				func(got pkg1.S3) pkg1.Map { return got.Map },
+				matcher,
+			),
+		)
+	}
+
+	{
+		matcher := want.MapSV
+		if matcher == nil {
+			if config.StrictModeForStruct {
+				matcher = its.Never[pkg1.MapSV]()
+			} else {
+				matcher = its.Always[pkg1.MapSV]()
+			}
+		}
+		sub = append(
+			sub,
+			its.Property[pkg1.S3, pkg1.MapSV](
+				".MapSV",
+				func(got pkg1.S3) pkg1.MapSV { return got.MapSV },
+				matcher,
+			),
+		)
+	}
+
+	{
+		matcher := want.MapSK
+		if matcher == nil {
+			if config.StrictModeForStruct {
+				matcher = its.Never[pkg1.MapSK]()
+			} else {
+				matcher = its.Always[pkg1.MapSK]()
+			}
+		}
+		sub = append(
+			sub,
+			its.Property[pkg1.S3, pkg1.MapSK](
+				".MapSK",
+				func(got pkg1.S3) pkg1.MapSK { return got.MapSK },
+				matcher,
+			),
+		)
+	}
+
+	{
+		matcher := want.Slice
+		if matcher == nil {
+			if config.StrictModeForStruct {
+				matcher = its.Never[pkg1.Slice]()
+			} else {
+				matcher = its.Always[pkg1.Slice]()
+			}
+		}
+		sub = append(
+			sub,
+			its.Property[pkg1.S3, pkg1.Slice](
+				".Slice",
+				func(got pkg1.S3) pkg1.Slice { return got.Slice },
+				matcher,
+			),
+		)
+	}
+
+	{
+		matcher := want.SliceS
+		if matcher == nil {
+			if config.StrictModeForStruct {
+				matcher = its.Never[pkg1.SliceS]()
+			} else {
+				matcher = its.Always[pkg1.SliceS]()
+			}
+		}
+		sub = append(
+			sub,
+			its.Property[pkg1.S3, pkg1.SliceS](
+				".SliceS",
+				func(got pkg1.S3) pkg1.SliceS { return got.SliceS },
+				matcher,
+			),
+		)
+	}
+
+	return _S3Matcher{
+		label:  itskit.NewLabelWithLocation("type S3:"),
+		fields: sub,
+	}
+}
+
+func (m _S3Matcher) Match(got pkg1.S3) itskit.Match {
+	ok := 0
+	sub := []itskit.Match{}
+	for _, f := range m.fields {
+		m := f.Match(got)
+		if m.Ok() {
+			ok += 1
+		}
+		sub = append(sub, m)
+	}
+
+	return itskit.NewMatch(len(sub) == ok, m.label.Fill(got), sub...)
+}
+
+func (m _S3Matcher) Write(ww itsio.Writer) error {
+	return itsio.WriteBlock(ww, "type S3:", m.fields)
+}
+
+func (m _S3Matcher) String() string {
+	sb := new(strings.Builder)
+	w := itsio.Wrap(sb)
+	m.Write(w)
+	return sb.String()
+}
+
+func ItsMap(want its.Matcher[map[string]int]) its.Matcher[pkg1.Map] {
+	cancel := itskit.SkipStack()
+	defer cancel()
+
+	return _MapMatcher{matchers: want}
+}
+
+type _MapMatcher struct {
+	matchers its.Matcher[map[string]int]
+}
+
+func (m _MapMatcher) Match(got pkg1.Map) itskit.Match {
+	gotm := map[string]int(got)
+	return m.matchers.Match(gotm)
+}
+
+func (m _MapMatcher) Write(ww itsio.Writer) error {
+	return itsio.WriteBlock(ww, "type Map:", []its.Matcher[map[string]int]{m.matchers})
+}
+
+func (m _MapMatcher) String() string {
+	sb := new(strings.Builder)
+	w := itsio.Wrap(sb)
+	m.Write(w)
+	return sb.String()
+}
+
+func ItsMapSV(want its.Matcher[map[string]struct {
+	Field1 int
+}]) its.Matcher[pkg1.MapSV] {
+	cancel := itskit.SkipStack()
+	defer cancel()
+
+	return _MapSVMatcher{matchers: want}
+}
+
+type _MapSVMatcher struct {
+	matchers its.Matcher[map[string]struct {
+		Field1 int
+	}]
+}
+
+func (m _MapSVMatcher) Match(got pkg1.MapSV) itskit.Match {
+	gotm := map[string]struct {
+		Field1 int
+	}(got)
+	return m.matchers.Match(gotm)
+}
+
+func (m _MapSVMatcher) Write(ww itsio.Writer) error {
+	return itsio.WriteBlock(ww, "type MapSV:", []its.Matcher[map[string]struct {
+		Field1 int
+	}]{m.matchers})
+}
+
+func (m _MapSVMatcher) String() string {
+	sb := new(strings.Builder)
+	w := itsio.Wrap(sb)
+	m.Write(w)
+	return sb.String()
+}
+
+func ItsMapGV[T any](want its.Matcher[map[string]T]) its.Matcher[pkg1.MapGV[T]] {
+	cancel := itskit.SkipStack()
+	defer cancel()
+
+	return _MapGVMatcher[T]{matchers: want}
+}
+
+type _MapGVMatcher[T any] struct {
+	matchers its.Matcher[map[string]T]
+}
+
+func (m _MapGVMatcher[T]) Match(got pkg1.MapGV[T]) itskit.Match {
+	gotm := map[string]T(got)
+	return m.matchers.Match(gotm)
+}
+
+func (m _MapGVMatcher[T]) Write(ww itsio.Writer) error {
+	return itsio.WriteBlock(ww, "type MapGV:", []its.Matcher[map[string]T]{m.matchers})
+}
+
+func (m _MapGVMatcher[T]) String() string {
+	sb := new(strings.Builder)
+	w := itsio.Wrap(sb)
+	m.Write(w)
+	return sb.String()
+}
+
+func ItsMapGGV[T any](want its.Matcher[map[string]pkg1.G[T]]) its.Matcher[pkg1.MapGGV[T]] {
+	cancel := itskit.SkipStack()
+	defer cancel()
+
+	return _MapGGVMatcher[T]{matchers: want}
+}
+
+type _MapGGVMatcher[T any] struct {
+	matchers its.Matcher[map[string]pkg1.G[T]]
+}
+
+func (m _MapGGVMatcher[T]) Match(got pkg1.MapGGV[T]) itskit.Match {
+	gotm := map[string]pkg1.G[T](got)
+	return m.matchers.Match(gotm)
+}
+
+func (m _MapGGVMatcher[T]) Write(ww itsio.Writer) error {
+	return itsio.WriteBlock(ww, "type MapGGV:", []its.Matcher[map[string]pkg1.G[T]]{m.matchers})
+}
+
+func (m _MapGGVMatcher[T]) String() string {
+	sb := new(strings.Builder)
+	w := itsio.Wrap(sb)
+	m.Write(w)
+	return sb.String()
+}
+
+func ItsMapGK[K comparable](want its.Matcher[map[K]string]) its.Matcher[pkg1.MapGK[K]] {
+	cancel := itskit.SkipStack()
+	defer cancel()
+
+	return _MapGKMatcher[K]{matchers: want}
+}
+
+type _MapGKMatcher[K comparable] struct {
+	matchers its.Matcher[map[K]string]
+}
+
+func (m _MapGKMatcher[K]) Match(got pkg1.MapGK[K]) itskit.Match {
+	gotm := map[K]string(got)
+	return m.matchers.Match(gotm)
+}
+
+func (m _MapGKMatcher[K]) Write(ww itsio.Writer) error {
+	return itsio.WriteBlock(ww, "type MapGK:", []its.Matcher[map[K]string]{m.matchers})
+}
+
+func (m _MapGKMatcher[K]) String() string {
+	sb := new(strings.Builder)
+	w := itsio.Wrap(sb)
+	m.Write(w)
+	return sb.String()
+}
+
+func ItsMapSK(want its.Matcher[map[struct {
+	Field int
+}]string]) its.Matcher[pkg1.MapSK] {
+	cancel := itskit.SkipStack()
+	defer cancel()
+
+	return _MapSKMatcher{matchers: want}
+}
+
+type _MapSKMatcher struct {
+	matchers its.Matcher[map[struct {
+		Field int
+	}]string]
+}
+
+func (m _MapSKMatcher) Match(got pkg1.MapSK) itskit.Match {
+	gotm := map[struct {
+		Field int
+	}]string(got)
+	return m.matchers.Match(gotm)
+}
+
+func (m _MapSKMatcher) Write(ww itsio.Writer) error {
+	return itsio.WriteBlock(ww, "type MapSK:", []its.Matcher[map[struct {
+		Field int
+	}]string]{m.matchers})
+}
+
+func (m _MapSKMatcher) String() string {
+	sb := new(strings.Builder)
+	w := itsio.Wrap(sb)
+	m.Write(w)
+	return sb.String()
+}
+
+func ItsSlice(want its.Matcher[[]string]) its.Matcher[pkg1.Slice] {
+	cancel := itskit.SkipStack()
+	defer cancel()
+
+	return _SliceMatcher{matcher: want}
+}
+
+type _SliceMatcher struct {
+	matcher its.Matcher[[]string]
+}
+
+func (m _SliceMatcher) Match(got pkg1.Slice) itskit.Match {
+	gots := []string(got)
+	return m.matcher.Match(gots)
+}
+
+func (m _SliceMatcher) Write(ww itsio.Writer) error {
+	return itsio.WriteBlock(ww, "type Slice:", []its.Matcher[[]string]{m.matcher})
+}
+
+func (m _SliceMatcher) String() string {
+	sb := new(strings.Builder)
+	w := itsio.Wrap(sb)
+	m.Write(w)
+	return sb.String()
+}
+
+func ItsSliceS(want its.Matcher[[]struct {
+	Field1 int
+}]) its.Matcher[pkg1.SliceS] {
+	cancel := itskit.SkipStack()
+	defer cancel()
+
+	return _SliceSMatcher{matcher: want}
+}
+
+type _SliceSMatcher struct {
+	matcher its.Matcher[[]struct {
+		Field1 int
+	}]
+}
+
+func (m _SliceSMatcher) Match(got pkg1.SliceS) itskit.Match {
+	gots := []struct {
+		Field1 int
+	}(got)
+	return m.matcher.Match(gots)
+}
+
+func (m _SliceSMatcher) Write(ww itsio.Writer) error {
+	return itsio.WriteBlock(ww, "type SliceS:", []its.Matcher[[]struct {
+		Field1 int
+	}]{m.matcher})
+}
+
+func (m _SliceSMatcher) String() string {
+	sb := new(strings.Builder)
+	w := itsio.Wrap(sb)
+	m.Write(w)
+	return sb.String()
+}
+
+func ItsSliceG[T any](want its.Matcher[[]T]) its.Matcher[pkg1.SliceG[T]] {
+	cancel := itskit.SkipStack()
+	defer cancel()
+
+	return _SliceGMatcher[T]{matcher: want}
+}
+
+type _SliceGMatcher[T any] struct {
+	matcher its.Matcher[[]T]
+}
+
+func (m _SliceGMatcher[T]) Match(got pkg1.SliceG[T]) itskit.Match {
+	gots := []T(got)
+	return m.matcher.Match(gots)
+}
+
+func (m _SliceGMatcher[T]) Write(ww itsio.Writer) error {
+	return itsio.WriteBlock(ww, "type SliceG:", []its.Matcher[[]T]{m.matcher})
+}
+
+func (m _SliceGMatcher[T]) String() string {
+	sb := new(strings.Builder)
+	w := itsio.Wrap(sb)
+	m.Write(w)
+	return sb.String()
+}
+
+func ItsSliceGG[T any](want its.Matcher[[]pkg1.G[T]]) its.Matcher[pkg1.SliceGG[T]] {
+	cancel := itskit.SkipStack()
+	defer cancel()
+
+	return _SliceGGMatcher[T]{matcher: want}
+}
+
+type _SliceGGMatcher[T any] struct {
+	matcher its.Matcher[[]pkg1.G[T]]
+}
+
+func (m _SliceGGMatcher[T]) Match(got pkg1.SliceGG[T]) itskit.Match {
+	gots := []pkg1.G[T](got)
+	return m.matcher.Match(gots)
+}
+
+func (m _SliceGGMatcher[T]) Write(ww itsio.Writer) error {
+	return itsio.WriteBlock(ww, "type SliceGG:", []its.Matcher[[]pkg1.G[T]]{m.matcher})
+}
+
+func (m _SliceGGMatcher[T]) String() string {
+	sb := new(strings.Builder)
+	w := itsio.Wrap(sb)
+	m.Write(w)
+	return sb.String()
+}

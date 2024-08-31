@@ -58,7 +58,7 @@ func ForItems[T, U, X any, F func(U) Matcher[T], S func(...Matcher[T]) Matcher[X
 //
 // - wants: map entries.
 func ForEntries[
-	K comparable, T, U, X any, F func(U) Matcher[T], S func(map[K]Matcher[T]) Matcher[X],
+	K comparable, T any, U any, X map[K]U, F func(U) Matcher[T], S func(map[K]Matcher[T]) Matcher[X],
 ](
 	s S,
 	matcherFactory F,

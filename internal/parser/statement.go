@@ -57,20 +57,15 @@ type ImportStatment struct {
 	Path string
 }
 
-type TypeDecl interface {
-	Name() *NamedType
-	Instantiate(params []Type) Type
-}
-
-type TypeStructDecl struct {
+type TypeDecl[B Type] struct {
 	DefinedIn  string
 	ImportPath string
 	Name       string
 	TypeParams []*TypeParam
-	Body       *StructType
+	Body       B
 }
 
-func (s *TypeStructDecl) InstantiateName(typeParams []Type) *NamedType {
+func (s *TypeDecl[B]) InstantiateName(typeParams []Type) *NamedType {
 	return &NamedType{
 		ImportPath: s.ImportPath,
 		Name:       s.Name,
@@ -78,7 +73,7 @@ func (s *TypeStructDecl) InstantiateName(typeParams []Type) *NamedType {
 	}
 }
 
-func (s *TypeStructDecl) GenericExpr(imports *Imports, backtype bool) string {
+func (s *TypeDecl[B]) GenericExpr(imports *Imports, backtype bool) string {
 	typeParams := ""
 	{
 		tps := []string{}
@@ -96,13 +91,13 @@ func (s *TypeStructDecl) GenericExpr(imports *Imports, backtype bool) string {
 	return typeParams
 }
 
-func (s *TypeStructDecl) Expr(imports *Imports) string {
+func (s *TypeDecl[B]) Expr(imports *Imports) string {
 	expr := s.Name + s.GenericExpr(imports, false)
 	pkg := imports.GetName(s.ImportPath)
 	return pkg + "." + expr
 }
 
-func (s *TypeStructDecl) Require() []string {
+func (s *TypeDecl[B]) Require() []string {
 	req := []string{}
 	for i := range s.TypeParams {
 		req = append(req, s.TypeParams[i].Constraint.Require()...)
@@ -111,7 +106,7 @@ func (s *TypeStructDecl) Require() []string {
 	return req
 }
 
-func (s *TypeStructDecl) IsOpaque() bool {
+func (s *TypeDecl[B]) IsOpaque() bool {
 	for _, tp := range s.TypeParams {
 		if tp.IsOpaque() {
 			return true
@@ -120,7 +115,7 @@ func (s *TypeStructDecl) IsOpaque() bool {
 	return s.Body.IsOpaque() || isPrivateName(s.Name)
 }
 
-func (decl *TypeStructDecl) resolve(ns map[string]Type) {
+func (decl *TypeDecl[B]) resolve(ns map[string]Type) {
 	nstp := map[string]Type{}
 	for n := range ns {
 		nstp[n] = ns[n]
@@ -133,270 +128,6 @@ func (decl *TypeStructDecl) resolve(ns map[string]Type) {
 		tp.resolve(nstp)
 	}
 	decl.Body.resolve(nstp)
-}
-
-type TypeInterfaceDecl struct {
-	DefinedIn  string
-	ImportPath string
-	Name       string
-	TypeParams []*TypeParam
-	Body       *InterfaceType
-}
-
-func (s *TypeInterfaceDecl) PlainName() string {
-	return s.Name
-}
-
-func (s *TypeInterfaceDecl) GenericExpr(imports *Imports, backtype bool) string {
-	typeParams := ""
-	{
-		tps := []string{}
-		for _, tp := range s.TypeParams {
-			if backtype {
-				tps = append(tps, tp.Name+" "+tp.Constraint.Expr(imports))
-			} else {
-				tps = append(tps, tp.Name)
-			}
-		}
-		if 0 < len(tps) {
-			typeParams = "[" + strings.Join(tps, ", ") + "]"
-		}
-	}
-	return typeParams
-}
-
-func (s *TypeInterfaceDecl) Expr(imports *Imports) string {
-	pkg := imports.GetName(s.ImportPath)
-	return pkg + "." + s.Name + s.GenericExpr(imports, false)
-}
-
-func (s *TypeInterfaceDecl) Require() []string {
-	req := []string{}
-	for i := range s.TypeParams {
-		req = append(req, s.TypeParams[i].Constraint.Require()...)
-	}
-	req = append(req, s.Body.Require()...)
-	return req
-}
-
-func (in *TypeInterfaceDecl) IsOpaque() bool {
-	for _, tp := range in.TypeParams {
-		if tp.IsOpaque() {
-			return true
-		}
-	}
-	return in.Body.IsOpaque() || isPrivateName(in.Name)
-}
-
-func (decl *TypeInterfaceDecl) resolve(ns map[string]Type) {
-	nstp := map[string]Type{}
-	for n := range ns {
-		nstp[n] = ns[n]
-	}
-	for _, tp := range decl.TypeParams {
-		nstp[tp.Name] = tp
-	}
-
-	for _, tp := range decl.TypeParams {
-		tp.resolve(nstp)
-	}
-	decl.Body.resolve(nstp)
-}
-
-type TypeFuncDecl struct {
-	DefinedIn  string
-	ImportPath string
-	Name       string
-	TypeParams []*TypeParam
-	Body       *FuncType
-}
-
-func (fn *TypeFuncDecl) PlainName() string {
-	return fn.Name
-}
-
-func (fn *TypeFuncDecl) GenericExpr(imports *Imports, backtype bool) string {
-	typeParams := ""
-	{
-		tps := []string{}
-		for _, tp := range fn.TypeParams {
-			if backtype {
-				tps = append(tps, tp.Name+" "+tp.Constraint.Expr(imports))
-			} else {
-				tps = append(tps, tp.Name)
-			}
-		}
-		if 0 < len(tps) {
-			typeParams = "[" + strings.Join(tps, ", ") + "]"
-		}
-	}
-	return typeParams
-}
-
-func (fn *TypeFuncDecl) Expr(imports *Imports) string {
-	pkg := imports.GetName(fn.ImportPath)
-	return pkg + "." + fn.Name + fn.GenericExpr(imports, false)
-}
-
-func (fn *TypeFuncDecl) Require() []string {
-	req := []string{}
-	for i := range fn.TypeParams {
-		req = append(req, fn.TypeParams[i].Constraint.Require()...)
-	}
-	req = append(req, fn.Body.Require()...)
-	return req
-}
-
-func (fn *TypeFuncDecl) IsOpaque() bool {
-	for _, tp := range fn.TypeParams {
-		if tp.IsOpaque() {
-			return true
-		}
-	}
-	return fn.Body.IsOpaque() || isPrivateName(fn.Name)
-}
-
-func (decl *TypeFuncDecl) resolve(ns map[string]Type) {
-	nstp := map[string]Type{}
-	for n := range ns {
-		nstp[n] = ns[n]
-	}
-	for _, tp := range decl.TypeParams {
-		nstp[tp.Name] = tp
-	}
-
-	for _, tp := range decl.TypeParams {
-		tp.resolve(nstp)
-	}
-	decl.Body.resolve(nstp)
-}
-
-type TypeNameDecl struct {
-	DefinedIn  string
-	ImportPath string
-	Name       string
-	TypeParams []*TypeParam
-	Body       *NamedType
-}
-
-func (n *TypeNameDecl) GenericExpr(imports *Imports, backtype bool) string {
-	typeParams := ""
-	{
-		tps := []string{}
-		for _, tp := range n.TypeParams {
-			if backtype {
-				tps = append(tps, tp.Name+" "+tp.Constraint.Expr(imports))
-			} else {
-				tps = append(tps, tp.Name)
-			}
-		}
-		if 0 < len(tps) {
-			typeParams = "[" + strings.Join(tps, ", ") + "]"
-		}
-	}
-	return typeParams
-}
-
-func (n *TypeNameDecl) Expr(imports *Imports) string {
-	pkg := imports.GetName(n.ImportPath)
-	return pkg + "." + n.Name + n.GenericExpr(imports, false)
-}
-
-func (n *TypeNameDecl) Require() []string {
-	req := []string{}
-	for i := range n.TypeParams {
-		req = append(req, n.TypeParams[i].Constraint.Require()...)
-	}
-	req = append(req, n.Body.Require()...)
-	return req
-}
-
-func (decl *TypeNameDecl) resolve(ns map[string]Type) {
-	nstp := map[string]Type{}
-	for n := range ns {
-		nstp[n] = ns[n]
-	}
-	for _, tp := range decl.TypeParams {
-		nstp[tp.Name] = tp
-	}
-
-	for _, tp := range decl.TypeParams {
-		tp.resolve(nstp)
-	}
-	decl.Body.resolve(nstp)
-}
-
-func (fn *TypeNameDecl) IsOpaque() bool {
-	for _, tp := range fn.TypeParams {
-		if tp.IsOpaque() {
-			return true
-		}
-	}
-	return fn.Body.IsOpaque() || isPrivateName(fn.Name)
-}
-
-type TypeUnresolvedDecl struct {
-	DefinedIn  string
-	ImportPath string
-	Name       string
-	TypeParams []*TypeParam
-	Body       *unknwonType
-}
-
-func (n *TypeUnresolvedDecl) GenericExpr(imports *Imports, backtype bool) string {
-	typeParams := ""
-	{
-		tps := []string{}
-		for _, tp := range n.TypeParams {
-			if backtype {
-				tps = append(tps, tp.Name+" "+tp.Constraint.Expr(imports))
-			} else {
-				tps = append(tps, tp.Name)
-			}
-		}
-		if 0 < len(tps) {
-			typeParams = "[" + strings.Join(tps, ", ") + "]"
-		}
-	}
-	return typeParams
-}
-
-func (n *TypeUnresolvedDecl) Expr(imports *Imports) string {
-	pkg := imports.GetName(n.ImportPath)
-	return pkg + "." + n.Name + n.GenericExpr(imports, false)
-}
-
-func (n *TypeUnresolvedDecl) Require() []string {
-	req := []string{}
-	for i := range n.TypeParams {
-		req = append(req, n.TypeParams[i].Constraint.Require()...)
-	}
-	req = append(req, n.Body.Require()...)
-	return req
-}
-
-func (decl *TypeUnresolvedDecl) resolve(ns map[string]Type) {
-	nstp := map[string]Type{}
-	for n := range ns {
-		nstp[n] = ns[n]
-	}
-	for _, tp := range decl.TypeParams {
-		nstp[tp.Name] = tp
-	}
-
-	for _, tp := range decl.TypeParams {
-		tp.resolve(nstp)
-	}
-	decl.Body.resolve(nstp)
-}
-
-func (fn *TypeUnresolvedDecl) IsOpaque() bool {
-	for _, tp := range fn.TypeParams {
-		if tp.IsOpaque() {
-			return true
-		}
-	}
-	return fn.Body.IsOpaque() || isPrivateName(fn.Name)
 }
 
 type TypeParam struct {

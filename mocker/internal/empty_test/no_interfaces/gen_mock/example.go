@@ -3,7 +3,7 @@ package gen_mock
 
 import (
 	
-	itskit "github.com/youta-t/its/itskit"
+	itskit "github.com/youta-t/its/itskit" 
 	mockkit "github.com/youta-t/its/mocker/mockkit"
 	
 )
