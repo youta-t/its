@@ -169,7 +169,7 @@ It generates a file with same name as a file having go:generate directive.
 		for i := range funcs {
 			s := funcs[i]
 			newFile.ItsIsNeeded = newFile.ItsIsNeeded || 0 < len(s.Body.Args)
-			newFile.ItsIsNeeded = true
+			newFile.ItskitIsNeeded = true
 
 			if _, ok := targetTypeName[s.Name]; len(targetTypeName) != 0 && !ok {
 				continue
@@ -191,7 +191,7 @@ It generates a file with same name as a file having go:generate directive.
 			s := intfs[i]
 			for _, m := range s.Body.Methods {
 				newFile.ItsIsNeeded = newFile.ItsIsNeeded || 0 < len(m.Func.Args)
-				newFile.ItsIsNeeded = true
+				newFile.ItskitIsNeeded = true
 			}
 
 			if _, ok := targetTypeName[s.Name]; len(targetTypeName) != 0 && !ok {
