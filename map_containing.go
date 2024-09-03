@@ -8,47 +8,34 @@ import (
 	"github.com/youta-t/its/itskit/itsio"
 )
 
-type keyedMatch struct {
-	strkey string
-	match  itskit.Match
-}
-
-func (a keyedMatch) less(b keyedMatch) bool {
-	return a.strkey < b.strkey
-}
-
-type mapSpec[K comparable, V any] map[K]Matcher[V]
-
-type mapMatcher[K comparable, V any] struct {
+type mapContainingMatcher[K comparable, V any] struct {
 	header itskit.Label
 	spec   mapSpec[K, V]
 }
 
-type MapSpec[K comparable, V any] map[K]Matcher[V]
-
-func Map[K comparable, V any](spec map[K]Matcher[V]) Matcher[map[K]V] {
+func MapContaining[K comparable, V any](spec map[K]Matcher[V]) Matcher[map[K]V] {
 	cancel := itskit.SkipStack()
 	defer cancel()
 
-	return mapMatcher[K, V]{
+	return mapContainingMatcher[K, V]{
 		header: itskit.NewLabelWithLocation(
-			"map[%T]%T{... ( keys: %d, %d; +%d, -%d )",
-			*new(K), *new(V), itskit.Got, itskit.Want(len(spec)),
-			itskit.Placeholder, itskit.Placeholder,
+			"map[%T]%T{ ... (contain; keys %d, %d; -%d)",
+			*new(K), *new(V),
+			itskit.Got, itskit.Want(len(spec)), itskit.Placeholder,
 		),
 		spec: spec,
 	}
 }
 
-func (mm mapMatcher[K, V]) Match(actual map[K]V) itskit.Match {
+func (mcm mapContainingMatcher[K, V]) Match(actual map[K]V) itskit.Match {
+
 	allkeys := map[K]struct{}{}
 	for k := range actual {
 		allkeys[k] = struct{}{}
 	}
-	for k := range mm.spec {
+	for k := range mcm.spec {
 		allkeys[k] = struct{}{}
 	}
-
 	matches := []keyedMatch{}
 	extra := 0
 	miss := 0
@@ -56,7 +43,7 @@ func (mm mapMatcher[K, V]) Match(actual map[K]V) itskit.Match {
 
 	for k := range allkeys {
 		strkey := fmt.Sprintf("%+v", k)
-		x, xok := mm.spec[k]
+		x, xok := mcm.spec[k]
 		if !xok {
 			extra += 1
 			matches = append(
@@ -85,7 +72,7 @@ func (mm mapMatcher[K, V]) Match(actual map[K]V) itskit.Match {
 					strkey: strkey,
 					match: itskit.NG(
 						fmt.Sprintf("%+v: (not in got)", k),
-						itskit.NG(mm.spec[k].String()),
+						itskit.NG(mcm.spec[k].String()),
 					),
 				},
 			)
@@ -110,23 +97,23 @@ func (mm mapMatcher[K, V]) Match(actual map[K]V) itskit.Match {
 	}
 
 	submatches := make([]itskit.Match, 0, len(matches))
-
 	sort.Slice(
 		matches,
-		func(a, b int) bool { return matches[a].less(matches[b]) },
+		func(i, j int) bool { return matches[i].less(matches[j]) },
 	)
+
 	for _, m := range matches {
 		submatches = append(submatches, m.match)
 	}
 
 	return itskit.NewMatch(
-		ng+extra+miss == 0,
-		mm.header.Fill(len(actual), ng+extra, ng+miss),
+		ng+miss == 0,
+		mcm.header.Fill(len(actual), ng+miss),
 		submatches...,
 	)
 }
 
-func (mm mapMatcher[K, V]) Write(w itsio.Writer) error {
+func (mm mapContainingMatcher[K, V]) Write(w itsio.Writer) error {
 	if err := w.WriteStringln(mm.header.String()); err != nil {
 		return err
 	}
@@ -144,6 +131,6 @@ func (mm mapMatcher[K, V]) Write(w itsio.Writer) error {
 	return nil
 }
 
-func (mm mapMatcher[K, V]) String() string {
+func (mm mapContainingMatcher[K, V]) String() string {
 	return itskit.MatcherToString[map[K]V](mm)
 }
