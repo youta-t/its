@@ -6,14 +6,14 @@ In the case of needs of a custom matcher, its has matcher development kit, `gith
 Simple Matcher
 ---------------
 
-For just simple matcher, use `itskit.SimpleMatcher`.
+For just simple matcher, you can write your matcher based on `itskit.SimpleMatcher`.
 
 In this context, "simple" means...
 
 - matching is determined by short `func(got)bool` function, and
 - to build message, only got value and want value are needed.
 
-Now, showing "ApproxEq" matcher:
+Now, showing "ApproxEq" matcher for example:
 
 ```go
 func ApproxEq(want float64, tolerance float64) its.Matcher[float64] {
@@ -34,12 +34,12 @@ func ApproxEq(want float64, tolerance float64) its.Matcher[float64] {
 It tests that the got value is in the want value ± torerance.
 
 The first argument of `itskit.SimpleMatcher` determines when the match is passed.
-It is written `func(got type)bool`.
+It should be written in `func(got type)bool`.
 
-The second and the third argument is message template and parameters.
+The second and following argument is message template and parameters.
 The second is just a format string. Nothing special.
 
-Specials are found in the third. Values `its.Got` and `its.Want` appear.
+Specials are found in the third & the fourth, values `its.Got` and `its.Want` appear.
 `its.Got` is a placeholder. It will be filled with the got value when matching and prefixed with `/* got */`.
 `its.Want` is a decorator. In message, it prefixes `/* want */`.
 Others are passed to formatter as it is.
@@ -47,7 +47,7 @@ Others are passed to formatter as it is.
 > **Note**
 >
 > `itskit.SkipStack()` marks this callstack to be skipped
-> to detect file:line where a Matcher is created.
+> to detect file:line where a Matcher is created at.
 >
 > Doing that, your error message contains line where you call `ApproxEq`.
 
@@ -64,8 +64,7 @@ goes...
 
 ```
 --- FAIL: TestClose (0.00s)
-    /path/to/example_test.go:82: 
-        ✘ /* got */ 0.100000 in /* want */ 0.120000±0.010000       --- @ /path/to/example_test.go:84
+✘ /* got */ 0.100000 in /* want */ 0.120000±0.010000		--- @ /path/to/example_test.go:84
 ```
 
 It works!
@@ -124,7 +123,7 @@ func (y YourMatcher) Match(got SomeType) itskit.Match {
 ```
 
 `itskit.NewLabel` is like as `itskit.SimpleMatcher`'s formatting arguments.
-`.Fill` fills values known on matching timing, like the got value.
+`.Fill` fills values known on matching timing, like the got value is given.
 In `Match`, you can build result messages in a dinamic way.
 
 `itskit.NewMatch` can accept "submatch", corresponds with "submathcer".
@@ -134,12 +133,21 @@ The method `Write` writes string expression of the matcher itself.
 If your matcher has `itskit.Label`, created by `itskit.NewLabel` as a field value, it is easy.
 
 ```go
-func (y YoutMatcher) Write(w itsio.Writer) error {
+func (y YourMatcher) Write(w itsio.Writer) error {
     return y.label.Write(w)
 }
 ```
 
-To do that, move `NewLabel` from `Match` method to the factory function.
+And, `String` method is needed. It can be implemented with utility function.
+Do:
+
+```go
+func (y YourMatcher) String() string {
+	return itskit.MatcherToString(y)
+}
+```
+
+Finally, package them all.
 
 ```go
 type YourMatcher struct {
@@ -177,18 +185,8 @@ func (y YourMatcher) Write(w itsio.Writer) error {
 }
 ```
 
-Now, `itskit.NewLabelWithLocation` replaces `itskit.NewLabel`.
-The `WithLocation`-one suffixes file:line where the function is invoked.
-
-Finally, `String` method is needed. It can be implemented with utility function.
-Do:
-
-```go
-func (y YourMatcher) String() string {
-	return itskit.MatcherToString(y)
-}
-
-```
+Now, `itskit.NewLabelWithLocation` replaces `itskit.NewLabel`, and invoked in factory function.
+The `...WithLocation` suffixes file:line where the function is invoked.
 
 Now we have walked through of implementation a matcher from scratch.
 

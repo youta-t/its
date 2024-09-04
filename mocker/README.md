@@ -1,7 +1,7 @@
-its-mocker
+its/mocker
 ============
 
-its-mocker is a code generator to create mocks for interface or function types.
+its/mocker is a code generator to create mocks for interface or function types.
 
 ```
 Usage of .../mocker:
@@ -26,7 +26,7 @@ It generates a file with same name as a file having go:generate directive.
 Typical Usage
 -------------
 
-its-mocker is designed to be used as 
+its/mocker is designed to be used as 
 
 ```go
 //go:generate go run github.com/youta-t/its/mocker
@@ -37,7 +37,6 @@ Generated files are stored in a subpackage named `gen_mock`.
 When you do `go generate ./...`, its-mocker creates mock function builders and
 mock implementation of interfaces.
 
-
 Function Mocks of its
 -------------
 
@@ -46,11 +45,11 @@ Its has an opinion about mocks.
 When mocks are needed, they mostly are used for
 
 - checking arguments are fine, and
-- giving fixed return values.
+- giving (fixed) return values.
 
 So, its mock has such features.
 
-The its-mocker generates `${func name}_Expecs` function for each functions and methods of interfaces.
+The its/mocker generates `${func name}_Expects` function for each functions and methods of interfaces.
 This `..._Expects` is the entrypoint of function mock builder, and receives "what arguments to be passed" as `its.Matcher`
 
 `..._Expects` function is generated for each functions and methods of interfaces,
@@ -69,19 +68,19 @@ type Foo func(int, int) (int, bool)
 After `go generate ./...`, we can create mock of a `Foo` function.
 
 ```go
-mockFoo := Foo_Expects(its.EqEq(10), its.GreaterThan(0)).
+mockFoo := gen_mock.Foo_Expects(its.EqEq(10), its.GreaterThan(0)).
     // cont....
 ```
 
 It declares, the mock function is expected to be called as `mockFoo(10, 1)` or `mockFoo(10, 100)` (or something).
 
-This mock automatically test arguments when called, no needs to retreive arguments later.
+This mock automatically test arguments when called.
 If not the test is passed, it records test error.
 
 Then, let us declare return values and get a mock.
 
 ```go
-mockFoo := Foo_Expects(its.EqEq(10), its.GreaterThan(0)).
+mockFoo := gen_mock.Foo_Expects(its.EqEq(10), its.GreaterThan(0)).
     ThenReturn(42, false).
     // cont....
 ```
@@ -98,7 +97,7 @@ mockFoo := Foo_Expects(its.EqEq(10), its.GreaterThan(0)).
     Fn(t)  // t is *testing.T.
 ```
 
-Now we get a mock.
+Now we get a mocked function.
 
 ### Mock with Side Effect
 
@@ -136,7 +135,9 @@ Then, with its/mocker, you can mock of that with
 var mock FizzBazz = FizzBazz_Build(
     t,  // t is *testing.T
     FizzBazz_Spec{
-        Say: FizzBazz_Say_Expects(...).ThenReturn(...),
+        Say: gen_mock.
+            FizzBazz_Say_Expects(...).
+            ThenReturn(...),
     },
 )
 
@@ -147,7 +148,7 @@ Fields of `FizzBazz_Spec` holds "behavior" for each methods.
 Behavior, in this context, is a value defines that "how does it test the parameters?" and "what values will be returned?".
 
 They, fields, are typed as `github.com/youta.t/its/mocker/mockkit.FuncBehavior[F]`, of course it represents a behavior.
-Each of `F`s is a `func` type having same signature as the method for the field name,
+Each of type `F` is a `func` type having same signature as the method for the field name,
 and it expresses specification of the behavior the mocked funcion.
 
 When you call not-mocked method of interface mock, the interface mock records test error.
@@ -190,11 +191,11 @@ chap2 := mockkit.Next(sc, mockkit.Effect(func(...) { ... }))
 At first, `mockkit.BeginScenario`. This creates an empty scenario.
 Then, register `FuncBehavior[F]` with `mockkit.Next` in expected call order.
 
-Returned `chapX`s are behaviors tracked by scenario.
+Returned "chapters"(`chapX`s) are behaviors tracked by scenario.
 If `chap`s are called out of order or have not called until the end, scenario reports test errors.
 
 `mockkit.Next` can receive `FuncBehavior`, so we can pass function-mock.
-And, returned `chap` can be set as implementations of interface.
+And, returned `chap`s can be set as implementations of interface.
 
 So, building them up all and we get...
 
@@ -202,7 +203,7 @@ So, building them up all and we get...
 sc := mockkit.BeginScenario(t)  // t is *testing.T
 defer sc.End()
 
-spec := FizzBazz_Sppec{}
+spec := FizzBazz_Spec{}
 spec.Say = mockkit.Next(
     sc,
     NewFizzBazz_SayCall(its.EqEq(3)).ThenReturn(3, "fizz", true),
@@ -316,6 +317,6 @@ func TestUpdateUser(t *testing.T) {
 Concusion
 -----------
 
-- its-mock generates function-mock and interface-mock, they tests for each layer.
+- its/mocker generates function-mock and interface-mock, they tests for each layer.
 - its has scenario test feature, it tests calling order of functions.
 - its features are composable.
