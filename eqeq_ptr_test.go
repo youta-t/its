@@ -27,7 +27,7 @@ func ExampleEqEqPtr_ng_nonnil() {
 		OrError(t)
 	// Output:
 	// ✘ /* got */ *its_test.S is not nil,		--- @ ./eqeq_ptr_test.go:25
-	//     ✘ /* got */ {Field:24} == /* want */ {Field:42}		--- @ ./eqeq_ptr_test.go:25
+	//     ✘ /* got */ {Field:42} == /* want */ {Field:24}		--- @ ./eqeq_ptr_test.go:25
 }
 
 func ExampleEqEqPtr_ok_nil() {
