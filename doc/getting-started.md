@@ -14,22 +14,21 @@ func TestExample(t *testing.T) {
 
 `42` is the want value, and `12` is got value.
 
-Trailing `.OrError(t)` is reporting.
-It calles `t.Error`, if and only if the match is failed,
+Trailing `.OrError(t)` is reporting. It calles `t.Error`, if and only if the match is failed.
 
 Run the test above, you will show like this:
 
 ```
 --- FAIL: TestExample (0.00s)
-    /path/to/example_test.go:10: 
-        ✘ /* got */ 12 == /* want */ 42
+✘ /* got */ 12 == /* want */ 42		/path/to/example_test.go:10
 ```
 
 `✘` tells you "this match is failed!"
 
 There are more matchers.
 
-- `its.Equal`: match with `want.Equal(got)` method, like `time.Time`
+- `its.Equal`: match with `want.Equal(got)` method, for like `time.Time`
+- `its.DeepEqual`: match with `reflect.DeepEqual(got, want)`
 - `its.StringHavingPrefix`: match with `strings.HasPrefix(got, want)`
 - `its.GreaterEq`: match with `want <= got`
 - `its.LesserThan`: match with `want > got`
@@ -39,6 +38,18 @@ There are more matchers.
 
 For all matchers, see https://pkg.go.dev/github.com/youta-t/its .
 
+If you want to fail-fast, you call `Match(...).OrFatal(t)`.
+`.OrFatal` likes `OrError`, but calling `t.Fatal`.
+
+```go
+func TestExample(t *testing.T) {
+    its.EqEq(42).Match(12).OrFatal(t)
+    its.EqEq(100).Match(100).OrError(t)  // does not reach here
+}
+```
+
+If you need "match or not" in a value, `Match(...).Ok()`. This returns `true` if passing.
+
 Slice and Map
 --------------
 
@@ -46,7 +57,7 @@ Of cource its has matchers for slice and map.
 
 ### Example: `its.Slice`
 
-`its.Slice` matches with slice and `Macther[slice]`s.
+`its.Slice` matches with slice and `[]its.Macther`.
 
 See example:
 
@@ -89,15 +100,14 @@ And, you get error message
 
 ```
 --- FAIL: TestSlice (0.00s)
-    /path/to/example_test.go:21: 
-        ✘ []int{ ... (len: /* got */ 3, /* want */ 3; +1, -1)
-            ✔ /* want */ 3 >= /* got */ 1
-            ✔ /* got */ 4 == /* want */ 4
-            ✘ - /* want */ 5 <= /* got */ ??
-            ✘ + /* got */ 4
+✘ []int{ ... (len: /* got */ 3, /* want */ 3; +1, -1)		--- @ /path/to/example_test.go:21
+    ✔ /* want */ 3 >= /* got */ 1		--- @ /path/to/example_test.go:22
+    ✔ /* got */ 4 == /* want */ 4		--- @ /path/to/example_test.go:23
+    ✘ - /* want */ 5 <= /* got */ ??		--- @ /path/to/example_test.go:24
+    ✘ + /* got */ 4
 ```
 
-It shows match report with diff.
+It shows matching report with diff.
 Extra items in got values are prefixed with `+`, and extra mathcers are prefixed with `-`.
 
 ### Example: `its.Map`
@@ -120,25 +130,23 @@ func TestMap(t *testing.T) {
 		}).
 		OrError(t)
 }
-
 ```
 
 will shows you
 
 ```
 --- FAIL: TestMap (0.00s)
-    /path/to/example_test.go:38: 
-        ✘ map[string]string{... ( keys: /* got */ 4, /* want */ 4; +3, -3 )
-            ✔ body:
-                ✔ (/* want */ ^(t-shirt|jacket)$).MatchString(/* got */ "jacket")
-            ✘ foot: (not in got)
-                ✘ /* got */ ?? == /* want */ sneaker
-            ✘ hand: (not in want)
-                ✘ /* got */ white glove, /* want */ ??
-            ✘ head:
-                ✘ /* got */ hat == /* want */ cap
-            ✘ leg:
-                ✘ /* got */ slacks == /* want */ jeans
+✘ map[string]string{... ( keys: /* got */ 4, /* want */ 4; +3, -3 )		 --- @ /path/to/example_test.go:38
+    ✔ body:
+        ✔ (/* want */ ^(t-shirt|jacket)$).MatchString(/* got */ "jacket")		 --- @ /path/to/example_test.go:40
+    ✘ foot: (not in got)
+        ✘ /* got */ ?? == /* want */ sneaker		--- @ /path/to/example_test.go:42
+    ✘ hand: (not in want)
+        ✘ /* got */ white glove, /* want */ ??
+    ✘ head:
+        ✘ /* got */ hat == /* want */ cap		--- @ /path/to/example_test.go:39
+    ✘ leg:
+        ✘ /* got */ slacks == /* want */ jeans		--- @ /path/to/example_test:41
 ```
 
 Matcher Combinator
@@ -182,10 +190,9 @@ does not have "Dungeon", so failed.
 
 ```
 --- FAIL: TestAll (0.00s)
-    /path/to/example_test.go:47: 
-        ✘ // all: (1 ok / 2 matchers)
-            ✔ strings.Contains(/* got */ "Elmer and the Dragon", /* want */ "Dragon")
-            ✘ strings.Contains(/* got */ "Elmer and the Dragon", /* want */ "Dungeon")
+✘ // all: (1 ok / 2 matchers)		--- @ /path/to/example_test.go:4
+    ✔ strings.Contains(/* got */ "Elmer and the Dragon", /* want */ "Dragon")		--- @ /path/to/example_test.go:5
+    ✘ strings.Contains(/* got */ "Elmer and the Dragon", /* want */ "Dungeon")		--- @ /path/to/example_test.go:6
 ```
 
 Stateful Matcher
@@ -196,7 +203,7 @@ Almost all matchers are "stateless", means they do not remember got values in th
 But, some mathcers are "stateful".
 They remembers got values and deteremines match or not with the history.
 
-> **Warning**
+> [!WARNING]
 >
 > DO NOT use stateful mathers in slice-related matcher, like `its.Slice` or `its.SliceContaining`.
 >
@@ -226,11 +233,10 @@ It goes failed, and show you
 
 ```
 --- FAIL: TestMonotonic (0.00s)
-    /path/to/example_test.go:64: 
-        ✘ // monotonic
-            ✔ (always pass)
-            ✔ /* want */ abc < /* got */ def
-            ✘ /* want */ def < /* got */ ddf
+✘ // monotonic		--- @ /path/to/example_test.go:64
+    ✔ (always pass)		--- @ /path/to/example_test.go:65
+    ✔ /* want */ abc < /* got */ def		--- @ /path/to/example_test.go:66
+    ✘ /* want */ def < /* got */ ddf		--- @ /path/to/example_test.go:67
 ```
 
 This error message is shown because the third match is failed. So, match history is at then.
@@ -253,23 +259,22 @@ func TestSinguler(t *testing.T) {
 
 ```
 --- FAIL: TestSinguler (0.00s)
-    /path/to/example_test.go:56: 
-        ✘ //do not match with values have been gotten
-            ✔ (always pass)
-            ✔ // none of:
-                ~ /* got */ id: bbb == /* want */ id: aaa
-            ✔ // none of:
-                ~ /* got */ id: ccc == /* want */ id: aaa
-                ~ /* got */ id: ccc == /* want */ id: bbb
-            ✘ // none of:
-                ✘ /* got */ id: bbb == /* want */ id: aaa
-                ✔ /* got */ id: bbb == /* want */ id: bbb
-                ✘ /* got */ id: bbb == /* want */ id: ccc
+✘ //do not match with values have been gotten%%--- @ /path/to/example_test.go:56
+    ✔ (always pass)		--- @ /path/to/example_test.go:58
+    ✔ // none of:		--- @ /path/to/example_test.go:59
+        ~ /* got */ id: bbb == /* want */ id: aaa		--- @ /path/to/example_test.go:58
+    ✔ // none of:		--- @ /path/to/example_test.go:60
+        ~ /* got */ id: ccc == /* want */ id: aaa		--- @ /path/to/example_test.go:58
+        ~ /* got */ id: ccc == /* want */ id: bbb		--- @ /path/to/example_test.go:59
+    ✘ // none of:		--- @ /path/to/example_test.go:61
+        ✘ /* got */ id: bbb == /* want */ id: aaa		--- @ /path/to/example_test.go:58
+        ✔ /* got */ id: bbb == /* want */ id: bbb		--- @ /path/to/example_test.go:59
+        ✘ /* got */ id: bbb == /* want */ id: ccc		--- @ /path/to/example_test.go:60
 ```
 
 Conclusion
 -----------
 
-- its has many `its.Matcher[T]`, it works as `matcher.Match(got_value).OrError(t)`.
+- its has many `its.Matcher[T]` and they works as `matcher.Match(got_value).OrError(t)`.
 - matchers can be combined with `All`, `Some`, `None` or negated by `Not`.
 - some matchers are stateful.

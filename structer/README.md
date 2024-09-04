@@ -1,7 +1,7 @@
-its-structer
+its/structer
 ==============
 
-its-structer is code generator to create matchers for structs.
+its/structer is code generator to create matchers for structs.
 
 ```
 $ go run github.com/youta-t/its/structer --help
@@ -28,19 +28,18 @@ The new file, has "Matcher" and "Spec" types, is placed in "./gen_structer" dire
 Typical Usage
 -------------
 
-its-structer is designed to be used as
+its/structer is designed to be used as
 
 ```go
 //go:generate go run github.com/youta-t/its/structer
 ```
 
-
-When you do `go generate ./...`, its-structer creates "Matcher" and "Spec" for each structs in the file.
+When you do `go generate ./...`, its/structer creates "Matcher" and "Spec" for each structs in package `gen_structer`.
 
 For example, given code that
 
 ```go
-//go:generate go run github.com/youta-t/its/structer -s MyStruct -dest gen
+//go:generate go run github.com/youta-t/its/structer
 //go:generate gofmt -w ./gen/type.go
 package example
 
@@ -58,13 +57,13 @@ then, we get
 - `type MyStructSpec`
 - `func ItsMyStruct(spec MyStructSpec) its.Matcher[example.MyStruct]`
 
-in `gen` package aside of the file invoking structer.
+in `gen_structer` package aside of the file invoking structer.
 
 As the type shows you, they are used as
 
 ```go
-gen.ItsMyStruct(
-    gen.MyStructSpec{ ... }
+gen_structer.ItsMyStruct(
+    gen_structer.MyStructSpec{ ... }
 ).
     Match(example.MyStruct{ ... }).
     OrError(t)
@@ -126,7 +125,7 @@ gen_structer.ItsT(
 Advanced Usage
 ---------------
 
-its-structer can create specs & matchers from package name.
+its/structer can create specs & matchers from package name.
 
 Try that:
 
