@@ -2195,3 +2195,285 @@ func (c _F27Call[T]) ThenEffect(effect func(d T) T) mockkit.FuncBehavior[func(d 
 		effect: effect,
 	}
 }
+
+type _F28CallSpec struct {
+	arg0 its.Matcher[pkg2.DotMap]
+}
+
+type _F28Call struct {
+	name itskit.Label
+	spec _F28CallSpec
+}
+
+func F28_Expects(
+	arg0 its.Matcher[pkg2.DotMap],
+
+) _F28Call {
+	cancel := itskit.SkipStack()
+	defer cancel()
+
+	spec := _F28CallSpec{}
+	spec.arg0 = itskit.Named(
+		"arg0",
+		arg0,
+	)
+
+	return _F28Call{
+		name: itskit.NewLabelWithLocation("func F28"),
+		spec: spec,
+	}
+}
+
+type _F28Behavior struct {
+	name   itskit.Label
+	spec   _F28CallSpec
+	effect func(arg0 pkg2.DotMap) pkg2.DotSlice
+}
+
+func (b *_F28Behavior) Fn(t mockkit.TestLike) func(arg0 pkg2.DotMap) pkg2.DotSlice {
+	return func(
+
+		arg0 pkg2.DotMap,
+
+	) pkg2.DotSlice {
+		if h, ok := t.(interface{ Helper() }); ok {
+			h.Helper()
+		}
+		ok := 0
+		matches := []itskit.Match{}
+
+		{
+			matcher := b.spec.arg0
+			if matcher == nil {
+				matcher = its.Never[pkg2.DotMap]()
+			}
+			m := matcher.Match(arg0)
+			if m.Ok() {
+				ok += 1
+			}
+			matches = append(matches, m)
+		}
+
+		itskit.NewMatch(
+			ok == len(matches),
+			b.name.Fill(itskit.Missing),
+			matches...,
+		).OrError(t)
+		return b.effect(
+
+			arg0,
+		)
+	}
+}
+
+func (c _F28Call) ThenReturn(
+
+	ret0 pkg2.DotSlice,
+
+) mockkit.FuncBehavior[func(arg0 pkg2.DotMap) pkg2.DotSlice] {
+	return c.ThenEffect(func(
+
+		pkg2.DotMap,
+
+	) pkg2.DotSlice {
+
+		return ret0
+
+	})
+}
+
+func (c _F28Call) ThenEffect(effect func(arg0 pkg2.DotMap) pkg2.DotSlice) mockkit.FuncBehavior[func(arg0 pkg2.DotMap) pkg2.DotSlice] {
+	return &_F28Behavior{
+		name:   c.name,
+		spec:   c.spec,
+		effect: effect,
+	}
+}
+
+type _F29CallSpec struct {
+	arg0 its.Matcher[pkg2.DotSlice]
+}
+
+type _F29Call struct {
+	name itskit.Label
+	spec _F29CallSpec
+}
+
+func F29_Expects(
+	arg0 its.Matcher[pkg2.DotSlice],
+
+) _F29Call {
+	cancel := itskit.SkipStack()
+	defer cancel()
+
+	spec := _F29CallSpec{}
+	spec.arg0 = itskit.Named(
+		"arg0",
+		arg0,
+	)
+
+	return _F29Call{
+		name: itskit.NewLabelWithLocation("func F29"),
+		spec: spec,
+	}
+}
+
+type _F29Behavior struct {
+	name   itskit.Label
+	spec   _F29CallSpec
+	effect func(arg0 pkg2.DotSlice) pkg2.DotMap
+}
+
+func (b *_F29Behavior) Fn(t mockkit.TestLike) func(arg0 pkg2.DotSlice) pkg2.DotMap {
+	return func(
+
+		arg0 pkg2.DotSlice,
+
+	) pkg2.DotMap {
+		if h, ok := t.(interface{ Helper() }); ok {
+			h.Helper()
+		}
+		ok := 0
+		matches := []itskit.Match{}
+
+		{
+			matcher := b.spec.arg0
+			if matcher == nil {
+				matcher = its.Never[pkg2.DotSlice]()
+			}
+			m := matcher.Match(arg0)
+			if m.Ok() {
+				ok += 1
+			}
+			matches = append(matches, m)
+		}
+
+		itskit.NewMatch(
+			ok == len(matches),
+			b.name.Fill(itskit.Missing),
+			matches...,
+		).OrError(t)
+		return b.effect(
+
+			arg0,
+		)
+	}
+}
+
+func (c _F29Call) ThenReturn(
+
+	ret0 pkg2.DotMap,
+
+) mockkit.FuncBehavior[func(arg0 pkg2.DotSlice) pkg2.DotMap] {
+	return c.ThenEffect(func(
+
+		pkg2.DotSlice,
+
+	) pkg2.DotMap {
+
+		return ret0
+
+	})
+}
+
+func (c _F29Call) ThenEffect(effect func(arg0 pkg2.DotSlice) pkg2.DotMap) mockkit.FuncBehavior[func(arg0 pkg2.DotSlice) pkg2.DotMap] {
+	return &_F29Behavior{
+		name:   c.name,
+		spec:   c.spec,
+		effect: effect,
+	}
+}
+
+type _F30CallSpec struct {
+	arg0 its.Matcher[pkg2.DotGene[int]]
+}
+
+type _F30Call struct {
+	name itskit.Label
+	spec _F30CallSpec
+}
+
+func F30_Expects(
+	arg0 its.Matcher[pkg2.DotGene[int]],
+
+) _F30Call {
+	cancel := itskit.SkipStack()
+	defer cancel()
+
+	spec := _F30CallSpec{}
+	spec.arg0 = itskit.Named(
+		"arg0",
+		arg0,
+	)
+
+	return _F30Call{
+		name: itskit.NewLabelWithLocation("func F30"),
+		spec: spec,
+	}
+}
+
+type _F30Behavior struct {
+	name   itskit.Label
+	spec   _F30CallSpec
+	effect func(arg0 pkg2.DotGene[int]) pkg2.DotGene[int]
+}
+
+func (b *_F30Behavior) Fn(t mockkit.TestLike) func(arg0 pkg2.DotGene[int]) pkg2.DotGene[int] {
+	return func(
+
+		arg0 pkg2.DotGene[int],
+
+	) pkg2.DotGene[int] {
+		if h, ok := t.(interface{ Helper() }); ok {
+			h.Helper()
+		}
+		ok := 0
+		matches := []itskit.Match{}
+
+		{
+			matcher := b.spec.arg0
+			if matcher == nil {
+				matcher = its.Never[pkg2.DotGene[int]]()
+			}
+			m := matcher.Match(arg0)
+			if m.Ok() {
+				ok += 1
+			}
+			matches = append(matches, m)
+		}
+
+		itskit.NewMatch(
+			ok == len(matches),
+			b.name.Fill(itskit.Missing),
+			matches...,
+		).OrError(t)
+		return b.effect(
+
+			arg0,
+		)
+	}
+}
+
+func (c _F30Call) ThenReturn(
+
+	ret0 pkg2.DotGene[int],
+
+) mockkit.FuncBehavior[func(arg0 pkg2.DotGene[int]) pkg2.DotGene[int]] {
+	return c.ThenEffect(func(
+
+		pkg2.DotGene[int],
+
+	) pkg2.DotGene[int] {
+
+		return ret0
+
+	})
+}
+
+func (c _F30Call) ThenEffect(effect func(arg0 pkg2.DotGene[int]) pkg2.DotGene[int]) mockkit.FuncBehavior[func(arg0 pkg2.DotGene[int]) pkg2.DotGene[int]] {
+	return &_F30Behavior{
+		name:   c.name,
+		spec:   c.spec,
+		effect: effect,
+	}
+}

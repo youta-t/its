@@ -7,6 +7,8 @@ import (
 	"github.com/youta-t/its"
 	"github.com/youta-t/its/mocker/internal/example/sub"
 	types "github.com/youta-t/its/mocker/internal/generate_test"
+	"github.com/youta-t/its/mocker/internal/generate_test/dot"
+	gen_structer_dot "github.com/youta-t/its/mocker/internal/generate_test/dot/gen_structer"
 	"github.com/youta-t/its/mocker/internal/generate_test/gen_mock"
 )
 
@@ -142,4 +144,28 @@ func TestC4(t *testing.T) {
 	testee.DotMethod()
 	testee.AnotherMethod()
 
+}
+
+func TestC5(t *testing.T) {
+	// its does not support interface having struct
+}
+
+func TestC6(t *testing.T) {
+	testee := gen_mock.C6_Build(t, gen_mock.C6_Spec{
+		G2G: gen_mock.
+			C6_G2G_Expects(gen_structer_dot.ItsDotGene[int](gen_structer_dot.DotGeneSpec[int]{
+				Field: its.EqEq(42),
+			})).
+			ThenReturn(dot.DotGene[string]{Field: "foo"}),
+		Map2Slice: gen_mock.C6_Map2Slice_Expects(gen_structer_dot.ItsDotMap(its.Map(map[string]its.Matcher[string]{
+			"key": its.EqEq("val"),
+		}))).ThenReturn(dot.DotSlice{"bar"}),
+		Slice2Map: gen_mock.C6_Slice2Map_Expects(gen_structer_dot.ItsDotSlice(its.Slice(its.EqEq("bazz")))).ThenReturn(dot.DotMap{
+			"key": "val",
+		}),
+	})
+
+	testee.G2G(dot.DotGene[int]{Field: 42})
+	testee.Map2Slice(dot.DotMap{"key": "val"})
+	testee.Slice2Map(dot.DotSlice{"bazz"})
 }

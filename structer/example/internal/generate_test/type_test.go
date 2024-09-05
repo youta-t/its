@@ -7,6 +7,7 @@ import (
 	"github.com/youta-t/its"
 	types "github.com/youta-t/its/structer/example/internal/generate_test"
 	"github.com/youta-t/its/structer/example/internal/generate_test/dot"
+	gen_structer_dot "github.com/youta-t/its/structer/example/internal/generate_test/dot/gen_structer"
 	"github.com/youta-t/its/structer/example/internal/generate_test/gen_structer"
 	"github.com/youta-t/its/structer/example/internal/generate_test/sub1"
 	"github.com/youta-t/its/structer/example/internal/generate_test/sub2"
@@ -97,6 +98,16 @@ func TestT(t *testing.T) {
 
 		DN: its.EqEq(dot.DotName(42)),
 
+		DSlice: gen_structer_dot.ItsDotSlice(its.Slice(its.EqEq("dot slice"))),
+
+		DMap: gen_structer_dot.ItsDotMap(its.Map(map[string]its.Matcher[string]{
+			"key": its.EqEq("dot map"),
+		})),
+
+		DGene: gen_structer_dot.ItsDotG(gen_structer_dot.DotGSpec[string]{
+			Field: its.EqEq("dot generic"),
+		}),
+
 		DSStar: its.Pointer(its.EqEq(dot.DotStruct{
 			Value: "EStar",
 		})),
@@ -177,9 +188,12 @@ func TestT(t *testing.T) {
 		DS: dot.DotStruct{
 			Value: "E",
 		},
-		DI: nil,
-		DF: nil,
-		DN: 42,
+		DI:     nil,
+		DF:     nil,
+		DN:     42,
+		DSlice: dot.DotSlice{"dot slice"},
+		DMap:   dot.DotMap{"key": "dot map"},
+		DGene:  dot.DotG[string]{Field: "dot generic"},
 
 		DSStar: &dot.DotStruct{
 			Value: "EStar",
