@@ -4,7 +4,7 @@ its  --  A Matcher Library
 What it is? -- yes, it's its.
 ------------------------------
 
-`its` provides value matchers.
+`its` provides value matchers, matcher generator and mock generator.
 
 Install
 ---------
@@ -24,24 +24,53 @@ Built-in mathcers are here.
 For example, `its.EqEq` matcher is for `comparable`.
 
 ```go
-import "testing"
+import (
+	"testing"
 
-import "github.com/youta-t/its"
+	"github.com/youta-t/its"
+)
 
 func Add(a, b int) int {
-    return a + b
+	return a + b
 }
 
 func TestAdd(t *testing.T) {
-    actual := Add(3, 7)
-    its.EqEq(10).Match(actual).OrError(t)
+	got := Add(3, 7)
+	its.EqEq(10).   // want is 10
+		Match(got). // got
+		OrError(t)  // test
 }
 ```
 
-It passes becauase `10 == 3 + 7` is true, as you see.
+It passes becauase `10 == 3 + 7` is true.
 
 All matchers have example. See them in pkg.go.dev:
-https://pkg.go.dev/github.com/youta-t/its and doc/getting-started.
+https://pkg.go.dev/github.com/youta-t/its and [doc/getting-started](./doc/getting-started.md).
+
+If unmatch is fatal, you can do so.
+
+```go
+import (
+	"testing"
+	"errors"
+
+	"github.com/youta-t/its"
+)
+
+func Div(a, b float64) (float64, error) {
+	if b == 0 {
+		return 0, errors.New("zero div!")
+	}
+	return a + b
+}
+
+func TestAdd(t *testing.T) {
+	_, err := Div(3, 0)
+	its.Nil[error](). // want is nil.
+		Match(err).   // got
+		OrFatal(t)    // test
+}
+```
 
 ### Nice message
 
@@ -63,15 +92,13 @@ func TestAdd(t *testing.T) {
 	its.EqEq(got).Match(10).OrError(t)
 	its.EqEq(got).Match(11).OrError(t)
 }
-
 ```
 
 provides,
 
 ```
 --- FAIL: TestAdd (0.00s)
-    .../example_test.go:33:
-        ✘ /* got */ 11 == /* want */ 10
+✘ /* got */ 11 == /* want */ 10		--- @.../example_test.go:33:
 ```
 
 Error message is tailored for each matchers.
@@ -95,23 +122,21 @@ import (
 	"github.com/youta-t/its"
 )
 
-// ...
-
 func TestBetween(t *testing.T) {
 	its.All(
 		its.GreaterThan(3),
 		its.LesserEq(8),
-	).Match(7).OrError(t)
+	).Match(7).OrError(t)  // pass. 3 < 7 <= 8
 
 	its.All(
 		its.GreaterThan(3),
 		its.LesserEq(8),
-	).Match(8).OrError(t)
+	).Match(8).OrError(t)  // pass. 3 < 8 <= 8
 
 	its.All(
 		its.GreaterThan(3),
 		its.LesserEq(8),
-	).Match(9).OrError(t)
+	).Match(9).OrError(t) // fail! 3 < 9 <= 8
 }
 ```
 
@@ -119,22 +144,21 @@ provides,
 
 ```
 --- FAIL: TestBetween (0.00s)
-    .../example_test.go:20:
-        ✘ // all: (1 ok / 2 matchers)
-            ✔ /* want */ 3 < /* got */ 9
-            ✘ /* want */ 8 > /* got */ 9
+✘ // all: (1 ok / 2 matchers)		--- @.../example_test.go:19
+    ✔ /* want */ 3 < /* got */ 9		--- @ .../example_test.go:20
+    ✘ /* want */ 8 > /* got */ 9		--- @ .../example_test.go:21
 ```
 
-"A between B" means "greater than A, and lesser than B", as you know.
+"A between B" means "greater than A, and lesser than B".
 
-Not only `All`, there are `Some` (require match at least one) and `Not` (invert match).
+there are also `Some` (require match at least one), `Not` (invert match) and `None` (= `Not(Some(...))` + better message).
 
 Generate Struct Matcher: structer
 ---------------------------------
 
-its has a tool for `//go:generate` to generate matchers of struct, `github.com/youta-t/its/structer`.
+`its` has a tool for `//go:generate` to generate matchers of struct, `github.com/youta-t/its/structer`.
 
-You can get matchers for structs in and not in your package.
+You can get matchers for structs, `type T []E` and `type T map[K]E` (alias of slice/map) in and not in your package.
 
 See [structer/README.md](./structer/README.md) for more details.
 
@@ -157,5 +181,4 @@ Matcher developmenet kit, `itskit`, is included.
 You can create your matcher from scratch in 50 lines or so.
 Or, in the simplest case, you need just 10 lines per one matcher.
 
-See doc/how-to-write-my-matcher.md to know how to.
-
+See [doc/how-to-write-my-matcher.md](./doc/how-to-write-my-matcher.md) to know how to.

@@ -86,6 +86,12 @@ type TSpec[P interface {
 
 	DN its.Matcher[pkg5.DotName]
 
+	DSlice its.Matcher[pkg5.DotSlice]
+
+	DMap its.Matcher[pkg5.DotMap]
+
+	DGene its.Matcher[pkg5.DotG[string]]
+
 	GDS its.Matcher[pkg1.G[pkg5.DotStruct]]
 
 	GDI its.Matcher[pkg1.G[pkg5.DotInterface]]
@@ -690,6 +696,63 @@ func ItsT[P interface {
 			its.Property[pkg1.T[P], pkg5.DotName](
 				".DN",
 				func(got pkg1.T[P]) pkg5.DotName { return got.DN },
+				matcher,
+			),
+		)
+	}
+
+	{
+		matcher := want.DSlice
+		if matcher == nil {
+			if config.StrictModeForStruct {
+				matcher = its.Never[pkg5.DotSlice]()
+			} else {
+				matcher = its.Always[pkg5.DotSlice]()
+			}
+		}
+		sub = append(
+			sub,
+			its.Property[pkg1.T[P], pkg5.DotSlice](
+				".DSlice",
+				func(got pkg1.T[P]) pkg5.DotSlice { return got.DSlice },
+				matcher,
+			),
+		)
+	}
+
+	{
+		matcher := want.DMap
+		if matcher == nil {
+			if config.StrictModeForStruct {
+				matcher = its.Never[pkg5.DotMap]()
+			} else {
+				matcher = its.Always[pkg5.DotMap]()
+			}
+		}
+		sub = append(
+			sub,
+			its.Property[pkg1.T[P], pkg5.DotMap](
+				".DMap",
+				func(got pkg1.T[P]) pkg5.DotMap { return got.DMap },
+				matcher,
+			),
+		)
+	}
+
+	{
+		matcher := want.DGene
+		if matcher == nil {
+			if config.StrictModeForStruct {
+				matcher = its.Never[pkg5.DotG[string]]()
+			} else {
+				matcher = its.Always[pkg5.DotG[string]]()
+			}
+		}
+		sub = append(
+			sub,
+			its.Property[pkg1.T[P], pkg5.DotG[string]](
+				".DGene",
+				func(got pkg1.T[P]) pkg5.DotG[string] { return got.DGene },
 				matcher,
 			),
 		)

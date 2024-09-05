@@ -83,6 +83,12 @@ type C5 interface {
 	M()
 }
 
+type C6 interface {
+	Map2Slice(DotMap) DotSlice
+	Slice2Map(DotSlice) DotMap
+	G2G(DotGene[int]) DotGene[string]
+}
+
 func init() {
 	var x i6
 	_ = x

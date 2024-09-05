@@ -34,6 +34,10 @@ type F25 func(d DotStruct) DotInterface
 type F26 func(d DotInterface) DotStruct
 type F27[T DotInterface] func(d T) T
 
+type F28 func(DotMap) DotSlice
+type F29 func(DotSlice) DotMap
+type F30 func(DotGene[int]) DotGene[int]
+
 func init() {
 	var x f24 = nil
 	_ = x
