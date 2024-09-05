@@ -82,6 +82,12 @@ type T[P interface {
 
 	DN DotName
 
+	DSlice DotSlice
+
+	DMap DotMap
+
+	DGene DotG[string]
+
 	GDS G[DotStruct]
 	GDI G[DotInterface]
 	GDF G[DotFunc]

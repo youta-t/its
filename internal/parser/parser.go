@@ -169,6 +169,15 @@ func parseFile(bc ParseContext, pkg importTarget, filename string) (*TypeDeclara
 			for _, decl := range dot.Types.Funcs.Slice() {
 				types[decl.Name] = &NamedType{ImportPath: p, Name: decl.Name}
 			}
+			for _, decl := range dot.Types.Slices.Slice() {
+				types[decl.Name] = &NamedType{ImportPath: p, Name: decl.Name}
+			}
+			for _, decl := range dot.Types.Arrays.Slice() {
+				types[decl.Name] = &NamedType{ImportPath: p, Name: decl.Name}
+			}
+			for _, decl := range dot.Types.Maps.Slice() {
+				types[decl.Name] = &NamedType{ImportPath: p, Name: decl.Name}
+			}
 			for _, decl := range dot.Types.Names.Slice() {
 				types[decl.Name] = &NamedType{ImportPath: p, Name: decl.Name}
 			}
@@ -328,6 +337,7 @@ type TypeDeclarations struct {
 	Unresolved maps.OrderedMap[string, *TypeDecl[*unknwonType]]
 }
 
+// Merge merges other into tds
 func (tds *TypeDeclarations) Merge(other *TypeDeclarations) {
 	other.Structs.Iter(func(s string, decl *TypeDecl[*StructType]) bool {
 		tds.Structs.Put(s, decl)

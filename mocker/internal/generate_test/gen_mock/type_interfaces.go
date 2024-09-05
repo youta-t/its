@@ -6,6 +6,7 @@ import (
 	itskit "github.com/youta-t/its/itskit"
 	pkg1 "github.com/youta-t/its/mocker/internal/example/sub"
 	pkg2 "github.com/youta-t/its/mocker/internal/generate_test"
+	pkg3 "github.com/youta-t/its/mocker/internal/generate_test/dot"
 	mockkit "github.com/youta-t/its/mocker/mockkit"
 )
 
@@ -1522,6 +1523,288 @@ func (c _C5_MCall) ThenEffect(effect func()) mockkit.FuncBehavior[func()] {
 	}
 }
 
+type _C6_G2GCallSpec struct {
+	arg0 its.Matcher[pkg3.DotGene[int]]
+}
+
+type _C6_G2GCall struct {
+	name itskit.Label
+	spec _C6_G2GCallSpec
+}
+
+func C6_G2G_Expects(
+	arg0 its.Matcher[pkg3.DotGene[int]],
+
+) _C6_G2GCall {
+	cancel := itskit.SkipStack()
+	defer cancel()
+
+	spec := _C6_G2GCallSpec{}
+	spec.arg0 = itskit.Named(
+		"arg0",
+		arg0,
+	)
+
+	return _C6_G2GCall{
+		name: itskit.NewLabelWithLocation("func C6_G2G"),
+		spec: spec,
+	}
+}
+
+type _C6_G2GBehavior struct {
+	name   itskit.Label
+	spec   _C6_G2GCallSpec
+	effect func(arg0 pkg3.DotGene[int]) pkg3.DotGene[string]
+}
+
+func (b *_C6_G2GBehavior) Fn(t mockkit.TestLike) func(arg0 pkg3.DotGene[int]) pkg3.DotGene[string] {
+	return func(
+
+		arg0 pkg3.DotGene[int],
+
+	) pkg3.DotGene[string] {
+		if h, ok := t.(interface{ Helper() }); ok {
+			h.Helper()
+		}
+		ok := 0
+		matches := []itskit.Match{}
+
+		{
+			matcher := b.spec.arg0
+			if matcher == nil {
+				matcher = its.Never[pkg3.DotGene[int]]()
+			}
+			m := matcher.Match(arg0)
+			if m.Ok() {
+				ok += 1
+			}
+			matches = append(matches, m)
+		}
+
+		itskit.NewMatch(
+			ok == len(matches),
+			b.name.Fill(itskit.Missing),
+			matches...,
+		).OrError(t)
+		return b.effect(
+
+			arg0,
+		)
+	}
+}
+
+func (c _C6_G2GCall) ThenReturn(
+
+	ret0 pkg3.DotGene[string],
+
+) mockkit.FuncBehavior[func(arg0 pkg3.DotGene[int]) pkg3.DotGene[string]] {
+	return c.ThenEffect(func(
+
+		pkg3.DotGene[int],
+
+	) pkg3.DotGene[string] {
+
+		return ret0
+
+	})
+}
+
+func (c _C6_G2GCall) ThenEffect(effect func(arg0 pkg3.DotGene[int]) pkg3.DotGene[string]) mockkit.FuncBehavior[func(arg0 pkg3.DotGene[int]) pkg3.DotGene[string]] {
+	return &_C6_G2GBehavior{
+		name:   c.name,
+		spec:   c.spec,
+		effect: effect,
+	}
+}
+
+type _C6_Map2SliceCallSpec struct {
+	arg0 its.Matcher[pkg3.DotMap]
+}
+
+type _C6_Map2SliceCall struct {
+	name itskit.Label
+	spec _C6_Map2SliceCallSpec
+}
+
+func C6_Map2Slice_Expects(
+	arg0 its.Matcher[pkg3.DotMap],
+
+) _C6_Map2SliceCall {
+	cancel := itskit.SkipStack()
+	defer cancel()
+
+	spec := _C6_Map2SliceCallSpec{}
+	spec.arg0 = itskit.Named(
+		"arg0",
+		arg0,
+	)
+
+	return _C6_Map2SliceCall{
+		name: itskit.NewLabelWithLocation("func C6_Map2Slice"),
+		spec: spec,
+	}
+}
+
+type _C6_Map2SliceBehavior struct {
+	name   itskit.Label
+	spec   _C6_Map2SliceCallSpec
+	effect func(arg0 pkg3.DotMap) pkg3.DotSlice
+}
+
+func (b *_C6_Map2SliceBehavior) Fn(t mockkit.TestLike) func(arg0 pkg3.DotMap) pkg3.DotSlice {
+	return func(
+
+		arg0 pkg3.DotMap,
+
+	) pkg3.DotSlice {
+		if h, ok := t.(interface{ Helper() }); ok {
+			h.Helper()
+		}
+		ok := 0
+		matches := []itskit.Match{}
+
+		{
+			matcher := b.spec.arg0
+			if matcher == nil {
+				matcher = its.Never[pkg3.DotMap]()
+			}
+			m := matcher.Match(arg0)
+			if m.Ok() {
+				ok += 1
+			}
+			matches = append(matches, m)
+		}
+
+		itskit.NewMatch(
+			ok == len(matches),
+			b.name.Fill(itskit.Missing),
+			matches...,
+		).OrError(t)
+		return b.effect(
+
+			arg0,
+		)
+	}
+}
+
+func (c _C6_Map2SliceCall) ThenReturn(
+
+	ret0 pkg3.DotSlice,
+
+) mockkit.FuncBehavior[func(arg0 pkg3.DotMap) pkg3.DotSlice] {
+	return c.ThenEffect(func(
+
+		pkg3.DotMap,
+
+	) pkg3.DotSlice {
+
+		return ret0
+
+	})
+}
+
+func (c _C6_Map2SliceCall) ThenEffect(effect func(arg0 pkg3.DotMap) pkg3.DotSlice) mockkit.FuncBehavior[func(arg0 pkg3.DotMap) pkg3.DotSlice] {
+	return &_C6_Map2SliceBehavior{
+		name:   c.name,
+		spec:   c.spec,
+		effect: effect,
+	}
+}
+
+type _C6_Slice2MapCallSpec struct {
+	arg0 its.Matcher[pkg3.DotSlice]
+}
+
+type _C6_Slice2MapCall struct {
+	name itskit.Label
+	spec _C6_Slice2MapCallSpec
+}
+
+func C6_Slice2Map_Expects(
+	arg0 its.Matcher[pkg3.DotSlice],
+
+) _C6_Slice2MapCall {
+	cancel := itskit.SkipStack()
+	defer cancel()
+
+	spec := _C6_Slice2MapCallSpec{}
+	spec.arg0 = itskit.Named(
+		"arg0",
+		arg0,
+	)
+
+	return _C6_Slice2MapCall{
+		name: itskit.NewLabelWithLocation("func C6_Slice2Map"),
+		spec: spec,
+	}
+}
+
+type _C6_Slice2MapBehavior struct {
+	name   itskit.Label
+	spec   _C6_Slice2MapCallSpec
+	effect func(arg0 pkg3.DotSlice) pkg3.DotMap
+}
+
+func (b *_C6_Slice2MapBehavior) Fn(t mockkit.TestLike) func(arg0 pkg3.DotSlice) pkg3.DotMap {
+	return func(
+
+		arg0 pkg3.DotSlice,
+
+	) pkg3.DotMap {
+		if h, ok := t.(interface{ Helper() }); ok {
+			h.Helper()
+		}
+		ok := 0
+		matches := []itskit.Match{}
+
+		{
+			matcher := b.spec.arg0
+			if matcher == nil {
+				matcher = its.Never[pkg3.DotSlice]()
+			}
+			m := matcher.Match(arg0)
+			if m.Ok() {
+				ok += 1
+			}
+			matches = append(matches, m)
+		}
+
+		itskit.NewMatch(
+			ok == len(matches),
+			b.name.Fill(itskit.Missing),
+			matches...,
+		).OrError(t)
+		return b.effect(
+
+			arg0,
+		)
+	}
+}
+
+func (c _C6_Slice2MapCall) ThenReturn(
+
+	ret0 pkg3.DotMap,
+
+) mockkit.FuncBehavior[func(arg0 pkg3.DotSlice) pkg3.DotMap] {
+	return c.ThenEffect(func(
+
+		pkg3.DotSlice,
+
+	) pkg3.DotMap {
+
+		return ret0
+
+	})
+}
+
+func (c _C6_Slice2MapCall) ThenEffect(effect func(arg0 pkg3.DotSlice) pkg3.DotMap) mockkit.FuncBehavior[func(arg0 pkg3.DotSlice) pkg3.DotMap] {
+	return &_C6_Slice2MapBehavior{
+		name:   c.name,
+		spec:   c.spec,
+		effect: effect,
+	}
+}
+
 type _I0Impl struct {
 	M0 func()
 	M1 func(arg0 int, arg1 string) (bool, error)
@@ -1989,4 +2272,92 @@ type C4_Spec struct {
 	Method mockkit.FuncBehavior[func()]
 
 	Read mockkit.FuncBehavior[func(p []byte) (n int, err error)]
+}
+
+type _C6Impl struct {
+	G2G       func(arg0 pkg3.DotGene[int]) pkg3.DotGene[string]
+	Map2Slice func(arg0 pkg3.DotMap) pkg3.DotSlice
+	Slice2Map func(arg0 pkg3.DotSlice) pkg3.DotMap
+}
+
+func C6_Build(t mockkit.TestLike, spec C6_Spec) pkg2.C6 {
+	impl := _C6Impl{}
+
+	if spec.G2G != nil {
+		impl.G2G = spec.G2G.Fn(t)
+	}
+
+	if spec.Map2Slice != nil {
+		impl.Map2Slice = spec.Map2Slice.Fn(t)
+	}
+
+	if spec.Slice2Map != nil {
+		impl.Slice2Map = spec.Slice2Map.Fn(t)
+	}
+
+	return _C6Mock{t: t, impl: impl}
+}
+
+type _C6Mock struct {
+	t    mockkit.TestLike
+	impl _C6Impl
+}
+
+func (m _C6Mock) G2G(
+	arg0 pkg3.DotGene[int],
+) pkg3.DotGene[string] {
+	cancel := itskit.SkipStack()
+	defer cancel()
+
+	if m.impl.G2G == nil {
+		itskit.NG(
+			itskit.NewLabelWithLocation("C6.G2G is not mocked").String(),
+		).OrFatal(m.t)
+	}
+
+	return m.impl.G2G(
+		arg0,
+	)
+}
+
+func (m _C6Mock) Map2Slice(
+	arg0 pkg3.DotMap,
+) pkg3.DotSlice {
+	cancel := itskit.SkipStack()
+	defer cancel()
+
+	if m.impl.Map2Slice == nil {
+		itskit.NG(
+			itskit.NewLabelWithLocation("C6.Map2Slice is not mocked").String(),
+		).OrFatal(m.t)
+	}
+
+	return m.impl.Map2Slice(
+		arg0,
+	)
+}
+
+func (m _C6Mock) Slice2Map(
+	arg0 pkg3.DotSlice,
+) pkg3.DotMap {
+	cancel := itskit.SkipStack()
+	defer cancel()
+
+	if m.impl.Slice2Map == nil {
+		itskit.NG(
+			itskit.NewLabelWithLocation("C6.Slice2Map is not mocked").String(),
+		).OrFatal(m.t)
+	}
+
+	return m.impl.Slice2Map(
+		arg0,
+	)
+}
+
+type C6_Spec struct {
+	G2G mockkit.FuncBehavior[func(arg0 pkg3.DotGene[int]) pkg3.DotGene[string]]
+
+	Map2Slice mockkit.FuncBehavior[func(arg0 pkg3.DotMap) pkg3.DotSlice]
+
+	Slice2Map mockkit.FuncBehavior[func(arg0 pkg3.DotSlice) pkg3.DotMap]
 }
