@@ -19,14 +19,16 @@ type _FCall struct {
 
 func F_Expects(
 ) _FCall {
-	cancel := itskit.SkipStack()
-	defer cancel()
+	{
+		cancel := itskit.SkipStack()
+		defer cancel()
+	}
 
-	spec := _FCallSpec {}
-	
 	return _FCall{
 		name: itskit.NewLabelWithLocation("func F"),
-		spec: spec,
+		spec:  _FCallSpec{
+			
+		},
 	}
 }
 
