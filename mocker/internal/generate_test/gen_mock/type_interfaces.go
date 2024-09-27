@@ -19,14 +19,14 @@ type _I0_M0Call struct {
 }
 
 func I0_M0_Expects() _I0_M0Call {
-	cancel := itskit.SkipStack()
-	defer cancel()
-
-	spec := _I0_M0CallSpec{}
+	{
+		cancel := itskit.SkipStack()
+		defer cancel()
+	}
 
 	return _I0_M0Call{
 		name: itskit.NewLabelWithLocation("func I0_M0"),
-		spec: spec,
+		spec: _I0_M0CallSpec{},
 	}
 }
 
@@ -84,23 +84,24 @@ func I0_M1_Expects(
 	arg1 its.Matcher[string],
 
 ) _I0_M1Call {
-	cancel := itskit.SkipStack()
-	defer cancel()
-
-	spec := _I0_M1CallSpec{}
-	spec.arg0 = itskit.Named(
-		"arg0",
-		arg0,
-	)
-
-	spec.arg1 = itskit.Named(
-		"arg1",
-		arg1,
-	)
+	{
+		cancel := itskit.SkipStack()
+		defer cancel()
+	}
 
 	return _I0_M1Call{
 		name: itskit.NewLabelWithLocation("func I0_M1"),
-		spec: spec,
+		spec: _I0_M1CallSpec{
+			arg0: itskit.Named(
+				"arg0",
+				arg0,
+			),
+
+			arg1: itskit.Named(
+				"arg1",
+				arg1,
+			),
+		},
 	}
 }
 
@@ -215,23 +216,24 @@ func I0_M2_Expects(
 	s its.Matcher[string],
 
 ) _I0_M2Call {
-	cancel := itskit.SkipStack()
-	defer cancel()
-
-	spec := _I0_M2CallSpec{}
-	spec.i = itskit.Named(
-		"i",
-		i,
-	)
-
-	spec.s = itskit.Named(
-		"s",
-		s,
-	)
+	{
+		cancel := itskit.SkipStack()
+		defer cancel()
+	}
 
 	return _I0_M2Call{
 		name: itskit.NewLabelWithLocation("func I0_M2"),
-		spec: spec,
+		spec: _I0_M2CallSpec{
+			i: itskit.Named(
+				"i",
+				i,
+			),
+
+			s: itskit.Named(
+				"s",
+				s,
+			),
+		},
 	}
 }
 
@@ -344,22 +346,24 @@ func I0_M3_Expects(
 	i its.Matcher[int],
 	s its.Matcher[[]string],
 ) _I0_M3Call {
-	cancel := itskit.SkipStack()
-	defer cancel()
+	{
+		cancel := itskit.SkipStack()
+		defer cancel()
+	}
 
-	spec := _I0_M3CallSpec{}
-	spec.i = itskit.Named(
-		"i",
-		i,
-	)
-
-	spec.s = itskit.Named(
-		"s",
-		s,
-	)
 	return _I0_M3Call{
 		name: itskit.NewLabelWithLocation("func I0_M3"),
-		spec: spec,
+		spec: _I0_M3CallSpec{
+			i: itskit.Named(
+				"i",
+				i,
+			),
+
+			s: itskit.Named(
+				"s",
+				s,
+			),
+		},
 	}
 }
 
@@ -466,17 +470,19 @@ type _I0_M4Call struct {
 
 func I0_M4_Expects(s its.Matcher[[]string],
 ) _I0_M4Call {
-	cancel := itskit.SkipStack()
-	defer cancel()
+	{
+		cancel := itskit.SkipStack()
+		defer cancel()
+	}
 
-	spec := _I0_M4CallSpec{}
-	spec.s = itskit.Named(
-		"s",
-		s,
-	)
 	return _I0_M4Call{
 		name: itskit.NewLabelWithLocation("func I0_M4"),
-		spec: spec,
+		spec: _I0_M4CallSpec{
+			s: itskit.Named(
+				"s",
+				s,
+			),
+		},
 	}
 }
 
@@ -561,23 +567,24 @@ func I1_M0_Expects[S pkg1.T, T pkg1.T, U pkg2.X[T]](
 	arg1 its.Matcher[T],
 
 ) _I1_M0Call[S, T, U] {
-	cancel := itskit.SkipStack()
-	defer cancel()
-
-	spec := _I1_M0CallSpec[S, T, U]{}
-	spec.arg0 = itskit.Named(
-		"arg0",
-		arg0,
-	)
-
-	spec.arg1 = itskit.Named(
-		"arg1",
-		arg1,
-	)
+	{
+		cancel := itskit.SkipStack()
+		defer cancel()
+	}
 
 	return _I1_M0Call[S, T, U]{
 		name: itskit.NewLabelWithLocation("func I1_M0"),
-		spec: spec,
+		spec: _I1_M0CallSpec[S, T, U]{
+			arg0: itskit.Named(
+				"arg0",
+				arg0,
+			),
+
+			arg1: itskit.Named(
+				"arg1",
+				arg1,
+			),
+		},
 	}
 }
 
@@ -688,18 +695,19 @@ func I1_M1_Expects[S pkg1.T, T pkg1.T, U pkg2.X[T]](
 	arg0 its.Matcher[S],
 
 ) _I1_M1Call[S, T, U] {
-	cancel := itskit.SkipStack()
-	defer cancel()
-
-	spec := _I1_M1CallSpec[S, T, U]{}
-	spec.arg0 = itskit.Named(
-		"arg0",
-		arg0,
-	)
+	{
+		cancel := itskit.SkipStack()
+		defer cancel()
+	}
 
 	return _I1_M1Call[S, T, U]{
 		name: itskit.NewLabelWithLocation("func I1_M1"),
-		spec: spec,
+		spec: _I1_M1CallSpec[S, T, U]{
+			arg0: itskit.Named(
+				"arg0",
+				arg0,
+			),
+		},
 	}
 }
 
@@ -772,14 +780,14 @@ type _I1_M2Call[S pkg1.T, T pkg1.T, U pkg2.X[T]] struct {
 }
 
 func I1_M2_Expects[S pkg1.T, T pkg1.T, U pkg2.X[T]]() _I1_M2Call[S, T, U] {
-	cancel := itskit.SkipStack()
-	defer cancel()
-
-	spec := _I1_M2CallSpec[S, T, U]{}
+	{
+		cancel := itskit.SkipStack()
+		defer cancel()
+	}
 
 	return _I1_M2Call[S, T, U]{
 		name: itskit.NewLabelWithLocation("func I1_M2"),
-		spec: spec,
+		spec: _I1_M2CallSpec[S, T, U]{},
 	}
 }
 
@@ -839,18 +847,19 @@ func I2_M0_Expects[T ~string](
 	arg0 its.Matcher[T],
 
 ) _I2_M0Call[T] {
-	cancel := itskit.SkipStack()
-	defer cancel()
-
-	spec := _I2_M0CallSpec[T]{}
-	spec.arg0 = itskit.Named(
-		"arg0",
-		arg0,
-	)
+	{
+		cancel := itskit.SkipStack()
+		defer cancel()
+	}
 
 	return _I2_M0Call[T]{
 		name: itskit.NewLabelWithLocation("func I2_M0"),
-		spec: spec,
+		spec: _I2_M0CallSpec[T]{
+			arg0: itskit.Named(
+				"arg0",
+				arg0,
+			),
+		},
 	}
 }
 
@@ -933,18 +942,19 @@ func C3_Read_Expects(
 	p its.Matcher[[]byte],
 
 ) _C3_ReadCall {
-	cancel := itskit.SkipStack()
-	defer cancel()
-
-	spec := _C3_ReadCallSpec{}
-	spec.p = itskit.Named(
-		"p",
-		p,
-	)
+	{
+		cancel := itskit.SkipStack()
+		defer cancel()
+	}
 
 	return _C3_ReadCall{
 		name: itskit.NewLabelWithLocation("func C3_Read"),
-		spec: spec,
+		spec: _C3_ReadCallSpec{
+			p: itskit.Named(
+				"p",
+				p,
+			),
+		},
 	}
 }
 
@@ -1037,18 +1047,19 @@ func C3_Write_Expects(
 	p its.Matcher[[]byte],
 
 ) _C3_WriteCall {
-	cancel := itskit.SkipStack()
-	defer cancel()
-
-	spec := _C3_WriteCallSpec{}
-	spec.p = itskit.Named(
-		"p",
-		p,
-	)
+	{
+		cancel := itskit.SkipStack()
+		defer cancel()
+	}
 
 	return _C3_WriteCall{
 		name: itskit.NewLabelWithLocation("func C3_Write"),
-		spec: spec,
+		spec: _C3_WriteCallSpec{
+			p: itskit.Named(
+				"p",
+				p,
+			),
+		},
 	}
 }
 
@@ -1137,14 +1148,14 @@ type _C4_AnotherMethodCall struct {
 }
 
 func C4_AnotherMethod_Expects() _C4_AnotherMethodCall {
-	cancel := itskit.SkipStack()
-	defer cancel()
-
-	spec := _C4_AnotherMethodCallSpec{}
+	{
+		cancel := itskit.SkipStack()
+		defer cancel()
+	}
 
 	return _C4_AnotherMethodCall{
 		name: itskit.NewLabelWithLocation("func C4_AnotherMethod"),
-		spec: spec,
+		spec: _C4_AnotherMethodCallSpec{},
 	}
 }
 
@@ -1194,14 +1205,14 @@ type _C4_CloseCall struct {
 }
 
 func C4_Close_Expects() _C4_CloseCall {
-	cancel := itskit.SkipStack()
-	defer cancel()
-
-	spec := _C4_CloseCallSpec{}
+	{
+		cancel := itskit.SkipStack()
+		defer cancel()
+	}
 
 	return _C4_CloseCall{
 		name: itskit.NewLabelWithLocation("func C4_Close"),
-		spec: spec,
+		spec: _C4_CloseCallSpec{},
 	}
 }
 
@@ -1257,14 +1268,14 @@ type _C4_DotMethodCall struct {
 }
 
 func C4_DotMethod_Expects() _C4_DotMethodCall {
-	cancel := itskit.SkipStack()
-	defer cancel()
-
-	spec := _C4_DotMethodCallSpec{}
+	{
+		cancel := itskit.SkipStack()
+		defer cancel()
+	}
 
 	return _C4_DotMethodCall{
 		name: itskit.NewLabelWithLocation("func C4_DotMethod"),
-		spec: spec,
+		spec: _C4_DotMethodCallSpec{},
 	}
 }
 
@@ -1314,14 +1325,14 @@ type _C4_MethodCall struct {
 }
 
 func C4_Method_Expects() _C4_MethodCall {
-	cancel := itskit.SkipStack()
-	defer cancel()
-
-	spec := _C4_MethodCallSpec{}
+	{
+		cancel := itskit.SkipStack()
+		defer cancel()
+	}
 
 	return _C4_MethodCall{
 		name: itskit.NewLabelWithLocation("func C4_Method"),
-		spec: spec,
+		spec: _C4_MethodCallSpec{},
 	}
 }
 
@@ -1375,18 +1386,19 @@ func C4_Read_Expects(
 	p its.Matcher[[]byte],
 
 ) _C4_ReadCall {
-	cancel := itskit.SkipStack()
-	defer cancel()
-
-	spec := _C4_ReadCallSpec{}
-	spec.p = itskit.Named(
-		"p",
-		p,
-	)
+	{
+		cancel := itskit.SkipStack()
+		defer cancel()
+	}
 
 	return _C4_ReadCall{
 		name: itskit.NewLabelWithLocation("func C4_Read"),
-		spec: spec,
+		spec: _C4_ReadCallSpec{
+			p: itskit.Named(
+				"p",
+				p,
+			),
+		},
 	}
 }
 
@@ -1475,14 +1487,14 @@ type _C5_MCall struct {
 }
 
 func C5_M_Expects() _C5_MCall {
-	cancel := itskit.SkipStack()
-	defer cancel()
-
-	spec := _C5_MCallSpec{}
+	{
+		cancel := itskit.SkipStack()
+		defer cancel()
+	}
 
 	return _C5_MCall{
 		name: itskit.NewLabelWithLocation("func C5_M"),
-		spec: spec,
+		spec: _C5_MCallSpec{},
 	}
 }
 
@@ -1536,18 +1548,19 @@ func C6_G2G_Expects(
 	arg0 its.Matcher[pkg3.DotGene[int]],
 
 ) _C6_G2GCall {
-	cancel := itskit.SkipStack()
-	defer cancel()
-
-	spec := _C6_G2GCallSpec{}
-	spec.arg0 = itskit.Named(
-		"arg0",
-		arg0,
-	)
+	{
+		cancel := itskit.SkipStack()
+		defer cancel()
+	}
 
 	return _C6_G2GCall{
 		name: itskit.NewLabelWithLocation("func C6_G2G"),
-		spec: spec,
+		spec: _C6_G2GCallSpec{
+			arg0: itskit.Named(
+				"arg0",
+				arg0,
+			),
+		},
 	}
 }
 
@@ -1630,18 +1643,19 @@ func C6_Map2Slice_Expects(
 	arg0 its.Matcher[pkg3.DotMap],
 
 ) _C6_Map2SliceCall {
-	cancel := itskit.SkipStack()
-	defer cancel()
-
-	spec := _C6_Map2SliceCallSpec{}
-	spec.arg0 = itskit.Named(
-		"arg0",
-		arg0,
-	)
+	{
+		cancel := itskit.SkipStack()
+		defer cancel()
+	}
 
 	return _C6_Map2SliceCall{
 		name: itskit.NewLabelWithLocation("func C6_Map2Slice"),
-		spec: spec,
+		spec: _C6_Map2SliceCallSpec{
+			arg0: itskit.Named(
+				"arg0",
+				arg0,
+			),
+		},
 	}
 }
 
@@ -1724,18 +1738,19 @@ func C6_Slice2Map_Expects(
 	arg0 its.Matcher[pkg3.DotSlice],
 
 ) _C6_Slice2MapCall {
-	cancel := itskit.SkipStack()
-	defer cancel()
-
-	spec := _C6_Slice2MapCallSpec{}
-	spec.arg0 = itskit.Named(
-		"arg0",
-		arg0,
-	)
+	{
+		cancel := itskit.SkipStack()
+		defer cancel()
+	}
 
 	return _C6_Slice2MapCall{
 		name: itskit.NewLabelWithLocation("func C6_Slice2Map"),
-		spec: spec,
+		spec: _C6_Slice2MapCallSpec{
+			arg0: itskit.Named(
+				"arg0",
+				arg0,
+			),
+		},
 	}
 }
 
