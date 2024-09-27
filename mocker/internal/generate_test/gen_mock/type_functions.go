@@ -18,14 +18,14 @@ type _F1Call struct {
 }
 
 func F1_Expects() _F1Call {
-	cancel := itskit.SkipStack()
-	defer cancel()
-
-	spec := _F1CallSpec{}
+	{
+		cancel := itskit.SkipStack()
+		defer cancel()
+	}
 
 	return _F1Call{
 		name: itskit.NewLabelWithLocation("func F1"),
-		spec: spec,
+		spec: _F1CallSpec{},
 	}
 }
 
@@ -75,14 +75,14 @@ type _F2Call struct {
 }
 
 func F2_Expects() _F2Call {
-	cancel := itskit.SkipStack()
-	defer cancel()
-
-	spec := _F2CallSpec{}
+	{
+		cancel := itskit.SkipStack()
+		defer cancel()
+	}
 
 	return _F2Call{
 		name: itskit.NewLabelWithLocation("func F2"),
-		spec: spec,
+		spec: _F2CallSpec{},
 	}
 }
 
@@ -138,14 +138,14 @@ type _F3Call struct {
 }
 
 func F3_Expects() _F3Call {
-	cancel := itskit.SkipStack()
-	defer cancel()
-
-	spec := _F3CallSpec{}
+	{
+		cancel := itskit.SkipStack()
+		defer cancel()
+	}
 
 	return _F3Call{
 		name: itskit.NewLabelWithLocation("func F3"),
-		spec: spec,
+		spec: _F3CallSpec{},
 	}
 }
 
@@ -211,14 +211,14 @@ type _F4Call struct {
 }
 
 func F4_Expects() _F4Call {
-	cancel := itskit.SkipStack()
-	defer cancel()
-
-	spec := _F4CallSpec{}
+	{
+		cancel := itskit.SkipStack()
+		defer cancel()
+	}
 
 	return _F4Call{
 		name: itskit.NewLabelWithLocation("func F4"),
-		spec: spec,
+		spec: _F4CallSpec{},
 	}
 }
 
@@ -292,23 +292,24 @@ func F5_Expects(
 	arg1 its.Matcher[string],
 
 ) _F5Call {
-	cancel := itskit.SkipStack()
-	defer cancel()
-
-	spec := _F5CallSpec{}
-	spec.arg0 = itskit.Named(
-		"arg0",
-		arg0,
-	)
-
-	spec.arg1 = itskit.Named(
-		"arg1",
-		arg1,
-	)
+	{
+		cancel := itskit.SkipStack()
+		defer cancel()
+	}
 
 	return _F5Call{
 		name: itskit.NewLabelWithLocation("func F5"),
-		spec: spec,
+		spec: _F5CallSpec{
+			arg0: itskit.Named(
+				"arg0",
+				arg0,
+			),
+
+			arg1: itskit.Named(
+				"arg1",
+				arg1,
+			),
+		},
 	}
 }
 
@@ -405,22 +406,24 @@ func F6_Expects(
 	arg0 its.Matcher[int],
 	vararg its.Matcher[[]string],
 ) _F6Call {
-	cancel := itskit.SkipStack()
-	defer cancel()
+	{
+		cancel := itskit.SkipStack()
+		defer cancel()
+	}
 
-	spec := _F6CallSpec{}
-	spec.arg0 = itskit.Named(
-		"arg0",
-		arg0,
-	)
-
-	spec.vararg = itskit.Named(
-		"vararg",
-		vararg,
-	)
 	return _F6Call{
 		name: itskit.NewLabelWithLocation("func F6"),
-		spec: spec,
+		spec: _F6CallSpec{
+			arg0: itskit.Named(
+				"arg0",
+				arg0,
+			),
+
+			vararg: itskit.Named(
+				"vararg",
+				vararg,
+			),
+		},
 	}
 }
 
@@ -511,17 +514,19 @@ type _F7Call struct {
 
 func F7_Expects(vararg its.Matcher[[]string],
 ) _F7Call {
-	cancel := itskit.SkipStack()
-	defer cancel()
+	{
+		cancel := itskit.SkipStack()
+		defer cancel()
+	}
 
-	spec := _F7CallSpec{}
-	spec.vararg = itskit.Named(
-		"vararg",
-		vararg,
-	)
 	return _F7Call{
 		name: itskit.NewLabelWithLocation("func F7"),
-		spec: spec,
+		spec: _F7CallSpec{
+			vararg: itskit.Named(
+				"vararg",
+				vararg,
+			),
+		},
 	}
 }
 
@@ -584,9 +589,9 @@ func (c _F7Call) ThenEffect(effect func(vararg ...string)) mockkit.FuncBehavior[
 }
 
 type _F8CallSpec struct {
-	i its.Matcher[int]
+	cancel its.Matcher[int]
 
-	s its.Matcher[string]
+	spec its.Matcher[string]
 }
 
 type _F8Call struct {
@@ -595,38 +600,39 @@ type _F8Call struct {
 }
 
 func F8_Expects(
-	i its.Matcher[int],
+	cancel its.Matcher[int],
 
-	s its.Matcher[string],
+	spec its.Matcher[string],
 
 ) _F8Call {
-	cancel := itskit.SkipStack()
-	defer cancel()
-
-	spec := _F8CallSpec{}
-	spec.i = itskit.Named(
-		"i",
-		i,
-	)
-
-	spec.s = itskit.Named(
-		"s",
-		s,
-	)
+	{
+		cancel := itskit.SkipStack()
+		defer cancel()
+	}
 
 	return _F8Call{
 		name: itskit.NewLabelWithLocation("func F8"),
-		spec: spec,
+		spec: _F8CallSpec{
+			cancel: itskit.Named(
+				"cancel",
+				cancel,
+			),
+
+			spec: itskit.Named(
+				"spec",
+				spec,
+			),
+		},
 	}
 }
 
 type _F8Behavior struct {
 	name   itskit.Label
 	spec   _F8CallSpec
-	effect func(i int, s string)
+	effect func(cancel int, spec string)
 }
 
-func (b *_F8Behavior) Fn(t mockkit.TestLike) func(i int, s string) {
+func (b *_F8Behavior) Fn(t mockkit.TestLike) func(cancel int, spec string) {
 	return func(
 
 		arg0 int,
@@ -641,7 +647,7 @@ func (b *_F8Behavior) Fn(t mockkit.TestLike) func(i int, s string) {
 		matches := []itskit.Match{}
 
 		{
-			matcher := b.spec.i
+			matcher := b.spec.cancel
 			if matcher == nil {
 				matcher = its.Never[int]()
 			}
@@ -653,7 +659,7 @@ func (b *_F8Behavior) Fn(t mockkit.TestLike) func(i int, s string) {
 		}
 
 		{
-			matcher := b.spec.s
+			matcher := b.spec.spec
 			if matcher == nil {
 				matcher = its.Never[string]()
 			}
@@ -678,7 +684,7 @@ func (b *_F8Behavior) Fn(t mockkit.TestLike) func(i int, s string) {
 	}
 }
 
-func (c _F8Call) ThenReturn() mockkit.FuncBehavior[func(i int, s string)] {
+func (c _F8Call) ThenReturn() mockkit.FuncBehavior[func(cancel int, spec string)] {
 	return c.ThenEffect(func(
 
 		int,
@@ -690,7 +696,7 @@ func (c _F8Call) ThenReturn() mockkit.FuncBehavior[func(i int, s string)] {
 	})
 }
 
-func (c _F8Call) ThenEffect(effect func(i int, s string)) mockkit.FuncBehavior[func(i int, s string)] {
+func (c _F8Call) ThenEffect(effect func(cancel int, spec string)) mockkit.FuncBehavior[func(cancel int, spec string)] {
 	return &_F8Behavior{
 		name:   c.name,
 		spec:   c.spec,
@@ -713,22 +719,24 @@ func F9_Expects(
 	i its.Matcher[int],
 	ss its.Matcher[[]string],
 ) _F9Call {
-	cancel := itskit.SkipStack()
-	defer cancel()
+	{
+		cancel := itskit.SkipStack()
+		defer cancel()
+	}
 
-	spec := _F9CallSpec{}
-	spec.i = itskit.Named(
-		"i",
-		i,
-	)
-
-	spec.ss = itskit.Named(
-		"ss",
-		ss,
-	)
 	return _F9Call{
 		name: itskit.NewLabelWithLocation("func F9"),
-		spec: spec,
+		spec: _F9CallSpec{
+			i: itskit.Named(
+				"i",
+				i,
+			),
+
+			ss: itskit.Named(
+				"ss",
+				ss,
+			),
+		},
 	}
 }
 
@@ -819,17 +827,19 @@ type _F10Call struct {
 
 func F10_Expects(ss its.Matcher[[]string],
 ) _F10Call {
-	cancel := itskit.SkipStack()
-	defer cancel()
+	{
+		cancel := itskit.SkipStack()
+		defer cancel()
+	}
 
-	spec := _F10CallSpec{}
-	spec.ss = itskit.Named(
-		"ss",
-		ss,
-	)
 	return _F10Call{
 		name: itskit.NewLabelWithLocation("func F10"),
-		spec: spec,
+		spec: _F10CallSpec{
+			ss: itskit.Named(
+				"ss",
+				ss,
+			),
+		},
 	}
 }
 
@@ -908,23 +918,24 @@ func F11_Expects(
 	arg1 its.Matcher[string],
 
 ) _F11Call {
-	cancel := itskit.SkipStack()
-	defer cancel()
-
-	spec := _F11CallSpec{}
-	spec.arg0 = itskit.Named(
-		"arg0",
-		arg0,
-	)
-
-	spec.arg1 = itskit.Named(
-		"arg1",
-		arg1,
-	)
+	{
+		cancel := itskit.SkipStack()
+		defer cancel()
+	}
 
 	return _F11Call{
 		name: itskit.NewLabelWithLocation("func F11"),
-		spec: spec,
+		spec: _F11CallSpec{
+			arg0: itskit.Named(
+				"arg0",
+				arg0,
+			),
+
+			arg1: itskit.Named(
+				"arg1",
+				arg1,
+			),
+		},
 	}
 }
 
@@ -1021,22 +1032,24 @@ func F12_Expects(
 	arg0 its.Matcher[int],
 	vararg its.Matcher[[]string],
 ) _F12Call {
-	cancel := itskit.SkipStack()
-	defer cancel()
+	{
+		cancel := itskit.SkipStack()
+		defer cancel()
+	}
 
-	spec := _F12CallSpec{}
-	spec.arg0 = itskit.Named(
-		"arg0",
-		arg0,
-	)
-
-	spec.vararg = itskit.Named(
-		"vararg",
-		vararg,
-	)
 	return _F12Call{
 		name: itskit.NewLabelWithLocation("func F12"),
-		spec: spec,
+		spec: _F12CallSpec{
+			arg0: itskit.Named(
+				"arg0",
+				arg0,
+			),
+
+			vararg: itskit.Named(
+				"vararg",
+				vararg,
+			),
+		},
 	}
 }
 
@@ -1127,17 +1140,19 @@ type _F13Call struct {
 
 func F13_Expects(vararg its.Matcher[[]string],
 ) _F13Call {
-	cancel := itskit.SkipStack()
-	defer cancel()
+	{
+		cancel := itskit.SkipStack()
+		defer cancel()
+	}
 
-	spec := _F13CallSpec{}
-	spec.vararg = itskit.Named(
-		"vararg",
-		vararg,
-	)
 	return _F13Call{
 		name: itskit.NewLabelWithLocation("func F13"),
-		spec: spec,
+		spec: _F13CallSpec{
+			vararg: itskit.Named(
+				"vararg",
+				vararg,
+			),
+		},
 	}
 }
 
@@ -1216,23 +1231,24 @@ func F14_Expects(
 	arg1 its.Matcher[string],
 
 ) _F14Call {
-	cancel := itskit.SkipStack()
-	defer cancel()
-
-	spec := _F14CallSpec{}
-	spec.arg0 = itskit.Named(
-		"arg0",
-		arg0,
-	)
-
-	spec.arg1 = itskit.Named(
-		"arg1",
-		arg1,
-	)
+	{
+		cancel := itskit.SkipStack()
+		defer cancel()
+	}
 
 	return _F14Call{
 		name: itskit.NewLabelWithLocation("func F14"),
-		spec: spec,
+		spec: _F14CallSpec{
+			arg0: itskit.Named(
+				"arg0",
+				arg0,
+			),
+
+			arg1: itskit.Named(
+				"arg1",
+				arg1,
+			),
+		},
 	}
 }
 
@@ -1335,22 +1351,24 @@ func F15_Expects(
 	i its.Matcher[int],
 	ss its.Matcher[[]string],
 ) _F15Call {
-	cancel := itskit.SkipStack()
-	defer cancel()
+	{
+		cancel := itskit.SkipStack()
+		defer cancel()
+	}
 
-	spec := _F15CallSpec{}
-	spec.i = itskit.Named(
-		"i",
-		i,
-	)
-
-	spec.ss = itskit.Named(
-		"ss",
-		ss,
-	)
 	return _F15Call{
 		name: itskit.NewLabelWithLocation("func F15"),
-		spec: spec,
+		spec: _F15CallSpec{
+			i: itskit.Named(
+				"i",
+				i,
+			),
+
+			ss: itskit.Named(
+				"ss",
+				ss,
+			),
+		},
 	}
 }
 
@@ -1449,18 +1467,19 @@ func F16_Expects[T any](
 	arg0 its.Matcher[pkg1.F16[T]],
 
 ) _F16Call[T] {
-	cancel := itskit.SkipStack()
-	defer cancel()
-
-	spec := _F16CallSpec[T]{}
-	spec.arg0 = itskit.Named(
-		"arg0",
-		arg0,
-	)
+	{
+		cancel := itskit.SkipStack()
+		defer cancel()
+	}
 
 	return _F16Call[T]{
 		name: itskit.NewLabelWithLocation("func F16"),
-		spec: spec,
+		spec: _F16CallSpec[T]{
+			arg0: itskit.Named(
+				"arg0",
+				arg0,
+			),
+		},
 	}
 }
 
@@ -1549,18 +1568,19 @@ func F17_Expects[T ~struct {
 	arg0 its.Matcher[T],
 
 ) _F17Call[T] {
-	cancel := itskit.SkipStack()
-	defer cancel()
-
-	spec := _F17CallSpec[T]{}
-	spec.arg0 = itskit.Named(
-		"arg0",
-		arg0,
-	)
+	{
+		cancel := itskit.SkipStack()
+		defer cancel()
+	}
 
 	return _F17Call[T]{
 		name: itskit.NewLabelWithLocation("func F17"),
-		spec: spec,
+		spec: _F17CallSpec[T]{
+			arg0: itskit.Named(
+				"arg0",
+				arg0,
+			),
+		},
 	}
 }
 
@@ -1645,18 +1665,19 @@ func F18_Expects[T any, U any](
 	arg0 its.Matcher[func(arg0 T, arg1 U)],
 
 ) _F18Call[T, U] {
-	cancel := itskit.SkipStack()
-	defer cancel()
-
-	spec := _F18CallSpec[T, U]{}
-	spec.arg0 = itskit.Named(
-		"arg0",
-		arg0,
-	)
+	{
+		cancel := itskit.SkipStack()
+		defer cancel()
+	}
 
 	return _F18Call[T, U]{
 		name: itskit.NewLabelWithLocation("func F18"),
-		spec: spec,
+		spec: _F18CallSpec[T, U]{
+			arg0: itskit.Named(
+				"arg0",
+				arg0,
+			),
+		},
 	}
 }
 
@@ -1739,18 +1760,19 @@ func F19_Expects[T ~int](
 	arg0 its.Matcher[pkg1.F16[T]],
 
 ) _F19Call[T] {
-	cancel := itskit.SkipStack()
-	defer cancel()
-
-	spec := _F19CallSpec[T]{}
-	spec.arg0 = itskit.Named(
-		"arg0",
-		arg0,
-	)
+	{
+		cancel := itskit.SkipStack()
+		defer cancel()
+	}
 
 	return _F19Call[T]{
 		name: itskit.NewLabelWithLocation("func F19"),
-		spec: spec,
+		spec: _F19CallSpec[T]{
+			arg0: itskit.Named(
+				"arg0",
+				arg0,
+			),
+		},
 	}
 }
 
@@ -1833,18 +1855,19 @@ func F20_Expects[T ~int | int8 | ~int16 | int32](
 	arg0 its.Matcher[T],
 
 ) _F20Call[T] {
-	cancel := itskit.SkipStack()
-	defer cancel()
-
-	spec := _F20CallSpec[T]{}
-	spec.arg0 = itskit.Named(
-		"arg0",
-		arg0,
-	)
+	{
+		cancel := itskit.SkipStack()
+		defer cancel()
+	}
 
 	return _F20Call[T]{
 		name: itskit.NewLabelWithLocation("func F20"),
-		spec: spec,
+		spec: _F20CallSpec[T]{
+			arg0: itskit.Named(
+				"arg0",
+				arg0,
+			),
+		},
 	}
 }
 
@@ -1927,18 +1950,19 @@ func F25_Expects(
 	d its.Matcher[pkg2.DotStruct],
 
 ) _F25Call {
-	cancel := itskit.SkipStack()
-	defer cancel()
-
-	spec := _F25CallSpec{}
-	spec.d = itskit.Named(
-		"d",
-		d,
-	)
+	{
+		cancel := itskit.SkipStack()
+		defer cancel()
+	}
 
 	return _F25Call{
 		name: itskit.NewLabelWithLocation("func F25"),
-		spec: spec,
+		spec: _F25CallSpec{
+			d: itskit.Named(
+				"d",
+				d,
+			),
+		},
 	}
 }
 
@@ -2021,18 +2045,19 @@ func F26_Expects(
 	d its.Matcher[pkg2.DotInterface],
 
 ) _F26Call {
-	cancel := itskit.SkipStack()
-	defer cancel()
-
-	spec := _F26CallSpec{}
-	spec.d = itskit.Named(
-		"d",
-		d,
-	)
+	{
+		cancel := itskit.SkipStack()
+		defer cancel()
+	}
 
 	return _F26Call{
 		name: itskit.NewLabelWithLocation("func F26"),
-		spec: spec,
+		spec: _F26CallSpec{
+			d: itskit.Named(
+				"d",
+				d,
+			),
+		},
 	}
 }
 
@@ -2115,18 +2140,19 @@ func F27_Expects[T pkg2.DotInterface](
 	d its.Matcher[T],
 
 ) _F27Call[T] {
-	cancel := itskit.SkipStack()
-	defer cancel()
-
-	spec := _F27CallSpec[T]{}
-	spec.d = itskit.Named(
-		"d",
-		d,
-	)
+	{
+		cancel := itskit.SkipStack()
+		defer cancel()
+	}
 
 	return _F27Call[T]{
 		name: itskit.NewLabelWithLocation("func F27"),
-		spec: spec,
+		spec: _F27CallSpec[T]{
+			d: itskit.Named(
+				"d",
+				d,
+			),
+		},
 	}
 }
 
@@ -2209,18 +2235,19 @@ func F28_Expects(
 	arg0 its.Matcher[pkg2.DotMap],
 
 ) _F28Call {
-	cancel := itskit.SkipStack()
-	defer cancel()
-
-	spec := _F28CallSpec{}
-	spec.arg0 = itskit.Named(
-		"arg0",
-		arg0,
-	)
+	{
+		cancel := itskit.SkipStack()
+		defer cancel()
+	}
 
 	return _F28Call{
 		name: itskit.NewLabelWithLocation("func F28"),
-		spec: spec,
+		spec: _F28CallSpec{
+			arg0: itskit.Named(
+				"arg0",
+				arg0,
+			),
+		},
 	}
 }
 
@@ -2303,18 +2330,19 @@ func F29_Expects(
 	arg0 its.Matcher[pkg2.DotSlice],
 
 ) _F29Call {
-	cancel := itskit.SkipStack()
-	defer cancel()
-
-	spec := _F29CallSpec{}
-	spec.arg0 = itskit.Named(
-		"arg0",
-		arg0,
-	)
+	{
+		cancel := itskit.SkipStack()
+		defer cancel()
+	}
 
 	return _F29Call{
 		name: itskit.NewLabelWithLocation("func F29"),
-		spec: spec,
+		spec: _F29CallSpec{
+			arg0: itskit.Named(
+				"arg0",
+				arg0,
+			),
+		},
 	}
 }
 
@@ -2397,18 +2425,19 @@ func F30_Expects(
 	arg0 its.Matcher[pkg2.DotGene[int]],
 
 ) _F30Call {
-	cancel := itskit.SkipStack()
-	defer cancel()
-
-	spec := _F30CallSpec{}
-	spec.arg0 = itskit.Named(
-		"arg0",
-		arg0,
-	)
+	{
+		cancel := itskit.SkipStack()
+		defer cancel()
+	}
 
 	return _F30Call{
 		name: itskit.NewLabelWithLocation("func F30"),
-		spec: spec,
+		spec: _F30CallSpec{
+			arg0: itskit.Named(
+				"arg0",
+				arg0,
+			),
+		},
 	}
 }
 

@@ -24,19 +24,21 @@ func SessionStore_Expects(
 	cookie its.Matcher[string],
 	
 ) _SessionStoreCall {
-	cancel := itskit.SkipStack()
-	defer cancel()
+	{
+		cancel := itskit.SkipStack()
+		defer cancel()
+	}
 
-	spec := _SessionStoreCallSpec {}
-	spec.cookie = itskit.Named(
-		"cookie",
-		cookie,
-	)
-	
-	
 	return _SessionStoreCall{
 		name: itskit.NewLabelWithLocation("func SessionStore"),
-		spec: spec,
+		spec:  _SessionStoreCallSpec{
+			cookie: itskit.Named(
+				"cookie",
+				cookie,
+			),
+			
+			
+		},
 	}
 }
 
@@ -136,19 +138,21 @@ func UserRegistry_Delete_Expects(
 	arg0 its.Matcher[pkg1.User],
 	
 ) _UserRegistry_DeleteCall {
-	cancel := itskit.SkipStack()
-	defer cancel()
+	{
+		cancel := itskit.SkipStack()
+		defer cancel()
+	}
 
-	spec := _UserRegistry_DeleteCallSpec {}
-	spec.arg0 = itskit.Named(
-		"arg0",
-		arg0,
-	)
-	
-	
 	return _UserRegistry_DeleteCall{
 		name: itskit.NewLabelWithLocation("func UserRegistry_Delete"),
-		spec: spec,
+		spec:  _UserRegistry_DeleteCallSpec{
+			arg0: itskit.Named(
+				"arg0",
+				arg0,
+			),
+			
+			
+		},
 	}
 }
 
@@ -244,19 +248,21 @@ func UserRegistry_Get_Expects(
 	userId its.Matcher[string],
 	
 ) _UserRegistry_GetCall {
-	cancel := itskit.SkipStack()
-	defer cancel()
+	{
+		cancel := itskit.SkipStack()
+		defer cancel()
+	}
 
-	spec := _UserRegistry_GetCallSpec {}
-	spec.userId = itskit.Named(
-		"userId",
-		userId,
-	)
-	
-	
 	return _UserRegistry_GetCall{
 		name: itskit.NewLabelWithLocation("func UserRegistry_Get"),
-		spec: spec,
+		spec:  _UserRegistry_GetCallSpec{
+			userId: itskit.Named(
+				"userId",
+				userId,
+			),
+			
+			
+		},
 	}
 }
 
@@ -356,19 +362,21 @@ func UserRegistry_Update_Expects(
 	arg0 its.Matcher[pkg1.User],
 	
 ) _UserRegistry_UpdateCall {
-	cancel := itskit.SkipStack()
-	defer cancel()
+	{
+		cancel := itskit.SkipStack()
+		defer cancel()
+	}
 
-	spec := _UserRegistry_UpdateCallSpec {}
-	spec.arg0 = itskit.Named(
-		"arg0",
-		arg0,
-	)
-	
-	
 	return _UserRegistry_UpdateCall{
 		name: itskit.NewLabelWithLocation("func UserRegistry_Update"),
-		spec: spec,
+		spec:  _UserRegistry_UpdateCallSpec{
+			arg0: itskit.Named(
+				"arg0",
+				arg0,
+			),
+			
+			
+		},
 	}
 }
 

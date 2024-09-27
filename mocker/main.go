@@ -329,23 +329,26 @@ func {{ .Name }}_Expects{{ .GenericExpr $imports true }}(
 	{{ end -}}
 	{{ if .Body.VarArg }}{{ .Body.VarArg.ParamNameOr "vararg" }} its.Matcher[[]{{ .Body.VarArg.Type.Expr $imports }}],{{ end }}
 ) _{{ .Name }}Call{{ .GenericExpr $imports false }} {
-	cancel := itskit.SkipStack()
-	defer cancel()
+	{
+		cancel := itskit.SkipStack()
+		defer cancel()
+	}
 
-	spec := _{{ .Name }}CallSpec{{ .GenericExpr $imports false }} {}
-	{{- range $idx, $p := .Body.Args}}
-	spec.{{ $p.ParamNameOr (printf "arg%d" $idx) }} = itskit.Named(
-		"{{ $p.ParamNameOr (printf "arg%d" $idx) }}",
-		{{ $p.ParamNameOr (printf "arg%d" $idx) }},
-	)
-	{{ end }}
-	{{ if .Body.VarArg }}spec.{{ .Body.VarArg.ParamNameOr "vararg" }} = itskit.Named(
-		"{{ .Body.VarArg.ParamNameOr "vararg" }}",
-		{{ .Body.VarArg.ParamNameOr "vararg" }},
-	){{ end }}
 	return _{{ .Name }}Call{{ .GenericExpr $imports false }}{
 		name: itskit.NewLabelWithLocation("func {{ .Name }}"),
-		spec: spec,
+		spec:  _{{ .Name }}CallSpec{{ .GenericExpr $imports false }}{
+			{{- range $idx, $p := .Body.Args}}
+			{{ $p.ParamNameOr (printf "arg%d" $idx) }}: itskit.Named(
+				"{{ $p.ParamNameOr (printf "arg%d" $idx) }}",
+				{{ $p.ParamNameOr (printf "arg%d" $idx) }},
+			),
+			{{ end }}
+			{{ if .Body.VarArg }}{{ .Body.VarArg.ParamNameOr "vararg" }}: itskit.Named(
+				"{{ .Body.VarArg.ParamNameOr "vararg" }}",
+				{{ .Body.VarArg.ParamNameOr "vararg" }},
+			),
+			{{ end }}
+		},
 	}
 }
 
