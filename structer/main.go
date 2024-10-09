@@ -164,7 +164,9 @@ The new file, has "Matcher" and "Spec" types, is placed in "./gen_structer" dire
 			ConfigIsNeeded: false,
 			Imports:        new(parser.Imports),
 		}
-		genFile.Imports.Add(pkg.Path)
+
+		requires := map[string]struct{}{}
+		requires[pkg.Path] = struct{}{}
 
 		{
 			defs := structs[sourcepath]
@@ -173,7 +175,7 @@ The new file, has "Matcher" and "Spec" types, is placed in "./gen_structer" dire
 				genFile.ConfigIsNeeded = genFile.ConfigIsNeeded || 0 < len(s.Body.Fields)
 				genFile.Structs = append(genFile.Structs, s)
 				for _, req := range s.Require() {
-					genFile.Imports.Add(req)
+					requires[req] = struct{}{}
 				}
 			}
 		}
@@ -183,7 +185,7 @@ The new file, has "Matcher" and "Spec" types, is placed in "./gen_structer" dire
 				m := defs[i]
 				genFile.Maps = append(genFile.Maps, m)
 				for _, req := range m.Require() {
-					genFile.Imports.Add(req)
+					requires[req] = struct{}{}
 				}
 			}
 		}
@@ -193,7 +195,7 @@ The new file, has "Matcher" and "Spec" types, is placed in "./gen_structer" dire
 				m := defs[i]
 				genFile.Slices = append(genFile.Slices, m)
 				for _, req := range m.Require() {
-					genFile.Imports.Add(req)
+					requires[req] = struct{}{}
 				}
 			}
 		}
@@ -203,11 +205,20 @@ The new file, has "Matcher" and "Spec" types, is placed in "./gen_structer" dire
 				m := defs[i]
 				genFile.Arrays = append(genFile.Arrays, m)
 				for _, req := range m.Require() {
-					genFile.Imports.Add(req)
+					requires[req] = struct{}{}
 				}
 			}
 		}
-
+		{
+			rs := []string{}
+			for r := range requires {
+				rs = append(rs, r)
+			}
+			sort.Strings(rs)
+			for _, r := range rs {
+				genFile.Imports.Add(r)
+			}
+		}
 		if len(genFile.Structs) == 0 {
 			continue
 		}
