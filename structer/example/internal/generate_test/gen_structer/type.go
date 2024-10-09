@@ -11,10 +11,10 @@ import (
 	itsio "github.com/youta-t/its/itskit/itsio"
 
 	pkg1 "github.com/youta-t/its/structer/example/internal/generate_test"
-	pkg5 "github.com/youta-t/its/structer/example/internal/generate_test/dot"
-	pkg2 "github.com/youta-t/its/structer/example/internal/generate_test/sub1"
+	pkg2 "github.com/youta-t/its/structer/example/internal/generate_test/dot"
+	pkg3 "github.com/youta-t/its/structer/example/internal/generate_test/sub1"
 	pkg4 "github.com/youta-t/its/structer/example/internal/generate_test/sub2"
-	pkg3 "io"
+	pkg5 "io"
 )
 
 type TSpec[P interface {
@@ -25,9 +25,9 @@ type TSpec[P interface {
 
 	F1 its.Matcher[*string]
 
-	F2 its.Matcher[pkg2.Sub1]
+	F2 its.Matcher[pkg3.Sub1]
 
-	F3 its.Matcher[*pkg2.Sub1]
+	F3 its.Matcher[*pkg3.Sub1]
 
 	F4 its.Matcher[pkg1.G[int]]
 
@@ -63,7 +63,7 @@ type TSpec[P interface {
 
 	F18 its.Matcher[interface {
 		M(arg0 string, arg1 pkg1.X, vararg ...int) (int, error)
-		pkg3.Writer
+		pkg5.Writer
 		pkg1.I1
 		pkg1.I2
 	}]
@@ -76,29 +76,29 @@ type TSpec[P interface {
 
 	G its.Matcher[pkg1.G[int]]
 
-	DS its.Matcher[pkg5.DotStruct]
+	DS its.Matcher[pkg2.DotStruct]
 
-	DSStar its.Matcher[*pkg5.DotStruct]
+	DSStar its.Matcher[*pkg2.DotStruct]
 
-	DI its.Matcher[pkg5.DotInterface]
+	DI its.Matcher[pkg2.DotInterface]
 
-	DF its.Matcher[pkg5.DotFunc]
+	DF its.Matcher[pkg2.DotFunc]
 
-	DN its.Matcher[pkg5.DotName]
+	DN its.Matcher[pkg2.DotName]
 
-	DSlice its.Matcher[pkg5.DotSlice]
+	DSlice its.Matcher[pkg2.DotSlice]
 
-	DMap its.Matcher[pkg5.DotMap]
+	DMap its.Matcher[pkg2.DotMap]
 
-	DGene its.Matcher[pkg5.DotG[string]]
+	DGene its.Matcher[pkg2.DotG[string]]
 
-	GDS its.Matcher[pkg1.G[pkg5.DotStruct]]
+	GDS its.Matcher[pkg1.G[pkg2.DotStruct]]
 
-	GDI its.Matcher[pkg1.G[pkg5.DotInterface]]
+	GDI its.Matcher[pkg1.G[pkg2.DotInterface]]
 
-	GDF its.Matcher[pkg1.G[pkg5.DotFunc]]
+	GDF its.Matcher[pkg1.G[pkg2.DotFunc]]
 
-	GDN its.Matcher[pkg1.G[pkg5.DotName]]
+	GDN its.Matcher[pkg1.G[pkg2.DotName]]
 }
 
 type _TMatcher[P interface {
@@ -160,16 +160,16 @@ func ItsT[P interface {
 		matcher := want.F2
 		if matcher == nil {
 			if config.StrictModeForStruct {
-				matcher = its.Never[pkg2.Sub1]()
+				matcher = its.Never[pkg3.Sub1]()
 			} else {
-				matcher = its.Always[pkg2.Sub1]()
+				matcher = its.Always[pkg3.Sub1]()
 			}
 		}
 		sub = append(
 			sub,
-			its.Property[pkg1.T[P], pkg2.Sub1](
+			its.Property[pkg1.T[P], pkg3.Sub1](
 				".F2",
-				func(got pkg1.T[P]) pkg2.Sub1 { return got.F2 },
+				func(got pkg1.T[P]) pkg3.Sub1 { return got.F2 },
 				matcher,
 			),
 		)
@@ -179,16 +179,16 @@ func ItsT[P interface {
 		matcher := want.F3
 		if matcher == nil {
 			if config.StrictModeForStruct {
-				matcher = its.Never[*pkg2.Sub1]()
+				matcher = its.Never[*pkg3.Sub1]()
 			} else {
-				matcher = its.Always[*pkg2.Sub1]()
+				matcher = its.Always[*pkg3.Sub1]()
 			}
 		}
 		sub = append(
 			sub,
-			its.Property[pkg1.T[P], *pkg2.Sub1](
+			its.Property[pkg1.T[P], *pkg3.Sub1](
 				".F3",
-				func(got pkg1.T[P]) *pkg2.Sub1 { return got.F3 },
+				func(got pkg1.T[P]) *pkg3.Sub1 { return got.F3 },
 				matcher,
 			),
 		)
@@ -495,14 +495,14 @@ func ItsT[P interface {
 			if config.StrictModeForStruct {
 				matcher = its.Never[interface {
 					M(arg0 string, arg1 pkg1.X, vararg ...int) (int, error)
-					pkg3.Writer
+					pkg5.Writer
 					pkg1.I1
 					pkg1.I2
 				}]()
 			} else {
 				matcher = its.Always[interface {
 					M(arg0 string, arg1 pkg1.X, vararg ...int) (int, error)
-					pkg3.Writer
+					pkg5.Writer
 					pkg1.I1
 					pkg1.I2
 				}]()
@@ -512,14 +512,14 @@ func ItsT[P interface {
 			sub,
 			its.Property[pkg1.T[P], interface {
 				M(arg0 string, arg1 pkg1.X, vararg ...int) (int, error)
-				pkg3.Writer
+				pkg5.Writer
 				pkg1.I1
 				pkg1.I2
 			}](
 				".F18",
 				func(got pkg1.T[P]) interface {
 					M(arg0 string, arg1 pkg1.X, vararg ...int) (int, error)
-					pkg3.Writer
+					pkg5.Writer
 					pkg1.I1
 					pkg1.I2
 				} {
@@ -610,16 +610,16 @@ func ItsT[P interface {
 		matcher := want.DS
 		if matcher == nil {
 			if config.StrictModeForStruct {
-				matcher = its.Never[pkg5.DotStruct]()
+				matcher = its.Never[pkg2.DotStruct]()
 			} else {
-				matcher = its.Always[pkg5.DotStruct]()
+				matcher = its.Always[pkg2.DotStruct]()
 			}
 		}
 		sub = append(
 			sub,
-			its.Property[pkg1.T[P], pkg5.DotStruct](
+			its.Property[pkg1.T[P], pkg2.DotStruct](
 				".DS",
-				func(got pkg1.T[P]) pkg5.DotStruct { return got.DS },
+				func(got pkg1.T[P]) pkg2.DotStruct { return got.DS },
 				matcher,
 			),
 		)
@@ -629,16 +629,16 @@ func ItsT[P interface {
 		matcher := want.DSStar
 		if matcher == nil {
 			if config.StrictModeForStruct {
-				matcher = its.Never[*pkg5.DotStruct]()
+				matcher = its.Never[*pkg2.DotStruct]()
 			} else {
-				matcher = its.Always[*pkg5.DotStruct]()
+				matcher = its.Always[*pkg2.DotStruct]()
 			}
 		}
 		sub = append(
 			sub,
-			its.Property[pkg1.T[P], *pkg5.DotStruct](
+			its.Property[pkg1.T[P], *pkg2.DotStruct](
 				".DSStar",
-				func(got pkg1.T[P]) *pkg5.DotStruct { return got.DSStar },
+				func(got pkg1.T[P]) *pkg2.DotStruct { return got.DSStar },
 				matcher,
 			),
 		)
@@ -648,16 +648,16 @@ func ItsT[P interface {
 		matcher := want.DI
 		if matcher == nil {
 			if config.StrictModeForStruct {
-				matcher = its.Never[pkg5.DotInterface]()
+				matcher = its.Never[pkg2.DotInterface]()
 			} else {
-				matcher = its.Always[pkg5.DotInterface]()
+				matcher = its.Always[pkg2.DotInterface]()
 			}
 		}
 		sub = append(
 			sub,
-			its.Property[pkg1.T[P], pkg5.DotInterface](
+			its.Property[pkg1.T[P], pkg2.DotInterface](
 				".DI",
-				func(got pkg1.T[P]) pkg5.DotInterface { return got.DI },
+				func(got pkg1.T[P]) pkg2.DotInterface { return got.DI },
 				matcher,
 			),
 		)
@@ -667,16 +667,16 @@ func ItsT[P interface {
 		matcher := want.DF
 		if matcher == nil {
 			if config.StrictModeForStruct {
-				matcher = its.Never[pkg5.DotFunc]()
+				matcher = its.Never[pkg2.DotFunc]()
 			} else {
-				matcher = its.Always[pkg5.DotFunc]()
+				matcher = its.Always[pkg2.DotFunc]()
 			}
 		}
 		sub = append(
 			sub,
-			its.Property[pkg1.T[P], pkg5.DotFunc](
+			its.Property[pkg1.T[P], pkg2.DotFunc](
 				".DF",
-				func(got pkg1.T[P]) pkg5.DotFunc { return got.DF },
+				func(got pkg1.T[P]) pkg2.DotFunc { return got.DF },
 				matcher,
 			),
 		)
@@ -686,16 +686,16 @@ func ItsT[P interface {
 		matcher := want.DN
 		if matcher == nil {
 			if config.StrictModeForStruct {
-				matcher = its.Never[pkg5.DotName]()
+				matcher = its.Never[pkg2.DotName]()
 			} else {
-				matcher = its.Always[pkg5.DotName]()
+				matcher = its.Always[pkg2.DotName]()
 			}
 		}
 		sub = append(
 			sub,
-			its.Property[pkg1.T[P], pkg5.DotName](
+			its.Property[pkg1.T[P], pkg2.DotName](
 				".DN",
-				func(got pkg1.T[P]) pkg5.DotName { return got.DN },
+				func(got pkg1.T[P]) pkg2.DotName { return got.DN },
 				matcher,
 			),
 		)
@@ -705,16 +705,16 @@ func ItsT[P interface {
 		matcher := want.DSlice
 		if matcher == nil {
 			if config.StrictModeForStruct {
-				matcher = its.Never[pkg5.DotSlice]()
+				matcher = its.Never[pkg2.DotSlice]()
 			} else {
-				matcher = its.Always[pkg5.DotSlice]()
+				matcher = its.Always[pkg2.DotSlice]()
 			}
 		}
 		sub = append(
 			sub,
-			its.Property[pkg1.T[P], pkg5.DotSlice](
+			its.Property[pkg1.T[P], pkg2.DotSlice](
 				".DSlice",
-				func(got pkg1.T[P]) pkg5.DotSlice { return got.DSlice },
+				func(got pkg1.T[P]) pkg2.DotSlice { return got.DSlice },
 				matcher,
 			),
 		)
@@ -724,16 +724,16 @@ func ItsT[P interface {
 		matcher := want.DMap
 		if matcher == nil {
 			if config.StrictModeForStruct {
-				matcher = its.Never[pkg5.DotMap]()
+				matcher = its.Never[pkg2.DotMap]()
 			} else {
-				matcher = its.Always[pkg5.DotMap]()
+				matcher = its.Always[pkg2.DotMap]()
 			}
 		}
 		sub = append(
 			sub,
-			its.Property[pkg1.T[P], pkg5.DotMap](
+			its.Property[pkg1.T[P], pkg2.DotMap](
 				".DMap",
-				func(got pkg1.T[P]) pkg5.DotMap { return got.DMap },
+				func(got pkg1.T[P]) pkg2.DotMap { return got.DMap },
 				matcher,
 			),
 		)
@@ -743,16 +743,16 @@ func ItsT[P interface {
 		matcher := want.DGene
 		if matcher == nil {
 			if config.StrictModeForStruct {
-				matcher = its.Never[pkg5.DotG[string]]()
+				matcher = its.Never[pkg2.DotG[string]]()
 			} else {
-				matcher = its.Always[pkg5.DotG[string]]()
+				matcher = its.Always[pkg2.DotG[string]]()
 			}
 		}
 		sub = append(
 			sub,
-			its.Property[pkg1.T[P], pkg5.DotG[string]](
+			its.Property[pkg1.T[P], pkg2.DotG[string]](
 				".DGene",
-				func(got pkg1.T[P]) pkg5.DotG[string] { return got.DGene },
+				func(got pkg1.T[P]) pkg2.DotG[string] { return got.DGene },
 				matcher,
 			),
 		)
@@ -762,16 +762,16 @@ func ItsT[P interface {
 		matcher := want.GDS
 		if matcher == nil {
 			if config.StrictModeForStruct {
-				matcher = its.Never[pkg1.G[pkg5.DotStruct]]()
+				matcher = its.Never[pkg1.G[pkg2.DotStruct]]()
 			} else {
-				matcher = its.Always[pkg1.G[pkg5.DotStruct]]()
+				matcher = its.Always[pkg1.G[pkg2.DotStruct]]()
 			}
 		}
 		sub = append(
 			sub,
-			its.Property[pkg1.T[P], pkg1.G[pkg5.DotStruct]](
+			its.Property[pkg1.T[P], pkg1.G[pkg2.DotStruct]](
 				".GDS",
-				func(got pkg1.T[P]) pkg1.G[pkg5.DotStruct] { return got.GDS },
+				func(got pkg1.T[P]) pkg1.G[pkg2.DotStruct] { return got.GDS },
 				matcher,
 			),
 		)
@@ -781,16 +781,16 @@ func ItsT[P interface {
 		matcher := want.GDI
 		if matcher == nil {
 			if config.StrictModeForStruct {
-				matcher = its.Never[pkg1.G[pkg5.DotInterface]]()
+				matcher = its.Never[pkg1.G[pkg2.DotInterface]]()
 			} else {
-				matcher = its.Always[pkg1.G[pkg5.DotInterface]]()
+				matcher = its.Always[pkg1.G[pkg2.DotInterface]]()
 			}
 		}
 		sub = append(
 			sub,
-			its.Property[pkg1.T[P], pkg1.G[pkg5.DotInterface]](
+			its.Property[pkg1.T[P], pkg1.G[pkg2.DotInterface]](
 				".GDI",
-				func(got pkg1.T[P]) pkg1.G[pkg5.DotInterface] { return got.GDI },
+				func(got pkg1.T[P]) pkg1.G[pkg2.DotInterface] { return got.GDI },
 				matcher,
 			),
 		)
@@ -800,16 +800,16 @@ func ItsT[P interface {
 		matcher := want.GDF
 		if matcher == nil {
 			if config.StrictModeForStruct {
-				matcher = its.Never[pkg1.G[pkg5.DotFunc]]()
+				matcher = its.Never[pkg1.G[pkg2.DotFunc]]()
 			} else {
-				matcher = its.Always[pkg1.G[pkg5.DotFunc]]()
+				matcher = its.Always[pkg1.G[pkg2.DotFunc]]()
 			}
 		}
 		sub = append(
 			sub,
-			its.Property[pkg1.T[P], pkg1.G[pkg5.DotFunc]](
+			its.Property[pkg1.T[P], pkg1.G[pkg2.DotFunc]](
 				".GDF",
-				func(got pkg1.T[P]) pkg1.G[pkg5.DotFunc] { return got.GDF },
+				func(got pkg1.T[P]) pkg1.G[pkg2.DotFunc] { return got.GDF },
 				matcher,
 			),
 		)
@@ -819,16 +819,16 @@ func ItsT[P interface {
 		matcher := want.GDN
 		if matcher == nil {
 			if config.StrictModeForStruct {
-				matcher = its.Never[pkg1.G[pkg5.DotName]]()
+				matcher = its.Never[pkg1.G[pkg2.DotName]]()
 			} else {
-				matcher = its.Always[pkg1.G[pkg5.DotName]]()
+				matcher = its.Always[pkg1.G[pkg2.DotName]]()
 			}
 		}
 		sub = append(
 			sub,
-			its.Property[pkg1.T[P], pkg1.G[pkg5.DotName]](
+			its.Property[pkg1.T[P], pkg1.G[pkg2.DotName]](
 				".GDN",
-				func(got pkg1.T[P]) pkg1.G[pkg5.DotName] { return got.GDN },
+				func(got pkg1.T[P]) pkg1.G[pkg2.DotName] { return got.GDN },
 				matcher,
 			),
 		)

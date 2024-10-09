@@ -166,6 +166,7 @@ It generates a file with same name as a file having go:generate directive.
 		funcs := functions[fname]
 		intfs := interfaces[fname]
 
+		requires := map[string]struct{}{}
 		for i := range funcs {
 			s := funcs[i]
 			newFile.ItsIsNeeded = newFile.ItsIsNeeded || 0 < len(s.Body.Args)
@@ -180,13 +181,22 @@ It generates a file with same name as a file having go:generate directive.
 
 			newFile.Funcs = append(newFile.Funcs, s)
 
-			types := s.Require()
-			for i := range types {
-				t := types[i]
-				newFile.Imports.Add(t)
+			req := s.Require()
+			for i := range req {
+				t := req[i]
+				requires[t] = struct{}{}
 			}
 		}
-
+		{
+			rs := []string{}
+			for r := range requires {
+				rs = append(rs, r)
+			}
+			sort.Strings(rs)
+			for _, r := range rs {
+				newFile.Imports.Add(r)
+			}
+		}
 		for i := range intfs {
 			s := intfs[i]
 			for _, m := range s.Body.Methods {
