@@ -7,7 +7,7 @@ import "github.com/youta-t/its/itskit"
 //	got.Cmp(want) == 0
 //
 // want value can be big.Int, for example, but whatever okay if it has Cmp().
-func CmpEq[T interface{ Cmp(T) int }](want T) itskit.Matcher[T] {
+func CmpEq[T interface{ Cmp(T) int }](want T) Matcher[T] {
 	cancel := itskit.SkipStack()
 	defer cancel()
 	return itskit.SimpleMatcher(
