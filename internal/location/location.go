@@ -11,7 +11,7 @@ import (
 )
 
 var skipstack = map[uintptr]struct{}{}
-var mustack sync.Mutex
+var mustack sync.RWMutex
 
 func SkipStackSkipping(depth int) (cancel func()) {
 	mustack.Lock()
@@ -60,6 +60,9 @@ func init() {
 }
 
 func InvokedFrom() Location {
+	mustack.RLock()
+	defer mustack.RUnlock()
+
 	skip := 2
 	for {
 		pc, file, line, ok := runtime.Caller(skip)
