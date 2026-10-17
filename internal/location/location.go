@@ -10,14 +10,14 @@ import (
 	"github.com/youta-t/its/config"
 )
 
-var skipstack = map[uintptr]struct{}{}
-var mustack sync.Mutex
+var skipstack = map[uintptr]int{}
+var mustack sync.RWMutex
 
 func SkipStackSkipping(depth int) (cancel func()) {
 	mustack.Lock()
 	defer mustack.Unlock()
 	if skipstack == nil {
-		skipstack = map[uintptr]struct{}{}
+		skipstack = map[uintptr]int{}
 	}
 
 	pcs := []uintptr{}
@@ -25,20 +25,31 @@ func SkipStackSkipping(depth int) (cancel func()) {
 	for d := 0; d <= depth; d += 1 {
 		pc, file, line, ok := runtime.Caller(1 + d)
 		if !ok {
-			return func() {}
+			break
 		}
 		_, _ = file, line
 		fnpc := runtime.FuncForPC(pc).Entry()
 
-		skipstack[fnpc] = struct{}{}
+		skipstack[fnpc]++
 		pcs = append(pcs, fnpc)
 	}
 
+	canceled := false
 	return func() {
 		mustack.Lock()
 		defer mustack.Unlock()
+
+		if canceled {
+			return
+		}
+		canceled = true
+
 		for _, fnpc := range pcs {
-			delete(skipstack, fnpc)
+			if skipstack[fnpc] <= 1 {
+				delete(skipstack, fnpc)
+			} else {
+				skipstack[fnpc]--
+			}
 		}
 	}
 }
@@ -60,6 +71,9 @@ func init() {
 }
 
 func InvokedFrom() Location {
+	mustack.RLock()
+	defer mustack.RUnlock()
+
 	skip := 2
 	for {
 		pc, file, line, ok := runtime.Caller(skip)
