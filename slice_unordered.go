@@ -13,7 +13,7 @@ type sliceUnorderedMatcher[T any] sliceSpec[T]
 //
 // # Args
 //
-// - mathcers: matchers for each element.
+// - matchers: matchers for each element.
 // Each matchers is tried multiple times with many element.
 // Do not use stateful matcher.
 func SliceUnordered[T any](specs ...Matcher[T]) Matcher[[]T] {
