@@ -4,7 +4,7 @@ import "github.com/youta-t/its/itskit"
 
 // LesserEq tests of numeric value with
 //
-//	want > got
+//	want >= got
 func LesserEq[T Numeric | ~string](want T) Matcher[T] {
 	cancel := itskit.SkipStack()
 	defer cancel()
